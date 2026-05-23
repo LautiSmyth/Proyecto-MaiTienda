@@ -36,7 +36,8 @@ namespace DAL
                     NombreUsuario = fila["NombreUsuario"].ToString(),
                     Password = fila["Password"].ToString(),
                     Estado = (EstadoUsuario)Convert.ToInt32(fila["Estado"]),
-                    Perfil = (Perfil)Convert.ToInt32(fila["Perfil"])
+                    Perfil = (Perfil)Convert.ToInt32(fila["Perfil"]),
+                    IntentosFallidos = Convert.ToInt32(fila["IntentosFallidos"])
                 };
             }
             return null;
@@ -44,13 +45,28 @@ namespace DAL
 
         public void Insertar(BEUsuario usuario)
         {
-            string query = "INSERT INTO Usuario (NombreUsuario, Password, Estado, Perfil) VALUES (@NombreUsuario, @Password, @Estado, @Perfil)";
+            string query = "INSERT INTO Usuario (NombreUsuario, Password, Estado, Perfil, IntentosFallidos) VALUES (@NombreUsuario, @Password, @Estado, @Perfil, @IntentosFallidos)";
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@NombreUsuario", usuario.NombreUsuario),
                 new SqlParameter("@Password", usuario.Password),
                 new SqlParameter("@Estado", usuario.Estado),
-                new SqlParameter("@Perfil", (int)usuario.Perfil)
+                new SqlParameter("@Perfil", (int)usuario.Perfil),
+                new SqlParameter("@IntentosFallidos", usuario.IntentosFallidos)
+            };
+            _acceso.Escribir(query, parameters);
+        }
+
+        public void Actualizar(BEUsuario usuario)
+        {
+            string query = "UPDATE Usuario SET Password = @Password, Estado = @Estado, Perfil = @Perfil, IntentosFallidos = @IntentosFallidos WHERE IdUsuario = @IdUsuario";
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Password", usuario.Password),
+                new SqlParameter("@Estado", usuario.Estado),
+                new SqlParameter("@Perfil", (int)usuario.Perfil),
+                new SqlParameter("@IntentosFallidos", usuario.IntentosFallidos),
+                new SqlParameter("@IdUsuario", usuario.IdUsuario)
             };
             _acceso.Escribir(query, parameters);
         }

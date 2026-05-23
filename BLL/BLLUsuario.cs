@@ -39,10 +39,25 @@ namespace BLL
                 if (usuario == null || usuario.Estado != EstadoUsuario.Activo) throw new UnauthorizedAccessException();
 
                 bool esValido = Encriptador.Verificar(password, usuario.Password);
-                if (!esValido) throw new UnauthorizedAccessException();    
+                if (!esValido)
+                {
+                    if(usuario.IntentosFallidos >= 3)
+                    {
+                        usuario.Estado = EstadoUsuario.Bloqueado;
+                        _dalUsuario.Actualizar(usuario);
+                    }
+                    else
+                    {
+                        usuario.IntentosFallidos++;
+                        _dalUsuario.Actualizar(usuario);
+                    }
+                    throw new UnauthorizedAccessException();
+                }
                 
                 SessionManager _session = SessionManager.GetInstance();
                 _session.Login(usuario);
+                usuario.IntentosFallidos = 0;
+                _dalUsuario.Actualizar(usuario);
             }
             catch (UnauthorizedAccessException)
             {
@@ -50,5 +65,10 @@ namespace BLL
             }
         }
 
+        public void ActualizarEstado(BEUsuario usuario, EstadoUsuario nuevoEstado)
+        {
+            usuario.Estado = nuevoEstado;
+            _dalUsuario.Insertar(usuario);
+        }
     }
 }

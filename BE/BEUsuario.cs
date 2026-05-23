@@ -13,7 +13,6 @@ namespace BE
         public string Password { get; set; }
         public Enums.EstadoUsuario Estado { get; set; }
         public Enums.Perfil Perfil { get; set; }
-
-
+        public int IntentosFallidos { get; set; }
     }
 }
