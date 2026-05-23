@@ -6,15 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BLL
+namespace SERVICIOS
 {
-    public class BLLBitacora
+    public class ServicioBitacora
     {
         private readonly DAL.DALBitacora _dalBitacora = new DAL.DALBitacora();
 
         public void RegistrarEvento(string accion)
         {
             BEUsuario _usuario = SessionManager.GetInstance().Usuario;
+            BEBitacora _bitacora = new BEBitacora
+            {
+                IdUsuario = _usuario.IdUsuario,
+                NombreUsuario = _usuario.NombreUsuario,
+                Perfil = _usuario.Perfil.ToString(),
+                Accion = accion,
+                Fecha = DateTime.Now
+            };
+            _dalBitacora.RegistrarEvento(_bitacora);
+        }
+        public void RegistrarEvento(string accion, BEUsuario _usuario)
+        {
             BEBitacora _bitacora = new BEBitacora
             {
                 IdUsuario = _usuario.IdUsuario,

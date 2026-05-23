@@ -9,10 +9,12 @@ using SERVICIOS;
 using System.CodeDom;
 
 namespace BLL
+
 {
     public class BLLUsuario
     {
         private readonly DAL.DALUsuario _dalUsuario = new DAL.DALUsuario();
+        ServicioBitacora _sBitacora = new ServicioBitacora();
 
         public BE.BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
         {
@@ -45,11 +47,13 @@ namespace BLL
                     {
                         usuario.Estado = EstadoUsuario.Bloqueado;
                         _dalUsuario.Actualizar(usuario);
+                        _sBitacora.RegistrarEvento("bloqueado por intentos fallidos", usuario);
                     }
                     else
                     {
                         usuario.IntentosFallidos++;
                         _dalUsuario.Actualizar(usuario);
+                        _sBitacora.RegistrarEvento($"Intento fallido {usuario.IntentosFallidos}", usuario);
                     }
                     throw new UnauthorizedAccessException();
                 }
@@ -58,6 +62,8 @@ namespace BLL
                 _session.Login(usuario);
                 usuario.IntentosFallidos = 0;
                 _dalUsuario.Actualizar(usuario);
+                _sBitacora.RegistrarEvento("Inicio de sesion");
+
             }
             catch (UnauthorizedAccessException)
             {
@@ -69,6 +75,12 @@ namespace BLL
         {
             usuario.Estado = nuevoEstado;
             _dalUsuario.Insertar(usuario);
+        }
+
+        public void CerrarSesion()
+        {
+            _sBitacora.RegistrarEvento("Cierre de sesión");
+            SessionManager.GetInstance().Logout();
         }
     }
 }

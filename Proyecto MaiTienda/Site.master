@@ -9,10 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%: Page.Title %> - Mi aplicación ASP.NET</title>
 
-    <asp:PlaceHolder runat="server">
-        <%: Scripts.Render("~/bundles/modernizr") %>
-    </asp:PlaceHolder>
-    <webopt:bundlereference runat="server" path="~/Content/css" />
+<link href="Content/bootstrap.css" rel="stylesheet" type="text/css" />
+<link href="Content/Site.css" rel="stylesheet" type="text/css" />
+<script src="Scripts/modernizr-2.8.3.js"></script>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
 </head>

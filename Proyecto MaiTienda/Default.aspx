@@ -2,7 +2,7 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet" />
 
 <style>
     .mai-wrapper {
@@ -201,6 +201,29 @@
         .mai-card { padding: 36px 24px 32px; }
         .mai-logo { font-size: 26px; }
     }
+
+
+    .navbar.navbar-inverse.navbar-fixed-top {
+        display: none !important;
+    }
+
+
+    body {
+        padding-top: 0 !important;
+    }
+
+    .container.body-content {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .container.body-content > hr,
+    .container.body-content > footer {
+        display: none !important;
+    }
+
 </style>
 
 <div class="mai-wrapper">

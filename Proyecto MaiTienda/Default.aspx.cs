@@ -9,7 +9,6 @@ public partial class _Default : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        BLLUsuario _bllUsuario = new BLLUsuario();
     }
 
     protected void btnIngresar_Click(object sender, EventArgs e)
