@@ -7,9 +7,8 @@ public partial class Respuesta : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-
         string nombreUsuario = Session["nombreUsuario"] as string;
-        string perfil = Session["perfil"] as string;
+        string perfil        = Session["perfil"] as string;
 
         if (string.IsNullOrEmpty(nombreUsuario))
         {
@@ -21,7 +20,8 @@ public partial class Respuesta : Page
         {
             lblNombreUsuario.Text = nombreUsuario;
             lblPerfil.Text        = perfil;
-            lblBienvenida.Text    = perfil + " " + nombreUsuario;
+            lblBienvenida.Text    = nombreUsuario;
+            lblPerfilBadge.Text   = perfil;
         }
     }
 

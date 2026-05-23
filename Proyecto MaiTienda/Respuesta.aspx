@@ -1,316 +1,434 @@
-<%@ Page Title="Menu" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Respuesta.aspx.cs" ResponseEncoding="utf-8" Inherits="Respuesta" %>
+<%@ Page Title="Panel" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Respuesta.aspx.cs" ResponseEncoding="utf-8" Inherits="Respuesta" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
 <style>
-    .men-page {
-        background: linear-gradient(160deg, #ede5f5 0%, #f5f0fa 50%, #e8ddf2 100%);
-        min-height: 85vh;
-        margin: -20px -15px 0 -15px;
-        padding: 0 0 48px 0;
+    .navbar.navbar-inverse.navbar-fixed-top { display: none !important; }
+    body { padding-top: 0 !important; background: #f0ebfa !important; }
+    .container.body-content { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    .container.body-content > hr, .container.body-content > footer { display: none !important; }
+    * { box-sizing: border-box; }
+
+    .g-page {
+        min-height: 100vh;
+        background: #f0ebfa;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
     }
 
-    /* ── Barra superior ── */
-    .men-topbar {
-        background: #3d2260;
-        padding: 0 32px;
+    .g-page::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px);
+        background-size: 56px 56px;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ─── Topbar ─── */
+    .g-topbar {
+        background: #1e0a3c;
+        border-bottom: 3px solid #7c3aed;
+        height: 58px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 52px;
-        border-bottom: 2px solid #b89fd4;
-    }
-
-    .men-topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-    }
-
-    .men-system-name {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 18px;
-        font-weight: 600;
-        color: #f0e8ff;
-        letter-spacing: 1px;
-        text-decoration: none;
-    }
-
-    .men-separator {
-        width: 1px;
-        height: 22px;
-        background: #7b56a8;
-    }
-
-    .men-ornament-bar {
-        font-size: 11px;
-        color: #b89fd4;
-        letter-spacing: 4px;
-    }
-
-    .men-topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .men-user-info {
-        text-align: right;
-    }
-
-    .men-user-nombre {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 14px;
-        font-weight: 600;
-        color: #f0e8ff;
-        display: block;
-        line-height: 1.2;
-    }
-
-    .men-user-perfil {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 11px;
-        color: #b89fd4;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-        display: block;
-    }
-
-    .men-btn-logout {
-        background: transparent !important;
-        border: 1px solid #7b56a8 !important;
-        border-radius: 3px !important;
-        color: #d4b8f0 !important;
-        font-family: 'EB Garamond', Georgia, serif !important;
-        font-size: 12px !important;
-        letter-spacing: 1.5px !important;
-        text-transform: uppercase !important;
-        padding: 5px 14px !important;
-        cursor: pointer;
-        transition: background 0.2s, border-color 0.2s;
-        white-space: nowrap;
-    }
-
-    .men-btn-logout:hover,
-    .men-btn-logout:focus {
-        background: rgba(184,159,212,0.15) !important;
-        border-color: #b89fd4 !important;
-        color: #f0e8ff !important;
-    }
-
-    /* ── Contenido principal ── */
-    .men-body {
-        padding: 40px 32px;
-    }
-
-    .men-welcome-section {
-        margin-bottom: 36px;
-        text-align: center;
-    }
-
-    .men-welcome-ornament {
-        font-size: 12px;
-        color: #a688c4;
-        letter-spacing: 6px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .men-welcome-title {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 26px;
-        color: #3d2260;
-        margin: 0 0 6px 0;
-    }
-
-    .men-welcome-sub {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 15px;
-        color: #7054a0;
-        margin: 0;
-    }
-
-    .men-divider {
-        border: none;
-        border-top: 1px solid #cfc0e3;
-        margin: 0 auto 36px;
-        max-width: 480px;
+        padding: 0 28px;
         position: relative;
+        z-index: 10;
     }
 
-    .men-divider::after {
-        content: '&#10022;';
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: transparent;
-        padding: 0 10px;
-        color: #b89fd4;
-        font-size: 13px;
+    .g-topbar-left { display: flex; align-items: center; gap: 20px; }
+
+    .g-logo-bar {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 16px;
+        font-weight: 900;
+        color: #ffffff;
+        letter-spacing: 2px;
     }
 
-    /* ── Grid de m&#243;dulos ── */
-    .men-modules-label {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 11px;
-        color: #9474b8;
+    .g-logo-bar span { color: #c084fc; }
+
+    .g-nav-sep { width: 1px; height: 24px; background: #3b1a6e; }
+
+    .g-nav-tag {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        color: #9f7cc0;
         letter-spacing: 3px;
         text-transform: uppercase;
-        text-align: center;
-        display: block;
-        margin-bottom: 24px;
     }
 
-    .men-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        max-width: 860px;
-        margin: 0 auto;
-    }
+    .g-topbar-right { display: flex; align-items: center; gap: 20px; }
 
-    .men-card {
-        background: #fdf9ff;
-        border: 1.5px solid #cfc0e3;
-        border-radius: 4px;
-        padding: 28px 22px 24px;
-        position: relative;
-        text-align: center;
-        cursor: default;
-        transition: box-shadow 0.2s, border-color 0.2s;
-    }
+    .g-user-block { text-align: right; }
 
-    .men-card::before {
-        content: '';
-        position: absolute;
-        top: 6px; left: 8px; right: 8px;
-        height: 1px;
-        background: linear-gradient(to right, transparent, #d4c0e8 30%, #d4c0e8 70%, transparent);
-    }
-
-    .men-card:hover {
-        border-color: #9474b8;
-        box-shadow: 0 4px 20px rgba(90,60,130,0.10);
-    }
-
-    .men-card-icon {
-        font-size: 28px;
-        display: block;
-        margin-bottom: 12px;
-        line-height: 1;
-    }
-
-    .men-card-title {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 15px;
+    .g-user-name {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 14px;
         font-weight: 600;
-        color: #3d2260;
+        color: #ffffff;
+        display: block;
+        line-height: 1.3;
+    }
+
+    .g-user-role {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        color: #c084fc;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        display: block;
+    }
+
+    .g-btn-logout {
+        background: transparent !important;
+        border: 1.5px solid #7c3aed !important;
+        border-radius: 0 !important;
+        color: #c084fc !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-size: 9px !important;
+        font-weight: 600 !important;
+        letter-spacing: 2px !important;
+        text-transform: uppercase !important;
+        padding: 7px 16px !important;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        white-space: nowrap;
+        clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .g-btn-logout:hover, .g-btn-logout:focus {
+        background: #7c3aed !important;
+        color: #ffffff !important;
+    }
+
+    /* ─── Body ─── */
+    .g-body {
+        flex: 1;
+        padding: 40px 28px 56px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ─── Welcome ─── */
+    .g-welcome {
+        background: #ffffff;
+        border: 1.5px solid #ddd0f5;
+        border-left: 4px solid #7c3aed;
+        padding: 24px 28px;
+        margin-bottom: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        box-shadow: 0 2px 16px rgba(109,40,217,0.07);
+        clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    }
+
+    .g-welcome-pre {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        color: #7c3aed;
+        letter-spacing: 4px;
+        text-transform: uppercase;
         display: block;
         margin-bottom: 6px;
     }
 
-    .men-card-desc {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 13px;
-        color: #9474b8;
-        display: block;
-        line-height: 1.5;
+    .g-welcome-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e0a3c;
+        margin: 0;
+        line-height: 1.2;
     }
 
-    .men-card-badge {
-        display: inline-block;
-        margin-top: 12px;
-        background: #ede5f5;
-        border: 1px solid #cfc0e3;
-        border-radius: 20px;
-        font-family: 'EB Garamond', Georgia, serif;
+    .g-welcome-title span { color: #7c3aed; }
+
+    .g-welcome-sub {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 13px;
+        color: #9f7cc0;
+        margin: 6px 0 0;
+    }
+
+    .g-welcome-badge {
+        background: #f5f0ff;
+        border: 1.5px solid #ddd0f5;
+        padding: 12px 18px;
+        text-align: right;
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+
+    .g-badge-role {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4c1d95;
+        letter-spacing: 2px;
+        display: block;
+    }
+
+    .g-badge-status {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 11px;
+        color: #9f7cc0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: flex-end;
+        margin-top: 4px;
+    }
+
+    .g-dot {
+        width: 7px; height: 7px;
+        background: #7c3aed;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    /* ─── Modules ─── */
+    .g-modules-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .g-modules-title {
+        font-family: 'Exo 2', sans-serif;
         font-size: 10px;
-        color: #7054a0;
+        font-weight: 600;
+        color: #9f7cc0;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .g-modules-line {
+        flex: 1;
+        height: 1.5px;
+        background: linear-gradient(to right, #ddd0f5, transparent);
+    }
+
+    .g-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+
+    .g-card {
+        background: #ffffff;
+        border: 1.5px solid #ddd0f5;
+        padding: 26px 20px 22px;
+        position: relative;
+        cursor: default;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        box-shadow: 0 2px 8px rgba(109,40,217,0.05);
+        clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    }
+
+    .g-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(to right, #7c3aed33, transparent);
+        transition: background 0.2s;
+    }
+
+    .g-card:hover {
+        border-color: #a855f7;
+        box-shadow: 0 6px 24px rgba(124,58,237,0.14);
+        transform: translateY(-2px);
+    }
+
+    .g-card:hover::before {
+        background: linear-gradient(to right, #7c3aed, #a855f7, transparent);
+    }
+
+    .g-card-icon {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .g-card-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e0a3c;
+        display: block;
+        margin-bottom: 6px;
+        letter-spacing: 1px;
+    }
+
+    .g-card-desc {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: #7c5ea8;
+        display: block;
+        line-height: 1.6;
+        margin-bottom: 14px;
+    }
+
+    .g-card-badge {
+        display: inline-block;
+        background: #f5f0ff;
+        border: 1px solid #ddd0f5;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 9px;
+        font-weight: 600;
+        color: #9f7cc0;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 3px 10px;
+    }
+
+    .g-card-badge-active {
+        background: #ede9fe;
+        border-color: #a855f7;
+        color: #6d28d9;
+    }
+
+    /* ─── Footer ─── */
+    .g-footer-bar {
+        background: #1e0a3c;
+        border-top: 2px solid #7c3aed;
+        padding: 14px 28px;
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+    }
+
+    .g-footer-text {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        color: #9f7cc0;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        padding: 3px 12px;
     }
 
-    @media (max-width: 600px) {
-        .men-topbar { padding: 0 16px; height: auto; min-height: 52px; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
-        .men-body { padding: 28px 16px; }
-        .men-grid { grid-template-columns: 1fr 1fr; }
-        .men-ornament-bar { display: none; }
-    }
-
-    .navbar.navbar-inverse.navbar-fixed-top {
-        display: none !important;
-    }
-
-
-    body {
-        padding-top: 0 !important;
-    }
-
-    .container.body-content {
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    .container.body-content > hr,
-    .container.body-content > footer {
-        display: none !important;
+    @media (max-width: 640px) {
+        .g-topbar { padding: 0 14px; }
+        .g-nav-tag, .g-nav-sep { display: none; }
+        .g-body { padding: 22px 14px 36px; }
+        .g-welcome-title { font-size: 17px; }
+        .g-grid { grid-template-columns: 1fr 1fr; }
     }
 </style>
 
-<div class="men-page">
+<div class="g-page">
 
-    <%-- Barra superior con nombre de usuario y cerrar sesion --%>
-    <div class="men-topbar">
-        <div class="men-topbar-left">
-            <span class="men-system-name">MaiTienda</span>
-            <div class="men-separator"></div>
-            <span class="men-ornament-bar">&#10022; &nbsp; &#10022;</span>
+    <div class="g-topbar">
+        <div class="g-topbar-left">
+            <span class="g-logo-bar">Mai<span>Tienda</span></span>
+            <div class="g-nav-sep"></div>
+            <span class="g-nav-tag">Panel de gesti&#243;n</span>
         </div>
-        <div class="men-topbar-right">
-            <div class="men-user-info">
-                <asp:Label runat="server" ID="lblNombreUsuario" CssClass="men-user-nombre" />
-                <asp:Label runat="server" ID="lblPerfil" CssClass="men-user-perfil" />
+        <div class="g-topbar-right">
+            <div class="g-user-block">
+                <asp:Label runat="server" ID="lblNombreUsuario" CssClass="g-user-name" />
+                <asp:Label runat="server" ID="lblPerfil" CssClass="g-user-role" />
             </div>
             <asp:Button runat="server" ID="btnCerrarSesion"
                 Text="Cerrar sesi&#243;n"
-                CssClass="men-btn-logout"
+                CssClass="g-btn-logout"
                 OnClick="btnCerrarSesion_Click" />
         </div>
     </div>
 
-    <%-- Cuerpo --%>
-    <div class="men-body">
+    <div class="g-body">
 
-        <div class="men-welcome-section">
-            <span class="men-welcome-ornament">&#10022; &nbsp; &#10022; &nbsp; &#10022;</span>
-            <h2 class="men-welcome-title">
-                Bienvenid&#243;, <asp:Label runat="server" ID="lblBienvenida" />
-            </h2>
-            <p class="men-welcome-sub">&#191;Qu&#233; desea gestionar hoy?</p>
+        <div class="g-welcome">
+            <div>
+                <span class="g-welcome-pre">&#47;&#47; acceso autorizado</span>
+                <h2 class="g-welcome-title">
+                    Bienvenido, <asp:Label runat="server" ID="lblBienvenida" />
+                </h2>
+                <p class="g-welcome-sub">Selecion&#225; un m&#243;dulo para comenzar.</p>
+            </div>
+            <div class="g-welcome-badge">
+                <span class="g-badge-role"><asp:Label runat="server" ID="lblPerfilBadge" /></span>
+                <span class="g-badge-status"><span class="g-dot"></span>Sesi&#243;n activa</span>
+            </div>
         </div>
 
-        <hr class="men-divider" />
+        <div class="g-modules-header">
+            <span class="g-modules-title">M&#243;dulos del sistema</span>
+            <div class="g-modules-line"></div>
+        </div>
 
-        <span class="men-modules-label">M&#243;dulos del sistema</span>
-
-        <div class="men-grid">
-
-            <div class="men-card">
-                <span class="men-card-icon">&#128200;</span>
-                <span class="men-card-title">Bitacora</span>
-                <span class="men-card-desc">Registros de acciones</span>
-                <span class="men-card-badge">Pr&#243;ximamente</span>
+        <div class="g-grid">
+             
+            <div class="g-card">
+                <span class="g-card-icon">&#128202;</span>
+                <span class="g-card-title">Bit&#225;cora</span>
+                <span class="g-card-desc">Registro de eventos y acciones del sistema</span>
+                <span class="g-card-badge g-card-badge-active">Activo</span>
+            </div>
+        <!--
+            <div class="g-card">
+                <span class="g-card-icon">&#128290;</span>
+                <span class="g-card-title">Componentes</span>
+                <span class="g-card-desc">Cat&#225;logo de CPU, GPU, RAM y m&#225;s</span>
+                <span class="g-card-badge">Pr&#243;ximamente</span>
             </div>
 
-        </div>
+            <div class="g-card">
+                <span class="g-card-icon">&#128101;</span>
+                <span class="g-card-title">Clientes</span>
+                <span class="g-card-desc">Registro y seguimiento de compradores</span>
+                <span class="g-card-badge">Pr&#243;ximamente</span>
+            </div>
 
+            <div class="g-card">
+                <span class="g-card-icon">&#128203;</span>
+                <span class="g-card-title">Pedidos</span>
+                <span class="g-card-desc">Control de ventas y estado de env&#237;os</span>
+                <span class="g-card-badge">Pr&#243;ximamente</span>
+            </div>
+
+            <div class="g-card">
+                <span class="g-card-icon">&#129535;</span>
+                <span class="g-card-title">Stock</span>
+                <span class="g-card-desc">Inventario y alertas de reposici&#243;n</span>
+                <span class="g-card-badge">Pr&#243;ximamente</span>
+            </div>
+
+            <div class="g-card">
+                <span class="g-card-icon">&#128200;</span>
+                <span class="g-card-title">Reportes</span>
+                <span class="g-card-desc">Estad&#237;sticas y an&#225;lisis de ventas</span>
+                <span class="g-card-badge">Pr&#243;ximamente</span>
+            </div>
+          -->
+
+        </div>
     </div>
+
+    <div class="g-footer-bar">
+        <span class="g-footer-text">&#169; <%: DateTime.Now.Year %> MaiTienda &mdash; Sistema de gesti&#243;n</span>
+        <span class="g-footer-text">v1.0.0</span>
+    </div>
+
 </div>
 
 </asp:Content>

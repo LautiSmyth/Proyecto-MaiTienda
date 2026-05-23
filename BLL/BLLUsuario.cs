@@ -82,5 +82,10 @@ namespace BLL
             _sBitacora.RegistrarEvento("Cierre de sesión");
             SessionManager.GetInstance().Logout();
         }
+
+        public bool VerificarConexion()
+        {
+            return _dalUsuario.VerificarConexion();
+        }
     }
 }

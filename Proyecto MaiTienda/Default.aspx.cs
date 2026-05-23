@@ -9,6 +9,22 @@ public partial class _Default : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        if (!IsPostBack)
+        {
+            BLLUsuario _bllUsuario = new BLLUsuario();
+            bool conectado = _bllUsuario.VerificarConexion();
+
+            if (conectado)
+            {
+                lblConexion.Text = "<span class='g-status-dot'></span> DB conectada";
+            }
+            else
+            {
+                lblConexion.Text = "&#9888; Sin conexi&#243;n a BD";
+                lblConexion.Style["color"] = "#e53e3e";
+                btnIngresar.Enabled = false;
+            }
+        }
     }
 
     protected void btnIngresar_Click(object sender, EventArgs e)

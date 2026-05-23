@@ -1,267 +1,298 @@
-<%@ Page Title="Iniciar sesión" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Default.aspx.cs" ResponseEncoding="utf-8" Inherits="_Default" %>
+<%@ Page Title="Iniciar sesion" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Default.aspx.cs" ResponseEncoding="utf-8" Inherits="_Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
 <style>
-    .mai-wrapper {
-        min-height: 78vh;
+    .navbar.navbar-inverse.navbar-fixed-top { display: none !important; }
+    body { padding-top: 0 !important; background: #f0ebfa !important; }
+    .container.body-content { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    .container.body-content > hr, .container.body-content > footer { display: none !important; }
+    * { box-sizing: border-box; }
+
+    .g-wrapper {
+        min-height: 100vh;
+        background: #f0ebfa;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(160deg, #ede5f5 0%, #f5f0fa 40%, #e8ddf2 100%);
-        margin: -20px -15px 0 -15px;
-        padding: 48px 16px;
+        padding: 40px 16px;
         position: relative;
         overflow: hidden;
     }
 
-    .mai-wrapper::before {
+    .g-wrapper::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image:
-            radial-gradient(circle at 20% 30%, rgba(180,150,210,0.18) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(160,120,195,0.14) 0%, transparent 50%);
+        top: -180px; left: 50%;
+        transform: translateX(-50%);
+        width: 900px; height: 900px;
+        background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%);
         pointer-events: none;
     }
 
-    .mai-card {
-        background: #fdf9ff;
-        border: 1.5px solid #cfc0e3;
-        border-radius: 4px;
-        width: 100%;
-        max-width: 390px;
-        padding: 44px 40px 40px;
-        position: relative;
-        box-shadow: 0 8px 40px rgba(90,60,130,0.10), 0 2px 8px rgba(90,60,130,0.06);
+    .g-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(139,92,246,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,0.06) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
     }
 
-    .mai-card::before,
-    .mai-card::after {
+    .g-card {
+        background: #ffffff;
+        border: 1.5px solid #ddd0f5;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 8px 40px rgba(109,40,217,0.10), 0 2px 8px rgba(109,40,217,0.06);
+        clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    }
+
+    .g-card::after {
         content: '';
         position: absolute;
-        left: 10px; right: 10px;
-        height: 1.5px;
-        background: linear-gradient(to right, transparent, #b89fd4 20%, #b89fd4 80%, transparent);
-    }
-    .mai-card::before { top: 8px; }
-    .mai-card::after  { bottom: 8px; }
-
-    .mai-brand {
-        text-align: center;
-        margin-bottom: 28px;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(to right, #7c3aed, #a855f7, #c084fc);
     }
 
-    .mai-ornament {
-        font-size: 13px;
-        color: #a688c4;
-        letter-spacing: 6px;
-        display: block;
-        margin-bottom: 6px;
-        font-family: serif;
-    }
+    .g-inner { padding: 42px 38px 36px; }
 
-    .mai-logo {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 32px;
+    .g-brand { margin-bottom: 30px; }
+
+    .g-pretag {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
         font-weight: 600;
-        color: #3d2260;
-        letter-spacing: 1px;
+        color: #7c3aed;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .g-logo {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 30px;
+        font-weight: 900;
+        color: #1e0a3c;
+        letter-spacing: 2px;
         line-height: 1;
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
     }
 
-    .mai-tagline {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 13px;
-        color: #9474b8;
-        letter-spacing: 2.5px;
+    .g-logo span { color: #7c3aed; }
+
+    .g-tagline {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        color: #9f7cc0;
+        letter-spacing: 3px;
         text-transform: uppercase;
         display: block;
     }
 
-    .mai-divider {
+    .g-divider {
         border: none;
-        border-top: 1px solid #ddd0ef;
-        margin: 20px 0 28px;
+        border-top: 1.5px solid #ede5f8;
+        margin: 26px 0;
         position: relative;
     }
 
-    .mai-divider::after {
-        content: '❧';
+    .g-divider::after {
+        content: '//';
         position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #fdf9ff;
-        padding: 0 8px;
-        color: #b89fd4;
-        font-size: 14px;
+        top: -9px; left: 0;
+        background: #ffffff;
+        padding-right: 12px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 11px;
+        color: #a855f7;
+        letter-spacing: 2px;
     }
 
-    .mai-subtitle {
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: 16px;
-        color: #5b3e82;
-        text-align: center;
-        margin-bottom: 24px;
-        font-style: italic;
+    .g-section-title {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        color: #9f7cc0;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+        display: block;
     }
 
-    .mai-error {
-        background: #f9f0f5;
-        border: 1px solid #d4a0b8;
-        border-left: 3px solid #b06090;
-        border-radius: 3px;
+    .g-error {
+        background: #fdf2ff;
+        border: 1px solid #d8b4fe;
+        border-left: 3px solid #7c3aed;
         padding: 10px 14px;
         margin-bottom: 20px;
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 14px;
-        color: #7a3055;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 13px;
+        color: #5b21b6;
     }
 
-    .mai-label {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 13px;
-        color: #7054a0;
-        letter-spacing: 1.8px;
+    .g-form-group { margin-bottom: 20px; }
+
+    .g-label {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        color: #4c1d95;
+        letter-spacing: 2px;
         text-transform: uppercase;
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
-    .mai-input {
+    .g-input {
         width: 100% !important;
         max-width: 100% !important;
-        background: #f8f4fd !important;
-        border: 1px solid #cbbfe0 !important;
-        border-radius: 3px !important;
-        padding: 9px 13px !important;
-        font-family: 'EB Garamond', Georgia, serif !important;
+        background: #faf7ff !important;
+        border: 1.5px solid #ddd0f5 !important;
+        border-radius: 0 !important;
+        padding: 11px 14px !important;
+        font-family: 'Exo 2', sans-serif !important;
         font-size: 15px !important;
-        color: #2d1b4e !important;
-        transition: border-color 0.2s, background 0.2s;
+        color: #1e0a3c !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
         box-shadow: none !important;
         outline: none;
     }
 
-    .mai-input:focus {
-        border-color: #8b5fb8 !important;
+    .g-input:focus {
+        border-color: #7c3aed !important;
         background: #fff !important;
-        box-shadow: 0 0 0 3px rgba(139,95,184,0.10) !important;
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.10) !important;
     }
 
-    .mai-form-group {
-        margin-bottom: 20px;
-    }
-
-    .mai-validator {
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 13px;
-        color: #b06090;
+    .g-validator {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 11px;
+        color: #7c3aed;
         display: block;
-        margin-top: 4px;
-    }
-
-    .mai-btn {
-        width: 100%;
-        background: #5b3e82 !important;
-        border: none !important;
-        border-radius: 3px !important;
-        color: #f5f0fa !important;
-        font-family: 'EB Garamond', Georgia, serif !important;
-        font-size: 15px !important;
-        letter-spacing: 2px !important;
-        text-transform: uppercase !important;
-        padding: 11px 0 !important;
-        margin-top: 8px;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .mai-btn:hover,
-    .mai-btn:focus {
-        background: #3d2260 !important;
-        color: #f5f0fa !important;
-    }
-
-    .mai-footer-note {
-        text-align: center;
-        margin-top: 22px;
-        font-family: 'EB Garamond', Georgia, serif;
-        font-size: 12px;
-        color: #b09fc8;
+        margin-top: 5px;
         letter-spacing: 0.5px;
     }
 
+    .g-btn {
+        width: 100%;
+        background: #7c3aed !important;
+        border: none !important;
+        border-radius: 0 !important;
+        color: #ffffff !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        letter-spacing: 3px !important;
+        text-transform: uppercase !important;
+        padding: 14px 0 !important;
+        margin-top: 10px;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    }
+
+    .g-btn:hover, .g-btn:focus {
+        background: #6d28d9 !important;
+        box-shadow: 0 4px 20px rgba(109,40,217,0.30) !important;
+        color: #fff !important;
+    }
+
+    .g-footer {
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1.5px solid #ede5f8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .g-footer-text {
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        color: #c4b0e0;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .g-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Exo 2', sans-serif;
+        font-size: 10px;
+        color: #9f7cc0;
+        letter-spacing: 1px;
+    }
+
+    .g-status-dot {
+        width: 7px; height: 7px;
+        background: #7c3aed;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
     @media (max-width: 480px) {
-        .mai-card { padding: 36px 24px 32px; }
-        .mai-logo { font-size: 26px; }
+        .g-inner { padding: 28px 22px 24px; }
+        .g-logo { font-size: 24px; }
     }
-
-
-    .navbar.navbar-inverse.navbar-fixed-top {
-        display: none !important;
-    }
-
-
-    body {
-        padding-top: 0 !important;
-    }
-
-    .container.body-content {
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    .container.body-content > hr,
-    .container.body-content > footer {
-        display: none !important;
-    }
-
 </style>
 
-<div class="mai-wrapper">
-    <div class="mai-card">
+<div class="g-wrapper">
+    <div class="g-grid"></div>
+    <div class="g-card">
+        <div class="g-inner">
 
-        <div class="mai-brand">
-            <span class="mai-ornament">&#10022; &nbsp; &#10022; &nbsp; &#10022;</span>
-            <span class="mai-logo">MaiTienda</span>
-            <span class="mai-tagline">Sistema de gesti&#243;n</span>
+            <div class="g-brand">
+                <span class="g-pretag">&#47;&#47; acceso al sistema</span>
+                <span class="g-logo">Mai<span>Tienda</span></span>
+                <span class="g-tagline">Gesti&#243;n de componentes</span>
+            </div>
+
+            <hr class="g-divider" />
+
+            <span class="g-section-title">Autenticaci&#243;n</span>
+
+            <asp:Panel runat="server" ID="pnlError" Visible="false" CssClass="g-error" role="alert">
+                <asp:Literal runat="server" ID="litError" />
+            </asp:Panel>
+
+            <div class="g-form-group">
+                <asp:Label runat="server" AssociatedControlID="txtUsuario" CssClass="g-label" Text="Usuario" />
+                <asp:TextBox runat="server" ID="txtUsuario" CssClass="g-input" MaxLength="50" />
+                <asp:RequiredFieldValidator runat="server" ControlToValidate="txtUsuario"
+                    CssClass="g-validator" ErrorMessage="Ingrese el nombre de usuario." Display="Dynamic" />
+            </div>
+
+            <div class="g-form-group">
+                <asp:Label runat="server" AssociatedControlID="txtPassword" CssClass="g-label" Text="Contrase&#241;a" />
+                <asp:TextBox runat="server" ID="txtPassword" TextMode="Password" CssClass="g-input" MaxLength="100" />
+                <asp:RequiredFieldValidator runat="server" ControlToValidate="txtPassword"
+                    CssClass="g-validator" ErrorMessage="Ingrese la contrase&#241;a." Display="Dynamic" />
+            </div>
+
+            <asp:Button runat="server" ID="btnIngresar" Text="Ingresar"
+                CssClass="g-btn" OnClick="btnIngresar_Click" />
+
+            <div class="g-footer">
+                <span class="g-footer-text">&#169; <%: DateTime.Now.Year %> MaiTienda</span>
+                <span class="g-status">
+                    <asp:Label runat="server" ID="lblConexion" CssClass="g-status" />
+                </span>
+            </div>
+
         </div>
-
-        <hr class="mai-divider" />
-
-        <p class="mai-subtitle">Iniciar sesi&#243;n</p>
-
-        <asp:Panel runat="server" ID="pnlError" Visible="false" CssClass="mai-error" role="alert">
-            <asp:Literal runat="server" ID="litError" />
-        </asp:Panel>
-
-        <div class="mai-form-group">
-            <asp:Label runat="server" AssociatedControlID="txtUsuario" CssClass="mai-label" Text="Usuario" />
-            <asp:TextBox runat="server" ID="txtUsuario" CssClass="mai-input" MaxLength="50" />
-            <asp:RequiredFieldValidator runat="server" ControlToValidate="txtUsuario"
-                CssClass="mai-validator" ErrorMessage="Ingrese el nombre de usuario." Display="Dynamic" />
-        </div>
-
-        <div class="mai-form-group">
-            <asp:Label runat="server" AssociatedControlID="txtPassword" CssClass="mai-label" Text="Contrase&#241;a" />
-            <asp:TextBox runat="server" ID="txtPassword" TextMode="Password" CssClass="mai-input" MaxLength="100" />
-            <asp:RequiredFieldValidator runat="server" ControlToValidate="txtPassword"
-                CssClass="mai-validator" ErrorMessage="Ingrese la contrase&#241;a." Display="Dynamic" />
-        </div>
-
-        <asp:Button runat="server" ID="btnIngresar" Text="Ingresar"
-            CssClass="mai-btn" OnClick="btnIngresar_Click" />
-
-        <p class="mai-footer-note">&#169; <%: DateTime.Now.Year %> MaiTienda</p>
-
     </div>
 </div>
 

@@ -70,5 +70,10 @@ namespace DAL
             };
             _acceso.Escribir(query, parameters);
         }
+
+        public bool VerificarConexion()
+        {
+            return _acceso.VerificarConexion();
+        }
     }
 }
