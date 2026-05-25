@@ -1,7 +1,6 @@
 using System;
 using System.Web.UI;
 using BLL;
-using SERVICIOS;
 
 public partial class Respuesta : Page
 {
@@ -18,10 +17,8 @@ public partial class Respuesta : Page
 
         if (!IsPostBack)
         {
-            lblNombreUsuario.Text = nombreUsuario;
-            lblPerfil.Text        = perfil;
-            lblBienvenida.Text    = nombreUsuario;
-            lblPerfilBadge.Text   = perfil;
+            lblUsuario.Text = nombreUsuario;
+            lblRol.Text     = perfil;
         }
     }
 

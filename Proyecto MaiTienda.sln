@@ -1,28 +1,28 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.6.11806.211 stable
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Proyecto MaiTienda", "Proyecto MaiTienda\", "{55482858-F50B-48EB-AE93-120D09CC37CD}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "GUI", "GUI\", "{55482858-F50B-48EB-AE93-120D09CC37CD}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.7.2"
 		ProjectReferences = "{68407a89-d3a5-47f6-9d31-b83179a8244d}|BE.dll;{2ea7c669-3ba1-4990-b34e-c9c0abbbeaac}|BLL.dll;{0e318dde-c8c5-4b6f-89b2-aa7121566cbe}|SERVICIOS.dll;{6545893C-8D5A-4A74-AA6A-3C41DA573A26}|DAL.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51856"
-		Debug.AspNetCompiler.PhysicalPath = "Proyecto MaiTienda\"
+		Debug.AspNetCompiler.PhysicalPath = "GUI\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51856\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_51856"
-		Release.AspNetCompiler.PhysicalPath = "Proyecto MaiTienda\"
+		Release.AspNetCompiler.PhysicalPath = "GUI\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51856\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "51856"
-		SlnRelativePath = "Proyecto MaiTienda\"
+		SlnRelativePath = "GUI\"
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
