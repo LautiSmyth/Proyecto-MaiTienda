@@ -5,12 +5,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BE;
+using BLL;
 using Microsoft.Ajax.Utilities;
 using SERVICIOS;
 
 public partial class Bitacora : System.Web.UI.Page
 {
-    private ServicioBitacora _servicioBitacora = new ServicioBitacora();
+    private BLLBitacora _bllBitacora = new BLLBitacora();
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -25,7 +26,7 @@ public partial class Bitacora : System.Web.UI.Page
         {
             Response.Redirect("~/Default.aspx");
             return;
-        } else if (perfilActual != "WebMaster" && perfilActual != "Administrador")
+        } else if (perfilActual != "WebMaster")
         {
             Response.Redirect("~/respuesta.aspx");
             return;
@@ -37,7 +38,7 @@ public partial class Bitacora : System.Web.UI.Page
     {
         try
         {
-            List<BEBitacora> listadoBitacora = _servicioBitacora.ListarBitacora();
+            List<BEBitacora> listadoBitacora = _bllBitacora.ListarBitacora();
 
             // Filtrar por fecha desde
             if (!string.IsNullOrEmpty(txtDesde.Text))
@@ -57,22 +58,22 @@ public partial class Bitacora : System.Web.UI.Page
                 }
             }
 
-            // Filtrar por ID de Usuario (coincidencia parcial/total de texto para mayor flexibilidad)
-            if (!string.IsNullOrEmpty(txtIdUsuario.Text))
+            // Filtrar por Nombre de Usuario
+            if (!string.IsNullOrEmpty(txtUsuario.Text))
             {
-                listadoBitacora = listadoBitacora.Where(b => b.IdUsuario.ToString().Contains(txtIdUsuario.Text)).ToList();
+                listadoBitacora = listadoBitacora.Where(b => b.NombreUsuario.IndexOf(txtUsuario.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
             }
 
-            // Filtrar por Perfil (coincidencia parcial insensible a mayúsculas/minúsculas)
-            if (!string.IsNullOrEmpty(txtPerfil.Text))
+            // Filtrar por Perfil
+            if (ddlPerfil.SelectedValue != "todos")
             {
-                listadoBitacora = listadoBitacora.Where(b => b.Perfil.IndexOf(txtPerfil.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                listadoBitacora = listadoBitacora.Where(b => b.Perfil.Equals(ddlPerfil.SelectedValue, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Filtrar por Acción (coincidencia parcial insensible a mayúsculas/minúsculas)
-            if (!string.IsNullOrEmpty(txtAccion.Text))
+            // Filtrar por Acción (coincidencia parcial para soportar "Intento fallido X")
+            if (ddlAccion.SelectedValue != "todos")
             {
-                listadoBitacora = listadoBitacora.Where(b => b.Accion.IndexOf(txtAccion.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                listadoBitacora = listadoBitacora.Where(b => b.Accion.IndexOf(ddlAccion.SelectedValue, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
             }
 
             gvBitacora.DataSource = listadoBitacora;
@@ -143,9 +144,9 @@ public partial class Bitacora : System.Web.UI.Page
         ddlPreset.SelectedValue = "todos";
         txtDesde.Text = "";
         txtHasta.Text = "";
-        txtIdUsuario.Text = "";
-        txtPerfil.Text = "";
-        txtAccion.Text = "";
+        txtUsuario.Text = "";
+        ddlPerfil.SelectedValue = "todos";
+        ddlAccion.SelectedValue = "todos";
         gvBitacora.PageIndex = 0;
         CargarBitacora();
     }

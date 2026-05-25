@@ -24,10 +24,6 @@
                             <asp:Label runat="server" ID="lblUsuario" CssClass="g-highlight-user" />
                         </p>
                     </div>
-
-                    <asp:Button runat="server" ID="btnCerrarSesion" Text="Cerrar sesi&#243;n" CssClass="g-btn"
-                        OnClick="btnCerrarSesion_Click" />
-
                 </div>
             </div>
         </div>

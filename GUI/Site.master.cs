@@ -1,4 +1,4 @@
-﻿using BLL;
+using BLL;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -67,28 +67,26 @@ public partial class SiteMaster : MasterPage
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        string currentPath = Request.Url.AbsolutePath.ToLower();
+        string perfilActual = Session["perfil"] as string;
 
-        if (currentPath.EndsWith("default") || 
-            currentPath.EndsWith("default.aspx") || 
-            currentPath == "/")
+        if (perfilActual == "WebMaster")
         {
-            pnlNavbar.Visible = false;
+            liBitacora.Visible = true;
         }
         else
         {
-            pnlNavbar.Visible = true;
+            liBitacora.Visible = false;
+        }
 
-            string perfilActual = Session["perfil"].ToString();
-
-            if (perfilActual == "WebMaster" || perfilActual == "Administrador")
-            {
-                liBitacora.Visible = true;
-            }
-            else
-            {
-                liBitacora.Visible = false;
-            }
+        if (!string.IsNullOrEmpty(perfilActual))
+        {
+            liLogin.Visible = false;
+            liLogout.Visible = true;
+        }
+        else
+        {
+            liLogin.Visible = true;
+            liLogout.Visible = false;
         }
     }
 

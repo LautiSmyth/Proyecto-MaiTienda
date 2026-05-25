@@ -48,22 +48,31 @@
                     <div class="row" style="margin-top: 15px;">
                         <div class="col-md-3">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="txtIdUsuario" class="g-label">ID Usuario</label>
-                                <asp:TextBox ID="txtIdUsuario" runat="server" TextMode="Number" min="0"
-                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                                    CssClass="g-input" />
+                                <label for="txtUsuario" class="g-label">Usuario</label>
+                                <asp:TextBox ID="txtUsuario" runat="server" CssClass="g-input" />
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="txtPerfil" class="g-label">Perfil</label>
-                                <asp:TextBox ID="txtPerfil" runat="server" CssClass="g-input" />
+                                <label for="ddlPerfil" class="g-label">Perfil</label>
+                                <asp:DropDownList ID="ddlPerfil" runat="server" CssClass="g-input">
+                                    <asp:ListItem Value="todos" Text="Todos los perfiles" />
+                                    <asp:ListItem Value="WebMaster" Text="WebMaster" />
+                                    <asp:ListItem Value="Administrador" Text="Administrador" />
+                                    <asp:ListItem Value="Cliente" Text="Cliente" />
+                                </asp:DropDownList>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="txtAccion" class="g-label">Acción</label>
-                                <asp:TextBox ID="txtAccion" runat="server" CssClass="g-input" />
+                                <label for="ddlAccion" class="g-label">Acción</label>
+                                <asp:DropDownList ID="ddlAccion" runat="server" CssClass="g-input">
+                                    <asp:ListItem Value="todos" Text="Todas las acciones" />
+                                    <asp:ListItem Value="Inicio de sesion" Text="Inicio de sesión" />
+                                    <asp:ListItem Value="Cierre de sesión" Text="Cierre de sesión" />
+                                    <asp:ListItem Value="bloqueado por intentos fallidos" Text="Bloqueado por intentos" />
+                                    <asp:ListItem Value="Intento fallido" Text="Intento fallido" />
+                                </asp:DropDownList>
                             </div>
                         </div>
                         <div class="col-md-3" style="display: flex; align-items: flex-end; gap: 10px; height: 59px;">
@@ -82,8 +91,6 @@
                     AutoGenerateColumns="False" EmptyDataText="No hay registros en la bitácora." GridLines="None"
                     AllowPaging="True" PageSize="50" OnPageIndexChanging="gvBitacora_PageIndexChanging">
                     <Columns>
-                        <asp:BoundField DataField="IdBitacora" HeaderText="ID" />
-                        <asp:BoundField DataField="IdUsuario" HeaderText="ID Usuario" />
                         <asp:BoundField DataField="NombreUsuario" HeaderText="Usuario" />
                         <asp:BoundField DataField="Perfil" HeaderText="Perfil" />
                         <asp:BoundField DataField="Accion" HeaderText="Acción" />
