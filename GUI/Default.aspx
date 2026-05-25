@@ -37,8 +37,7 @@
                     CssClass="g-validator" ErrorMessage="Ingrese la contrase&#241;a." Display="Dynamic" />
             </div>
 
-            <asp:Button runat="server" ID="btnIngresar" Text="Ingresar"
-                CssClass="g-btn" OnClick="btnIngresar_Click" />
+            <asp:Button runat="server" ID="btnIngresar" Text="Ingresar" CssClass="g-btn" OnClick="btnIngresar_Click" />
 
             <div class="g-footer">
                 <span class="g-footer-text">&#169; <%: DateTime.Now.Year %> MaiTienda</span>

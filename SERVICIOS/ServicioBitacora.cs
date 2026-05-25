@@ -37,5 +37,10 @@ namespace SERVICIOS
             };
             _dalBitacora.RegistrarEvento(_bitacora);
         }
+
+        public List<BEBitacora> ListarBitacora()
+        {
+            return _dalBitacora.LeerBitacora();
+        }
     }
 }

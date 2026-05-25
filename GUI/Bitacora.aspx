@@ -1,0 +1,97 @@
+<%@ Page Title="Bitácora del Sistema" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true"
+    CodeFile="Bitacora.aspx.cs" Inherits="Bitacora" ResponseEncoding="utf-8" %>
+
+    <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+        <div class="container" style="margin-top: 50px;">
+            <h2>Gestión de Bitácora</h2>
+            <hr />
+            
+            <!-- Pestaña desplegable de Filtros -->
+            <div style="margin-bottom: 25px;">
+                <div class="g-filter-toggle" data-toggle="collapse" data-target="#collapseFilters"
+                    style="margin-bottom: -1px; position: relative; z-index: 2;">
+                    <span class="glyphicon glyphicon-filter"></span> Filtros <span class="caret"></span>
+                </div>
+
+                <div id="collapseFilters" class="collapse g-filter-card" style="margin-bottom: 0;">
+                    <!-- Fila 1: Filtros de Fecha -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="ddlPreset" class="g-label">Rango rápido</label>
+                                <asp:DropDownList ID="ddlPreset" runat="server" AutoPostBack="true"
+                                    OnSelectedIndexChanged="ddlPreset_SelectedIndexChanged" CssClass="g-input">
+                                    <asp:ListItem Value="todos" Text="Todos los registros" />
+                                    <asp:ListItem Value="hoy" Text="Hoy" />
+                                    <asp:ListItem Value="ayer" Text="Ayer" />
+                                    <asp:ListItem Value="semana" Text="Últimos 7 días" />
+                                    <asp:ListItem Value="mes" Text="Último mes" />
+                                    <asp:ListItem Value="personalizado" Text="Personalizado..." />
+                                </asp:DropDownList>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="txtDesde" class="g-label">Fecha Desde</label>
+                                <asp:TextBox ID="txtDesde" runat="server" TextMode="DateTimeLocal" CssClass="g-input" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="txtHasta" class="g-label">Fecha Hasta</label>
+                                <asp:TextBox ID="txtHasta" runat="server" TextMode="DateTimeLocal" CssClass="g-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Filtros de Entidades -->
+                    <div class="row" style="margin-top: 15px;">
+                        <div class="col-md-3">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="txtIdUsuario" class="g-label">ID Usuario</label>
+                                <asp:TextBox ID="txtIdUsuario" runat="server" TextMode="Number" min="0"
+                                    onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                                    CssClass="g-input" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="txtPerfil" class="g-label">Perfil</label>
+                                <asp:TextBox ID="txtPerfil" runat="server" CssClass="g-input" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="txtAccion" class="g-label">Acción</label>
+                                <asp:TextBox ID="txtAccion" runat="server" CssClass="g-input" />
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="display: flex; align-items: flex-end; gap: 10px; height: 59px;">
+                            <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" OnClick="btnFiltrar_Click"
+                                CssClass="g-btn" style="margin-top: 0; padding: 11px 0 !important;" />
+                            <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" OnClick="btnLimpiar_Click"
+                                CssClass="g-btn"
+                                style="margin-top: 0; padding: 11px 0 !important; background: #9f7cc0 !important;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <asp:GridView ID="gvBitacora" runat="server" CssClass="table table-striped table-bordered table-hover"
+                    AutoGenerateColumns="False" EmptyDataText="No hay registros en la bitácora." GridLines="None"
+                    AllowPaging="True" PageSize="50" OnPageIndexChanging="gvBitacora_PageIndexChanging">
+                    <Columns>
+                        <asp:BoundField DataField="IdBitacora" HeaderText="ID" />
+                        <asp:BoundField DataField="IdUsuario" HeaderText="ID Usuario" />
+                        <asp:BoundField DataField="NombreUsuario" HeaderText="Usuario" />
+                        <asp:BoundField DataField="Perfil" HeaderText="Perfil" />
+                        <asp:BoundField DataField="Accion" HeaderText="Acción" />
+                        <asp:BoundField DataField="Fecha" HeaderText="Fecha y Hora"
+                            DataFormatString="{0:dd/MM/yyyy HH:mm:ss}" />
+                    </Columns>
+                    <PagerStyle CssClass="gv-pager" HorizontalAlign="Center" />
+                </asp:GridView>
+            </div>
+        </div>
+    </asp:Content>

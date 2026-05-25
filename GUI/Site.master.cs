@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BLL;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -66,7 +67,38 @@ public partial class SiteMaster : MasterPage
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        string currentPath = Request.Url.AbsolutePath.ToLower();
 
+        if (currentPath.EndsWith("default") || 
+            currentPath.EndsWith("default.aspx") || 
+            currentPath == "/")
+        {
+            pnlNavbar.Visible = false;
+        }
+        else
+        {
+            pnlNavbar.Visible = true;
+
+            string perfilActual = Session["perfil"].ToString();
+
+            if (perfilActual == "WebMaster" || perfilActual == "Administrador")
+            {
+                liBitacora.Visible = true;
+            }
+            else
+            {
+                liBitacora.Visible = false;
+            }
+        }
+    }
+
+    protected void btnNavLogout_Click(object sender, EventArgs e)
+    {
+        BLLUsuario _bllUsuario = new BLLUsuario();
+        _bllUsuario.CerrarSesion();
+        Session.Clear();
+        Session.Abandon();
+        Response.Redirect("~/Default.aspx");
     }
 
     protected void Unnamed_LoggingOut(object sender, LoginCancelEventArgs e)

@@ -25,5 +25,29 @@ namespace DAL
             };
             _acceso.Escribir(query, parameters);
         }
+
+        public List<BEBitacora> LeerBitacora()
+        {
+            List<BEBitacora> bitacoras = new List<BEBitacora>();
+            string query = "SELECT IdBitacora, IdUsuario, NombreUsuario, Perfil, Accion, Fecha FROM Bitacora ORDER BY Fecha DESC";
+
+            System.Data.DataTable tabla = _acceso.Leer(query, null);
+
+            foreach (System.Data.DataRow row in tabla.Rows)
+            {
+                BEBitacora bit = new BEBitacora
+                {
+                    IdBitacora = Convert.ToInt32(row["IdBitacora"]),
+                    IdUsuario = Convert.ToInt32(row["IdUsuario"]),
+                    NombreUsuario = row["NombreUsuario"].ToString(),
+                    Perfil = row["Perfil"].ToString(),
+                    Accion = row["Accion"].ToString(),
+                    Fecha = Convert.ToDateTime(row["Fecha"])
+                };
+                bitacoras.Add(bit);
+            }
+
+            return bitacoras;
+        }
     }
 }

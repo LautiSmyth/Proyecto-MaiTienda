@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%: Page.Title %> - Mi aplicación ASP.NET</title>
+    <title><%: Page.Title %> - MaiTienda</title>
 
 <link href="Content/bootstrap.css" rel="stylesheet" type="text/css" />
 <link href="Content/Site.css" rel="stylesheet" type="text/css" />
@@ -38,7 +38,30 @@
             </Scripts>
         </asp:ScriptManager>
 
-        <!-- Navbar removida por limpieza -->
+        <asp:Panel ID="pnlNavbar" runat="server">
+            <nav class="navbar g-navbar navbar-fixed-top" style="display: block !important; position: fixed !important; z-index: 9999 !important;">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" runat="server" href="~/Respuesta.aspx">MaiTienda</a>
+                    </div>
+                    <div class="navbar-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li id="liBitacora" runat="server"><a runat="server" href="~/Bitacora.aspx">Bitácora</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><asp:LinkButton ID="btnNavLogout" runat="server" OnClick="btnNavLogout_Click">Cerrar sesión</asp:LinkButton></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </asp:Panel>
+
+        <!-- Navbar removida por limpieza original -->
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
