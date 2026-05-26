@@ -7,13 +7,14 @@
             <hr />
             
             <!-- Pestaña desplegable de Filtros -->
+            <asp:HiddenField ID="hfFiltersExpanded" runat="server" Value="false" />
             <div style="margin-bottom: 25px;">
                 <div class="g-filter-toggle" data-toggle="collapse" data-target="#collapseFilters"
                     style="margin-bottom: -1px; position: relative; z-index: 2;">
                     <span class="glyphicon glyphicon-filter"></span> Filtros <span class="caret"></span>
                 </div>
 
-                <div id="collapseFilters" class="collapse g-filter-card" style="margin-bottom: 0;">
+                <div id="collapseFilters" class='collapse g-filter-card <%= hfFiltersExpanded.Value == "true" ? "in" : "" %>' style="margin-bottom: 0;">
                     <!-- Fila 1: Filtros de Fecha -->
                     <div class="row">
                         <div class="col-md-4">
@@ -101,4 +102,19 @@
                 </asp:GridView>
             </div>
         </div>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var collapseEl = $('#collapseFilters');
+                var hiddenField = $('#<%= hfFiltersExpanded.ClientID %>');
+
+                collapseEl.on('shown.bs.collapse', function () {
+                    hiddenField.val("true");
+                });
+
+                collapseEl.on('hidden.bs.collapse', function () {
+                    hiddenField.val("false");
+                });
+            });
+        </script>
     </asp:Content>
