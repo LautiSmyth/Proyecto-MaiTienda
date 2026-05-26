@@ -37,11 +37,26 @@ public partial class Bitacora : Page
     private void CargarBitacora()
     {
         pnlError.Visible = false;
+
+        if (!string.IsNullOrEmpty(txtDesde.Text) && !string.IsNullOrEmpty(txtHasta.Text))
+        {
+            if (DateTime.TryParse(txtDesde.Text, out DateTime fechaDesde) && 
+                DateTime.TryParse(txtHasta.Text, out DateTime fechaHasta))
+            {
+                if (fechaHasta < fechaDesde)
+                {
+                    pnlError.Visible = true;
+                    litError.Text = "La fecha de fin (Fecha Hasta) no puede ser anterior a la fecha de inicio (Fecha Desde).";
+                    gvBitacora.DataSource = null;
+                    gvBitacora.DataBind();
+                    return;
+                }
+            }
+        }
+
         try
         {
             List<BEBitacora> listadoBitacora = _bllBitacora.ListarBitacora();
-
-
 
             gvBitacora.DataSource = AplicarFiltros(listadoBitacora);
             gvBitacora.DataBind();
