@@ -43,7 +43,7 @@ namespace BLL
                 bool esValido = Encriptador.Verificar(password, usuario.Password);
                 if (!esValido)
                 {
-                    if(usuario.IntentosFallidos >= 3)
+                    if(usuario.IntentosFallidos >= 2)
                     {
                         usuario.Estado = EstadoUsuario.Bloqueado;
                         _dalUsuario.Actualizar(usuario);
