@@ -29,7 +29,6 @@ public partial class Bitacora : Page
             Response.Redirect("~/respuesta.aspx");
             return;
         }
-
     }
 
     private void CargarBitacora()

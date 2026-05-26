@@ -4,12 +4,11 @@ using SERVICIOS;
 using System;
 
 namespace BLL
-
 {
     public class BLLUsuario
     {
         private readonly DAL.DALUsuario _dalUsuario = new DAL.DALUsuario();
-        ServicioBitacora _sBitacora = new ServicioBitacora();
+        private ServicioBitacora _sBitacora = new ServicioBitacora();
 
         public BE.BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
         {
@@ -58,7 +57,6 @@ namespace BLL
                 usuario.IntentosFallidos = 0;
                 _dalUsuario.Actualizar(usuario);
                 _sBitacora.RegistrarEvento("Inicio de sesion");
-
             }
             catch (UnauthorizedAccessException)
             {

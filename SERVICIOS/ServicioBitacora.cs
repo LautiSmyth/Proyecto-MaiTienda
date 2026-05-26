@@ -21,6 +21,7 @@ namespace SERVICIOS
             };
             _dalBitacora.RegistrarEvento(_bitacora);
         }
+
         public void RegistrarEvento(string accion, BEUsuario _usuario)
         {
             BEBitacora _bitacora = new BEBitacora
