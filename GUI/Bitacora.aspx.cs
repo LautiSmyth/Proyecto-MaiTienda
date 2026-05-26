@@ -9,7 +9,7 @@ using BLL;
 using Microsoft.Ajax.Utilities;
 using SERVICIOS;
 
-public partial class Bitacora : System.Web.UI.Page
+public partial class Bitacora : Page
 {
     private BLLBitacora _bllBitacora = new BLLBitacora();
 
@@ -36,6 +36,7 @@ public partial class Bitacora : System.Web.UI.Page
 
     private void CargarBitacora()
     {
+        pnlError.Visible = false;
         try
         {
             List<BEBitacora> listadoBitacora = _bllBitacora.ListarBitacora();
@@ -81,7 +82,8 @@ public partial class Bitacora : System.Web.UI.Page
         }
         catch (Exception ex)
         {
-            // Opcional: Manejar el error de forma visual si así lo deseas
+            pnlError.Visible = true;
+            litError.Text = "Ocurrió un error al cargar la bitácora: " + ex.Message;
         }
     }
 

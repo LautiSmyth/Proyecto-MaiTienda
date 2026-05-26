@@ -1,4 +1,4 @@
-﻿using BE;
+using BE;
 using BLL;
 using SERVICIOS;
 using System;
@@ -32,12 +32,10 @@ public partial class Login : System.Web.UI.Page
 
     protected void btnIngresar_Click(object sender, EventArgs e)
     {
-
         try
         {
             BLLUsuario _bllUsuario = new BLLUsuario();
             _bllUsuario.ValidarCredenciales(txtUsuario.Text.Trim(), txtPassword.Text);
-
 
             BEUsuario _usuario = SessionManager.GetInstance().Usuario;
             Session["nombreUsuario"] = _usuario.NombreUsuario;

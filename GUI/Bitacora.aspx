@@ -6,6 +6,10 @@
             <h2>Gestión de Bitácora</h2>
             <hr />
             
+            <asp:Panel runat="server" ID="pnlError" Visible="false" CssClass="g-error" role="alert" style="margin-bottom: 20px;">
+                <asp:Literal runat="server" ID="litError" />
+            </asp:Panel>
+            
             <!-- Pestaña desplegable de Filtros -->
             <asp:HiddenField ID="hfFiltersExpanded" runat="server" Value="false" />
             <div style="margin-bottom: 25px;">
