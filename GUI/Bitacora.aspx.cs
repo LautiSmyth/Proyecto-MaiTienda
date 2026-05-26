@@ -41,7 +41,6 @@ public partial class Bitacora : Page
         {
             List<BEBitacora> listadoBitacora = _bllBitacora.ListarBitacora();
 
-            // Filtrar por fecha desde
             if (!string.IsNullOrEmpty(txtDesde.Text))
             {
                 if (DateTime.TryParse(txtDesde.Text, out DateTime fechaDesde))
@@ -50,7 +49,6 @@ public partial class Bitacora : Page
                 }
             }
 
-            // Filtrar por fecha hasta
             if (!string.IsNullOrEmpty(txtHasta.Text))
             {
                 if (DateTime.TryParse(txtHasta.Text, out DateTime fechaHasta))
@@ -59,19 +57,16 @@ public partial class Bitacora : Page
                 }
             }
 
-            // Filtrar por Nombre de Usuario
             if (!string.IsNullOrEmpty(txtUsuario.Text))
             {
                 listadoBitacora = listadoBitacora.Where(b => b.NombreUsuario.IndexOf(txtUsuario.Text, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
             }
 
-            // Filtrar por Perfil
             if (ddlPerfil.SelectedValue != "todos")
             {
                 listadoBitacora = listadoBitacora.Where(b => b.Perfil.Equals(ddlPerfil.SelectedValue, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            // Filtrar por Acción (coincidencia parcial para soportar "Intento fallido X")
             if (ddlAccion.SelectedValue != "todos")
             {
                 listadoBitacora = listadoBitacora.Where(b => b.Accion.IndexOf(ddlAccion.SelectedValue, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
