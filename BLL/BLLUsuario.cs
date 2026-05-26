@@ -1,12 +1,7 @@
 ﻿using BE;
 using BE.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SERVICIOS;
-using System.CodeDom;
+using System;
 
 namespace BLL
 
@@ -43,7 +38,7 @@ namespace BLL
                 bool esValido = Encriptador.Verificar(password, usuario.Password);
                 if (!esValido)
                 {
-                    if(usuario.IntentosFallidos >= 2)
+                    if (usuario.IntentosFallidos >= 2)
                     {
                         usuario.Estado = EstadoUsuario.Bloqueado;
                         _dalUsuario.Actualizar(usuario);
@@ -57,7 +52,7 @@ namespace BLL
                     }
                     throw new UnauthorizedAccessException();
                 }
-                
+
                 SessionManager _session = SessionManager.GetInstance();
                 _session.Login(usuario);
                 usuario.IntentosFallidos = 0;

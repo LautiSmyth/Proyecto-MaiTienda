@@ -1,17 +1,14 @@
+using BE;
+using SERVICIOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using BE;
-using BLL;
-using Microsoft.Ajax.Utilities;
-using SERVICIOS;
 
 public partial class Bitacora : Page
 {
-    private BLLBitacora _bllBitacora = new BLLBitacora();
+    private ServicioBitacora _bllBitacora = new ServicioBitacora();
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -26,7 +23,8 @@ public partial class Bitacora : Page
         {
             Response.Redirect("~/Default.aspx");
             return;
-        } else if (perfilActual != "WebMaster")
+        }
+        else if (perfilActual != "WebMaster")
         {
             Response.Redirect("~/respuesta.aspx");
             return;
@@ -40,7 +38,7 @@ public partial class Bitacora : Page
 
         if (!string.IsNullOrEmpty(txtDesde.Text) && !string.IsNullOrEmpty(txtHasta.Text))
         {
-            if (DateTime.TryParse(txtDesde.Text, out DateTime fechaDesde) && 
+            if (DateTime.TryParse(txtDesde.Text, out DateTime fechaDesde) &&
                 DateTime.TryParse(txtHasta.Text, out DateTime fechaHasta))
             {
                 if (fechaHasta < fechaDesde)

@@ -1,6 +1,5 @@
 using System;
 using System.Web.UI;
-using BLL;
 
 public partial class Respuesta : Page
 {
