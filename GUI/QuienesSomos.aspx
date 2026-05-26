@@ -41,7 +41,6 @@
 
                     <hr class="g-divider" />
 
-                    <!-- SECCIÓN VIDEO -->
                     <span class="g-section-title" style="text-align: center;">Video de Presentación</span>
                     <div class="g-video-container">
                         <video controls style="background-color: #100526;">
