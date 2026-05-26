@@ -10,7 +10,6 @@
                 <asp:Literal runat="server" ID="litError" />
             </asp:Panel>
             
-            <!-- Pestaña desplegable de Filtros -->
             <asp:HiddenField ID="hfFiltersExpanded" runat="server" Value="false" />
             <div style="margin-bottom: 25px;">
                 <div class="g-filter-toggle" data-toggle="collapse" data-target="#collapseFilters"
@@ -19,7 +18,6 @@
                 </div>
 
                 <div id="collapseFilters" class='collapse g-filter-card <%= hfFiltersExpanded.Value == "true" ? "in" : "" %>' style="margin-bottom: 0;">
-                    <!-- Fila 1: Filtros de Fecha -->
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group" style="margin-bottom: 0;">
@@ -49,7 +47,6 @@
                         </div>
                     </div>
 
-                    <!-- Fila 2: Filtros de Entidades -->
                     <div class="row" style="margin-top: 15px;">
                         <div class="col-md-3">
                             <div class="form-group" style="margin-bottom: 0;">

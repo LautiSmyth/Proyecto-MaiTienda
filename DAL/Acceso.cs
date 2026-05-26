@@ -7,7 +7,7 @@ namespace DAL
 {
     public sealed class Acceso
     {
-        private static volatile Acceso _instance;
+        private static Acceso _instance;
         private static readonly object _lock = new object();
 
         private readonly string _cadenaConexion;
