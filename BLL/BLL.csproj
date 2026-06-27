@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BLLUsuario.cs" />
+    <Compile Include="BLLProducto.cs" />
+    <Compile Include="BLLCarrito.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

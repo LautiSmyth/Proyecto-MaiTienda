@@ -11,7 +11,7 @@
 
 <link href="Content/bootstrap.css" rel="stylesheet" type="text/css" />
 <link href="Content/Site.css" rel="stylesheet" type="text/css" />
-<link href="Content/app.css" rel="stylesheet" type="text/css" />
+<link href="Content/app.css?v=2" rel="stylesheet" type="text/css" />
 <script src="Scripts/modernizr-2.8.3.js"></script>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
@@ -47,7 +47,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" runat="server" href="~/Respuesta.aspx">MaiTienda</a>
+                        <a class="navbar-brand" runat="server" href="~/Default.aspx">MaiTienda</a>
                     </div>
                     <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">
@@ -55,6 +55,16 @@
                             <li id="liBitacora" runat="server"><a runat="server" href="~/Bitacora.aspx">Bitácora</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
+                            <li id="liCarrito" class="nav-item">
+                                <a href="Carrito.aspx" class="nav-link" style="display: flex; align-items: center; gap: 8px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;">
+                                        <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                    </svg>
+                                    <span style="vertical-align: middle;">Carrito</span>
+                                    <span id="lblCarritoContador" runat="server" class="badge" style="background-color: #7c3aed; color: #ffffff; font-family: 'Orbitron', sans-serif; vertical-align: middle;">0</span>
+                                </a>
+                            </li>
                             <li id="liLogin" runat="server"><a runat="server" href="~/Login.aspx">Iniciar sesión</a></li>
                             <li id="liLogout" runat="server"><asp:LinkButton ID="btnNavLogout" runat="server" OnClick="btnNavLogout_Click">Cerrar sesión</asp:LinkButton></li>
                         </ul>
@@ -63,10 +73,23 @@
             </nav>
         </asp:Panel>
 
+
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
         </div>
     </form>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
+            if (!logueado) {
+                var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
+                var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
+                if (lblContador) {
+                    lblContador.innerText = carritoLocal.length.toString();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

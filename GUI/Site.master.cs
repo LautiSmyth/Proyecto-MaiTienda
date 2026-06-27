@@ -80,6 +80,13 @@ public partial class SiteMaster : MasterPage
             liLogin.Visible = true;
             liLogout.Visible = false;
         }
+
+        // Registrar variable global de login en el cliente para todas las páginas
+        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        string script = $"var usuarioLogueado = {(usuario != null ? "true" : "false")};";
+        Page.ClientScript.RegisterStartupScript(this.GetType(), "sessionInfoGlobal", script, true);
+
+        ActualizarCarritoContador();
     }
 
     protected void btnNavLogout_Click(object sender, EventArgs e)
@@ -94,5 +101,24 @@ public partial class SiteMaster : MasterPage
     protected void Unnamed_LoggingOut(object sender, LoginCancelEventArgs e)
     {
         Context.GetOwinContext().Authentication.SignOut();
+    }
+
+    public void ActualizarCarritoContador()
+    {
+        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        int cantidad = 0;
+
+        if (usuario != null)
+        {
+            BLL.BLLCarrito bllCarrito = new BLL.BLLCarrito();
+            cantidad = bllCarrito.ObtenerCantidadTotal(usuario.IdUsuario);
+        }
+        else
+        {
+            var carrito = Session["Carrito"] as System.Collections.Generic.List<int>;
+            cantidad = carrito != null ? carrito.Count : 0;
+        }
+
+        lblCarritoContador.InnerText = cantidad.ToString();
     }
 }
