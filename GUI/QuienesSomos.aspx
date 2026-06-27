@@ -51,6 +51,22 @@
 
                     <hr class="g-divider" />
 
+                    <span class="g-section-title" style="text-align: center;">Nuestra Ubicación</span>
+                    <p style="color: #7c5ea8; font-family: 'Exo 2', sans-serif; font-size: 13px; text-align: center; margin-bottom: 20px;">
+                        Visítanos en nuestras oficinas centrales de <span class="g-highlight">UAI Lomas</span>.
+                    </p>
+                    <div style="border: 2px solid #ddd0f5; padding: 4px; background: #ffffff; border-radius: 4px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.05); margin-bottom: 25px;">
+                        <iframe 
+                            src="https://maps.google.com/maps?q=Universidad%20Abierta%20Interamericana%20-%20UAI%20Lomas&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+                            width="100%" 
+                            height="350" 
+                            style="border:0; display: block;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+
                     <div style="text-align: center; margin-top: 25px;">
                         <a href="Default.aspx" class="g-btn"
                             style="text-decoration: none; display: inline-block; width: auto; padding: 12px 35px !important; margin-top: 0;">Volver

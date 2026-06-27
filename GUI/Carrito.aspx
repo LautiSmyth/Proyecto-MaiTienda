@@ -105,8 +105,18 @@
                             <span id="lblTotal" runat="server" style="font-family: 'Orbitron', sans-serif; font-weight: 900; color: #7c3aed; font-size: 24px;">$0,00</span>
                         </div>
 
+                        <!-- Panel de Firma Digital -->
+                        <div id="pnlSignature" style="margin-bottom: 20px;">
+                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 8px;">Firme aquí para autorizar el despacho de hardware:</label>
+                            <div style="border: 1px solid #ddd0f5; background: #faf7ff; border-radius: 4px; position: relative;">
+                                <canvas id="signature-canvas" style="display: block; width: 100%; height: 110px; cursor: crosshair; touch-action: none; background: #faf7ff;"></canvas>
+                                <button type="button" id="btnClearSignature" style="position: absolute; bottom: 5px; right: 5px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: 'Exo 2', sans-serif; font-size: 10px; padding: 2px 8px; cursor: pointer; border-radius: 3px;">Borrar</button>
+                            </div>
+                            <span id="lblSignatureError" style="font-family: 'Exo 2', sans-serif; font-size: 10px; color: #ef4444; display: none; margin-top: 5px;">⚠️ Se requiere firma de conformidad para proceder.</span>
+                        </div>
+
                         <!-- Botón de Proceder -->
-                        <asp:Button ID="btnCheckout" runat="server" Text="Finalizar Compra" CssClass="g-btn" OnClick="btnCheckout_Click" 
+                        <asp:Button ID="btnCheckout" runat="server" Text="Finalizar Compra" CssClass="g-btn" OnClick="btnCheckout_Click" OnClientClick="return validarFirmaDigital();"
                             style="width: 100% !important; padding: 14px 0 !important; font-size: 12px !important; margin-top: 10px !important;" />
                         
                         <a href="Default.aspx" style="display: block; text-align: center; margin-top: 15px; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 600;">← Seguir Comprando</a>
@@ -271,6 +281,139 @@
                 if (subtotalSpan) subtotalSpan.innerText = formatSubtotal;
                 if (totalSpan) totalSpan.innerText = formatSubtotal;
             }
+
+            // --- Lógica del Canvas de Firma Digital ---
+            var sigCanvas = document.getElementById('signature-canvas');
+            var btnClearSig = document.getElementById('btnClearSignature');
+            var lblSigError = document.getElementById('lblSignatureError');
+            var hasSigned = false;
+
+            if (sigCanvas) {
+                var sigCtx = sigCanvas.getContext('2d');
+                var drawing = false;
+
+                function resizeSigCanvas() {
+                    // Guardar contenido antes de redimensionar
+                    var tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = sigCanvas.width;
+                    tempCanvas.height = sigCanvas.height;
+                    var tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.drawImage(sigCanvas, 0, 0);
+
+                    sigCanvas.width = sigCanvas.offsetWidth;
+                    sigCanvas.height = sigCanvas.offsetHeight;
+
+                    // Re-dibujar contenido y aplicar estilos tras redimensionar
+                    sigCtx.drawImage(tempCanvas, 0, 0);
+                    sigCtx.strokeStyle = '#7c3aed';
+                    sigCtx.lineWidth = 3;
+                    sigCtx.lineCap = 'round';
+                    sigCtx.lineJoin = 'round';
+                }
+                window.addEventListener('resize', resizeSigCanvas);
+                
+                // Inicializar dimensiones
+                sigCanvas.width = sigCanvas.offsetWidth;
+                sigCanvas.height = sigCanvas.offsetHeight;
+                sigCtx.strokeStyle = '#7c3aed';
+                sigCtx.lineWidth = 3;
+                sigCtx.lineCap = 'round';
+                sigCtx.lineJoin = 'round';
+
+                // Mouse Events
+                sigCanvas.addEventListener('mousedown', function (e) {
+                    drawing = true;
+                    sigCtx.beginPath();
+                    var pos = getMousePos(sigCanvas, e);
+                    sigCtx.moveTo(pos.x, pos.y);
+                });
+
+                sigCanvas.addEventListener('mousemove', function (e) {
+                    if (!drawing) return;
+                    var pos = getMousePos(sigCanvas, e);
+                    sigCtx.lineTo(pos.x, pos.y);
+                    sigCtx.stroke();
+                    hasSigned = true;
+                    if (lblSigError) lblSigError.style.display = 'none';
+                });
+
+                window.addEventListener('mouseup', function () {
+                    drawing = false;
+                });
+
+                // Touch Events (Celulares y Tablets)
+                sigCanvas.addEventListener('touchstart', function (e) {
+                    drawing = true;
+                    sigCtx.beginPath();
+                    var touch = e.touches[0];
+                    var pos = getTouchPos(sigCanvas, touch);
+                    sigCtx.moveTo(pos.x, pos.y);
+                    e.preventDefault();
+                }, { passive: false });
+
+                sigCanvas.addEventListener('touchmove', function (e) {
+                    if (!drawing) return;
+                    var touch = e.touches[0];
+                    var pos = getTouchPos(sigCanvas, touch);
+                    sigCtx.lineTo(pos.x, pos.y);
+                    sigCtx.stroke();
+                    hasSigned = true;
+                    if (lblSigError) lblSigError.style.display = 'none';
+                    e.preventDefault();
+                }, { passive: false });
+
+                sigCanvas.addEventListener('touchend', function () {
+                    drawing = false;
+                });
+
+                function getMousePos(canvasEl, evt) {
+                    var rect = canvasEl.getBoundingClientRect();
+                    return {
+                        x: evt.clientX - rect.left,
+                        y: evt.clientY - rect.top
+                    };
+                }
+
+                function getTouchPos(canvasEl, touchEl) {
+                    var rect = canvasEl.getBoundingClientRect();
+                    return {
+                        x: touchEl.clientX - rect.left,
+                        y: touchEl.clientY - rect.top
+                    };
+                }
+
+                if (btnClearSig) {
+                    btnClearSig.addEventListener('click', clearSignature);
+                }
+
+                function clearSignature() {
+                    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+                    hasSigned = false;
+                    sigCtx.strokeStyle = '#7c3aed';
+                    sigCtx.lineWidth = 3;
+                    sigCtx.lineCap = 'round';
+                    sigCtx.lineJoin = 'round';
+                    if (lblSigError) lblSigError.style.display = 'none';
+                }
+            }
+
+            window.validarFirmaDigital = function () {
+                var sigError = document.getElementById('lblSignatureError');
+                if (!hasSigned) {
+                    if (sigError) sigError.style.display = 'block';
+                    sigCanvas.parentElement.style.borderColor = '#ef4444';
+                    setTimeout(function () {
+                        sigCanvas.parentElement.style.borderColor = '#ddd0f5';
+                    }, 1000);
+                    return false;
+                }
+                
+                var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
+                if (!logueado) {
+                    localStorage.removeItem('carrito');
+                }
+                return true;
+            };
         });
     </script>
 </asp:Content>
