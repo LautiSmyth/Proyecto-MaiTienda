@@ -87,4 +87,10 @@
                 var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
                 var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
                 if (lblContador) {
-                    lblContador.innerTex
+                    lblContador.innerText = carritoLocal.length.toString();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

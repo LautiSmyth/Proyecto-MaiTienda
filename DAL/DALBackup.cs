@@ -33,7 +33,6 @@ namespace DAL
             using (SqlConnection conexion = new SqlConnection(_cadenaConexion))
             using (SqlCommand cmd = new SqlCommand(query, conexion))
             {
-                // Timeout extendido: el backup puede demorar varios minutos
                 cmd.CommandTimeout = 600;
                 conexion.Open();
                 cmd.ExecuteNonQuery();

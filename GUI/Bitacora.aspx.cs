@@ -26,7 +26,7 @@ public partial class Bitacora : Page
         }
         else if (perfilActual != "WebMaster")
         {
-            Response.Redirect("~/respuesta.aspx");
+            Response.Redirect("~/Bienvenida.aspx");
             return;
         }
     }

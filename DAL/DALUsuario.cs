@@ -23,20 +23,16 @@ namespace DAL
             if (tabla.Rows.Count == 0)
                 return null;
 
-            if (tabla.Rows.Count > 0)
+            DataRow fila = tabla.Rows[0];
+            return new BEUsuario
             {
-                DataRow fila = tabla.Rows[0];
-                return new BEUsuario
-                {
-                    IdUsuario = Convert.ToInt32(fila["IdUsuario"]),
-                    NombreUsuario = fila["NombreUsuario"].ToString(),
-                    Password = fila["Password"].ToString(),
-                    Estado = (EstadoUsuario)Convert.ToInt32(fila["Estado"]),
-                    Perfil = (Perfil)Convert.ToInt32(fila["Perfil"]),
-                    IntentosFallidos = Convert.ToInt32(fila["IntentosFallidos"])
-                };
-            }
-            return null;
+                IdUsuario = Convert.ToInt32(fila["IdUsuario"]),
+                NombreUsuario = fila["NombreUsuario"].ToString(),
+                Password = fila["Password"].ToString(),
+                Estado = (EstadoUsuario)Convert.ToInt32(fila["Estado"]),
+                Perfil = (Perfil)Convert.ToInt32(fila["Perfil"]),
+                IntentosFallidos = Convert.ToInt32(fila["IntentosFallidos"])
+            };
         }
 
         public void Insertar(BEUsuario usuario)

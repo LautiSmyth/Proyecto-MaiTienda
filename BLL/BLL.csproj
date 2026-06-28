@@ -61,4 +61,6 @@
       <Project>{0e318dde-c8c5-4b6f-89b2-aa7121566cbe}</Project>
       <Name>SERVICIOS</Name>
     </ProjectReference>
-  </I
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

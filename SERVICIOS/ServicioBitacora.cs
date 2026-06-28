@@ -1,4 +1,4 @@
-﻿using BE;
+using BE;
 using System;
 using System.Collections.Generic;
 
@@ -10,32 +10,44 @@ namespace SERVICIOS
 
         public void RegistrarEvento(string accion)
         {
-            BEUsuario _usuario = SessionManager.GetInstance().Usuario;
-            BEBitacora _bitacora = new BEBitacora
+            BEUsuario usuario = SessionManager.GetInstance().Usuario;
+            _dalBitacora.RegistrarEvento(new BEBitacora
             {
-                IdUsuario = _usuario.IdUsuario,
-                NombreUsuario = _usuario.NombreUsuario,
-                Perfil = _usuario.Perfil.ToString(),
+                IdUsuario = usuario.IdUsuario,
+                NombreUsuario = usuario.NombreUsuario,
+                Perfil = usuario.Perfil.ToString(),
                 Accion = accion,
                 Fecha = DateTime.Now
-            };
-            _dalBitacora.RegistrarEvento(_bitacora);
+            });
         }
 
-        public void RegistrarEvento(string accion, BEUsuario _usuario)
+        public void RegistrarEvento(string accion, BEUsuario usuario)
         {
-            BEBitacora _bitacora = new BEBitacora
+            _dalBitacora.RegistrarEvento(new BEBitacora
             {
-                IdUsuario = _usuario.IdUsuario,
-                NombreUsuario = _usuario.NombreUsuario,
-                Perfil = _usuario.Perfil.ToString(),
+                IdUsuario = usuario.IdUsuario,
+                NombreUsuario = usuario.NombreUsuario,
+                Perfil = usuario.Perfil.ToString(),
                 Accion = accion,
                 Fecha = DateTime.Now
-            };
-            _dalBitacora.RegistrarEvento(_bitacora);
+            });
         }
 
         public void RegistrarEventoSistema(string accion)
         {
-            BEBitacora _bitacora = new BEBitacora
-        
+            _dalBitacora.RegistrarEvento(new BEBitacora
+            {
+                IdUsuario = 0,
+                NombreUsuario = "Sistema",
+                Perfil = "Sistema",
+                Accion = accion,
+                Fecha = DateTime.Now
+            });
+        }
+
+        public List<BEBitacora> ListarBitacora()
+        {
+            return _dalBitacora.LeerBitacora();
+        }
+    }
+}
