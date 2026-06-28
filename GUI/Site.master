@@ -53,6 +53,7 @@
                         <ul class="nav navbar-nav">
                             <li><a runat="server" href="~/QuienesSomos.aspx">Quiénes Somos</a></li>
                             <li id="liBitacora" runat="server"><a runat="server" href="~/Bitacora.aspx">Bitácora</a></li>
+                            <li id="liBackup" runat="server"><a runat="server" href="~/Backup.aspx">Backup</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             <li id="liCarrito" class="nav-item">
@@ -86,10 +87,4 @@
                 var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
                 var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
                 if (lblContador) {
-                    lblContador.innerText = carritoLocal.length.toString();
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+                    lblContador.innerTex

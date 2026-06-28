@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acceso.cs" />
+    <Compile Include="DALBackup.cs" />
     <Compile Include="DALBitacora.cs" />
     <Compile Include="DALUsuario.cs" />
     <Compile Include="DALProducto.cs" />

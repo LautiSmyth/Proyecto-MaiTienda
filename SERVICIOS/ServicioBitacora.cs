@@ -35,9 +35,7 @@ namespace SERVICIOS
             _dalBitacora.RegistrarEvento(_bitacora);
         }
 
-        public List<BEBitacora> ListarBitacora()
+        public void RegistrarEventoSistema(string accion)
         {
-            return _dalBitacora.LeerBitacora();
-        }
-    }
-}
+            BEBitacora _bitacora = new BEBitacora
+        

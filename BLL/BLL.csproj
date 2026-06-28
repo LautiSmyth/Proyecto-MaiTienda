@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -41,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLLBackup.cs" />
     <Compile Include="BLLUsuario.cs" />
     <Compile Include="BLLProducto.cs" />
     <Compile Include="BLLCarrito.cs" />
@@ -59,6 +61,4 @@
       <Project>{0e318dde-c8c5-4b6f-89b2-aa7121566cbe}</Project>
       <Name>SERVICIOS</Name>
     </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-</Project>
+  </I

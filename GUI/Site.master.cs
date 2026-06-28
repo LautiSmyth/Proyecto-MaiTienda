@@ -64,10 +64,12 @@ public partial class SiteMaster : MasterPage
         if (perfilActual == "WebMaster")
         {
             liBitacora.Visible = true;
+            liBackup.Visible = true;
         }
         else
         {
             liBitacora.Visible = false;
+            liBackup.Visible = false;
         }
 
         if (!string.IsNullOrEmpty(perfilActual))
@@ -117,8 +119,4 @@ public partial class SiteMaster : MasterPage
         {
             var carrito = Session["Carrito"] as System.Collections.Generic.List<int>;
             cantidad = carrito != null ? carrito.Count : 0;
-        }
-
-        lblCarritoContador.InnerText = cantidad.ToString();
-    }
-}
+     
