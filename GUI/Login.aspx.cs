@@ -1,17 +1,15 @@
-using BE;
 using BLL;
 using SERVICIOS;
 using System;
+using System.Web.UI;
 
-public partial class Login : System.Web.UI.Page
+public partial class Login : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!IsPostBack)
         {
-            BLLUsuario _bllUsuario = new BLLUsuario();
-            bool conectado = _bllUsuario.VerificarConexion();
-
+            bool conectado = new BLLUsuario().VerificarConexion();
             if (conectado)
             {
                 lblConexion.Text = "<span class='g-status-dot'></span> DB conectada";
@@ -29,14 +27,13 @@ public partial class Login : System.Web.UI.Page
     {
         try
         {
-            BLLUsuario _bllUsuario = new BLLUsuario();
-            _bllUsuario.ValidarCredenciales(txtUsuario.Text.Trim(), txtPassword.Text);
+            new BLLUsuario().ValidarCredenciales(txtUsuario.Text.Trim(), txtPassword.Text);
 
-            BEUsuario _usuario = SessionManager.GetInstance().Usuario;
-            Session["nombreUsuario"] = _usuario.NombreUsuario;
-            Session["perfil"] = _usuario.Perfil.ToString();
+            var usuario = SessionManager.GetInstance().Usuario;
+            Session["nombreUsuario"] = usuario.NombreUsuario;
+            Session["perfil"] = usuario.Perfil.ToString();
 
-            Response.Redirect("Respuesta.aspx");
+            Response.Redirect("~/Bienvenida.aspx");
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -46,7 +43,7 @@ public partial class Login : System.Web.UI.Page
         catch (Exception)
         {
             pnlError.Visible = true;
-            litError.Text = "Ocurrió un error al intentar iniciar sesión. Intente nuevamente.";
+            litError.Text = "Ocurrio un error al intentar iniciar sesion. Intente nuevamente.";
         }
     }
 }

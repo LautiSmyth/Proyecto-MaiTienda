@@ -1,6 +1,7 @@
-﻿using BE;
+using BE;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace DAL
@@ -27,12 +28,11 @@ namespace DAL
         {
             List<BEBitacora> bitacoras = new List<BEBitacora>();
             string query = "SELECT IdBitacora, IdUsuario, NombreUsuario, Perfil, Accion, Fecha FROM Bitacora ORDER BY Fecha DESC";
+            DataTable tabla = _acceso.Leer(query, null);
 
-            System.Data.DataTable tabla = _acceso.Leer(query, null);
-
-            foreach (System.Data.DataRow row in tabla.Rows)
+            foreach (DataRow row in tabla.Rows)
             {
-                BEBitacora bit = new BEBitacora
+                bitacoras.Add(new BEBitacora
                 {
                     IdBitacora = Convert.ToInt32(row["IdBitacora"]),
                     IdUsuario = Convert.ToInt32(row["IdUsuario"]),
@@ -40,8 +40,7 @@ namespace DAL
                     Perfil = row["Perfil"].ToString(),
                     Accion = row["Accion"].ToString(),
                     Fecha = Convert.ToDateTime(row["Fecha"])
-                };
-                bitacoras.Add(bit);
+                });
             }
 
             return bitacoras;

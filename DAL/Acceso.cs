@@ -61,9 +61,8 @@ namespace DAL
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"[Acceso] Error de conexion: {ex.Message}");
                 return false;
             }
         }

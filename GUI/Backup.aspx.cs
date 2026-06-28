@@ -1,6 +1,5 @@
 using BLL;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -12,7 +11,6 @@ public partial class Backup : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        // Solo WebMaster puede acceder
         string perfil = Session["perfil"] as string;
         if (string.IsNullOrEmpty(perfil))
         {
@@ -45,7 +43,6 @@ public partial class Backup : Page
             litRuta.Text = ruta;
             pnlExito.Visible = true;
 
-            // Refrescar lista
             string carpeta = ConfigurationManager.AppSettings["BackupFolder"] ?? @"C:\Backups\MaiTienda";
             CargarListaBackups(carpeta);
         }
@@ -58,7 +55,6 @@ public partial class Backup : Page
 
     private void CargarProximoBackup()
     {
-        // Leer la próxima ejecución guardada en Application
         DateTime? proximo = Application["BackupProximaEjecucion"] as DateTime?;
         litProximoBackup.Text = proximo.HasValue
             ? proximo.Value.ToString("dd/MM/yyyy HH:mm:ss")

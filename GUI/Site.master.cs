@@ -1,5 +1,6 @@
 using BLL;
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -14,8 +15,7 @@ public partial class SiteMaster : MasterPage
     protected void Page_Init(object sender, EventArgs e)
     {
         var requestCookie = Request.Cookies[AntiXsrfTokenKey];
-        Guid requestCookieGuidValue;
-        if (requestCookie != null && Guid.TryParse(requestCookie.Value, out requestCookieGuidValue))
+        if (requestCookie != null && Guid.TryParse(requestCookie.Value, out Guid requestCookieGuidValue))
         {
             _antiXsrfTokenValue = requestCookie.Value;
             Page.ViewStateUserKey = _antiXsrfTokenValue;
@@ -31,9 +31,8 @@ public partial class SiteMaster : MasterPage
                 Value = _antiXsrfTokenValue
             };
             if (FormsAuthentication.RequireSSL && Request.IsSecureConnection)
-            {
                 responseCookie.Secure = true;
-            }
+
             Response.Cookies.Set(responseCookie);
         }
 
@@ -45,14 +44,14 @@ public partial class SiteMaster : MasterPage
         if (!IsPostBack)
         {
             ViewState[AntiXsrfTokenKey] = Page.ViewStateUserKey;
-            ViewState[AntiXsrfUserNameKey] = Context.User.Identity.Name ?? String.Empty;
+            ViewState[AntiXsrfUserNameKey] = Context.User.Identity.Name ?? string.Empty;
         }
         else
         {
             if ((string)ViewState[AntiXsrfTokenKey] != _antiXsrfTokenValue
-                || (string)ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? String.Empty))
+                || (string)ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? string.Empty))
             {
-                throw new InvalidOperationException("Error de validación del token Anti-XSRF.");
+                throw new InvalidOperationException("Error de validacion del token Anti-XSRF.");
             }
         }
     }
@@ -60,63 +59,43 @@ public partial class SiteMaster : MasterPage
     protected void Page_Load(object sender, EventArgs e)
     {
         string perfilActual = Session["perfil"] as string;
+        bool esWebMaster = perfilActual == "WebMaster";
 
-        if (perfilActual == "WebMaster")
-        {
-            liBitacora.Visible = true;
-            liBackup.Visible = true;
-        }
-        else
-        {
-            liBitacora.Visible = false;
-            liBackup.Visible = false;
-        }
+        liBitacora.Visible = esWebMaster;
+        liBackup.Visible = esWebMaster;
+        liLogin.Visible = string.IsNullOrEmpty(perfilActual);
+        liLogout.Visible = !string.IsNullOrEmpty(perfilActual);
 
-        if (!string.IsNullOrEmpty(perfilActual))
-        {
-            liLogin.Visible = false;
-            liLogout.Visible = true;
-        }
-        else
-        {
-            liLogin.Visible = true;
-            liLogout.Visible = false;
-        }
-
-        // Registrar variable global de login en el cliente para todas las páginas
         var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
         string script = $"var usuarioLogueado = {(usuario != null ? "true" : "false")};";
-        Page.ClientScript.RegisterStartupScript(this.GetType(), "sessionInfoGlobal", script, true);
+        Page.ClientScript.RegisterStartupScript(GetType(), "sessionInfoGlobal", script, true);
 
         ActualizarCarritoContador();
     }
 
     protected void btnNavLogout_Click(object sender, EventArgs e)
     {
-        BLLUsuario _bllUsuario = new BLLUsuario();
-        _bllUsuario.CerrarSesion();
+        new BLLUsuario().CerrarSesion();
         Session.Clear();
         Session.Abandon();
         Response.Redirect("~/Default.aspx");
     }
 
-    protected void Unnamed_LoggingOut(object sender, LoginCancelEventArgs e)
-    {
-        Context.GetOwinContext().Authentication.SignOut();
-    }
-
     public void ActualizarCarritoContador()
     {
         var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-        int cantidad = 0;
+        int cantidad;
 
         if (usuario != null)
         {
-            BLL.BLLCarrito bllCarrito = new BLL.BLLCarrito();
-            cantidad = bllCarrito.ObtenerCantidadTotal(usuario.IdUsuario);
+            cantidad = new BLLCarrito().ObtenerCantidadTotal(usuario.IdUsuario);
         }
         else
         {
-            var carrito = Session["Carrito"] as System.Collections.Generic.List<int>;
-            cantidad = carrito != null ? carrito.Count : 0;
-     
+            var carrito = Session["Carrito"] as List<int>;
+            cantidad = carrito?.Count ?? 0;
+        }
+
+        lblCarritoContador.InnerText = cantidad.ToString();
+    }
+}

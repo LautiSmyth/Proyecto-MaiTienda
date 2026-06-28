@@ -1,4 +1,4 @@
-﻿using BE;
+using BE;
 using BE.Enums;
 using SERVICIOS;
 using System;
@@ -8,9 +8,9 @@ namespace BLL
     public class BLLUsuario
     {
         private readonly DAL.DALUsuario _dalUsuario = new DAL.DALUsuario();
-        private ServicioBitacora _sBitacora = new ServicioBitacora();
+        private readonly ServicioBitacora _sBitacora = new ServicioBitacora();
 
-        public BE.BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
+        public BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
         {
             return _dalUsuario.BuscarPorNombreUsuario(nombreUsuario);
         }
@@ -22,7 +22,7 @@ namespace BLL
                 NombreUsuario = nombreUsuario,
                 Password = Encriptador.Hash(password),
                 Estado = EstadoUsuario.Activo,
-                Perfil = (Perfil)perfil
+                Perfil = perfil
             };
             _dalUsuario.Insertar(usuario);
         }
@@ -32,7 +32,8 @@ namespace BLL
             try
             {
                 BEUsuario usuario = _dalUsuario.BuscarPorNombreUsuario(nombreUsuario);
-                if (usuario == null || usuario.Estado != EstadoUsuario.Activo) throw new UnauthorizedAccessException();
+                if (usuario == null || usuario.Estado != EstadoUsuario.Activo)
+                    throw new UnauthorizedAccessException();
 
                 bool esValido = Encriptador.Verificar(password, usuario.Password);
                 if (!esValido)
@@ -52,8 +53,7 @@ namespace BLL
                     throw new UnauthorizedAccessException();
                 }
 
-                SessionManager _session = SessionManager.GetInstance();
-                _session.Login(usuario);
+                SessionManager.GetInstance().Login(usuario);
                 usuario.IntentosFallidos = 0;
                 _dalUsuario.Actualizar(usuario);
                 _sBitacora.RegistrarEvento("Inicio de sesion");
@@ -64,15 +64,9 @@ namespace BLL
             }
         }
 
-        public void ActualizarEstado(BEUsuario usuario, EstadoUsuario nuevoEstado)
-        {
-            usuario.Estado = nuevoEstado;
-            _dalUsuario.Insertar(usuario);
-        }
-
         public void CerrarSesion()
         {
-            _sBitacora.RegistrarEvento("Cierre de sesión");
+            _sBitacora.RegistrarEvento("Cierre de sesion");
             SessionManager.GetInstance().Logout();
         }
 
