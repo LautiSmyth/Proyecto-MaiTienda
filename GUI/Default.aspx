@@ -157,34 +157,27 @@
 
                         <asp:Repeater ID="repProductos" runat="server">
                             <ItemTemplate>
-                                <div class="g-card product-card">
+                                <div class='<%# "g-card product-card" + (IsEnCarrito(Eval("IdProducto")) ? " en-carrito" : "") %>'>
                                     <div class="product-image-area">
-                                        <span class="product-badge">
-                                            <%# Eval("Categoria") %>
-                                        </span>
+                                        <span class="product-badge"><%# Eval("Categoria") %></span>
+                                        <div class="en-carrito-ribbon"><span>&#10003; En carrito</span></div>
                                         <img class="product-img" src='<%# ResolveUrl(Eval("ImagenUrl").ToString()) %>'
                                             alt='<%# Eval("Nombre") %>'
                                             onerror="this.onerror=null;this.src='https://placehold.co/300x160/faf7ff/7c3aed?text=Hardware';" />
                                     </div>
                                     <div class="product-info">
-                                        <span class="product-category">
-                                            <%# Eval("Stock") %> unidades en stock
-                                        </span>
-                                        <h3 class="product-name">
-                                            <%# Eval("Nombre") %>
-                                        </h3>
-                                        <p class="product-desc">
-                                            <%# Eval("Descripcion") %>
-                                        </p>
+                                        <span class="product-category"><%# Eval("Stock") %> unidades en stock</span>
+                                        <h3 class="product-name"><%# Eval("Nombre") %></h3>
+                                        <p class="product-desc"><%# Eval("Descripcion") %></p>
                                         <div class="product-footer">
-                                            <span class="product-price">
-                                                <%# Eval("Precio", "{0:N2}" ) %>
-                                            </span>
+                                            <span class="product-price"><%# Eval("Precio", "{0:N2}") %></span>
                                             <asp:LinkButton ID="btnAgregar" runat="server" CommandName="Agregar"
                                                 CommandArgument='<%# Eval("IdProducto") %>'
                                                 data-id='<%# Eval("IdProducto") %>'
-                                                OnCommand="AgregarAlCarrito_Click" CssClass="g-btn g-btn-buy">
-                                                + Agregar
+                                                OnCommand="AgregarAlCarrito_Click"
+                                                CssClass='<%# "g-btn g-btn-buy" + (IsEnCarrito(Eval("IdProducto")) ? " btn-en-carrito" : "") %>'>
+                                                <span class="btn-text-agregar">+ Agregar</span>
+                                                <span class="btn-text-encarrito">&#10003; En carrito</span>
                                             </asp:LinkButton>
                                         </div>
                                     </div>
@@ -255,8 +248,9 @@
                         .catch(err => console.error("Error al sincronizar carrito:", err));
                     }
                 } else {
-                    // Si no está logueado, actualizar contador en navbar desde localStorage
+                    // Si no está logueado, actualizar contador y marcar productos desde localStorage
                     actualizarContadorCliente();
+                    marcarProductosEnCarrito();
 
                     // Interceptar clics de botones "Agregar" en el cliente
                     var botonesAgregar = document.querySelectorAll('.g-btn-buy');
@@ -273,21 +267,25 @@
 
                                 actualizarContadorCliente();
 
-                                // Feedback interactivo
-                                var originalText = btn.innerHTML;
-                                btn.innerHTML = "✓ Agregado";
-                                btn.style.background = "#10b981";
-                                btn.style.borderColor = "#10b981";
-                                btn.style.color = "#ffffff";
-                                
-                                setTimeout(function () {
-                                    btn.innerHTML = originalText;
-                                    btn.style.background = "";
-                                    btn.style.borderColor = "";
-                                    btn.style.color = "";
-                                }, 1200);
+                                // Marcar la card como "en carrito"
+                                var card = btn.closest('.product-card');
+                                if (card) card.classList.add('en-carrito');
+                                btn.classList.add('btn-en-carrito');
                             }
                         });
+                    });
+                }
+
+                function marcarProductosEnCarrito() {
+                    var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
+                    if (carritoLocal.length === 0) return;
+                    document.querySelectorAll('.g-btn-buy').forEach(function (btn) {
+                        var id = parseInt(btn.getAttribute('data-id'));
+                        if (carritoLocal.indexOf(id) !== -1) {
+                            btn.classList.add('btn-en-carrito');
+                            var card = btn.closest('.product-card');
+                            if (card) card.classList.add('en-carrito');
+                        }
                     });
                 }
 

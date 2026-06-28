@@ -28,6 +28,11 @@ namespace BLL
             _dalCarrito.SincronizarCarrito(idUsuario, productoIds);
         }
 
+        public HashSet<int> ObtenerIdsProductos(int idUsuario)
+        {
+            return _dalCarrito.ObtenerIdsProductos(idUsuario);
+        }
+
         public void LimpiarCarrito(int idUsuario)
         {
             _dalCarrito.LimpiarCarrito(idUsuario);

@@ -9,6 +9,12 @@ using System.Web.UI.WebControls;
 public partial class _Default : Page
 {
     private readonly BLLProducto _bllProducto = new BLLProducto();
+    private HashSet<int> _idsEnCarrito = new HashSet<int>();
+
+    protected bool IsEnCarrito(object idProducto)
+    {
+        return _idsEnCarrito.Contains(Convert.ToInt32(idProducto));
+    }
 
     public int PaginaActual
     {
@@ -25,6 +31,17 @@ public partial class _Default : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        if (usuario != null)
+        {
+            try
+            {
+                BLLCarrito bllCarrito = new BLLCarrito();
+                _idsEnCarrito = bllCarrito.ObtenerIdsProductos(usuario.IdUsuario);
+            }
+            catch { _idsEnCarrito = new HashSet<int>(); }
+        }
+
         if (!IsPostBack)
         {
             Session["CategoriaSeleccionada"] = "Todos";
@@ -67,20 +84,17 @@ public partial class _Default : Page
             PagedDataSource pds = new PagedDataSource();
             pds.DataSource = productos;
             pds.AllowPaging = true;
-            pds.PageSize = 24; // Paginación de 24 productos por página
+            pds.PageSize = 24;
 
-            // Validar que la página actual esté en rango
             if (PaginaActual >= pds.PageCount)
             {
                 PaginaActual = 0;
             }
             pds.CurrentPageIndex = PaginaActual;
 
-            // Enlazar los productos
             repProductos.DataSource = pds;
             repProductos.DataBind();
 
-            // Configurar botonera de paginación superior e inferior
             ConfigurarPaginadores(pds.PageCount);
 
             lblSinResultados.Visible = !productos.Any();
@@ -104,21 +118,17 @@ public partial class _Default : Page
 
         List<int> paginas = Enumerable.Range(0, totalPaginas).ToList();
 
-        // Cargar Paginador Superior
         repPaginasSup.DataSource = paginas;
         repPaginasSup.DataBind();
 
-        // Cargar Paginador Inferior
         repPaginasInf.DataSource = paginas;
         repPaginasInf.DataBind();
 
-        // Habilitar/Deshabilitar botones Anterior
         btnAntSup.Enabled = PaginaActual > 0;
         btnAntInf.Enabled = PaginaActual > 0;
         btnAntSup.CssClass = PaginaActual > 0 ? "g-btn-page" : "g-btn-page disabled";
         btnAntInf.CssClass = PaginaActual > 0 ? "g-btn-page" : "g-btn-page disabled";
 
-        // Habilitar/Deshabilitar botones Siguiente
         btnSigSup.Enabled = PaginaActual < totalPaginas - 1;
         btnSigInf.Enabled = PaginaActual < totalPaginas - 1;
         btnSigSup.CssClass = PaginaActual < totalPaginas - 1 ? "g-btn-page" : "g-btn-page disabled";
@@ -151,9 +161,8 @@ public partial class _Default : Page
         LinkButton btn = (LinkButton)sender;
         string cat = btn.CommandArgument;
         Session["CategoriaSeleccionada"] = cat;
-        PaginaActual = 0; // Resetear página al filtrar
+        PaginaActual = 0;
 
-        // Actualizar estados visuales de botones
         ResetearEstiloFiltros();
         btn.CssClass = "g-btn-filter active";
 
@@ -182,13 +191,13 @@ public partial class _Default : Page
 
     protected void txtBuscar_TextChanged(object sender, EventArgs e)
     {
-        PaginaActual = 0; // Resetear página al buscar
+        PaginaActual = 0;
         CargarProductos();
     }
 
     protected void btnBuscar_Click(object sender, EventArgs e)
     {
-        PaginaActual = 0; // Resetear página al buscar
+        PaginaActual = 0;
         CargarProductos();
     }
 
@@ -219,6 +228,7 @@ public partial class _Default : Page
         {
             BLLCarrito bllCarrito = new BLLCarrito();
             bllCarrito.AgregarProducto(usuario.IdUsuario, productoId, 1);
+            _idsEnCarrito = bllCarrito.ObtenerIdsProductos(usuario.IdUsuario);
         }
         else
         {
@@ -231,7 +241,6 @@ public partial class _Default : Page
             Session["Carrito"] = carrito;
         }
 
-        // Actualizar el contador en la Master Page si corresponde
         var master = Master as SiteMaster;
         if (master != null)
         {
@@ -264,7 +273,6 @@ public partial class _Default : Page
         Session["CategoriaSeleccionada"] = "Todos";
         PaginaActual = 0;
 
-        // Resetear visualmente las categorías en el frontend
         ResetearEstiloFiltros();
         btnCatTodos.CssClass = "g-btn-filter active";
 
@@ -286,7 +294,6 @@ public partial class _Default : Page
         }
         catch
         {
-            // Omitir error
         }
         return false;
     }

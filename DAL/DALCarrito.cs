@@ -12,7 +12,6 @@ namespace DAL
 
         public void AgregarProducto(int idUsuario, int idProducto, int cantidad = 1)
         {
-            // Usamos un merge o insert/update clásico en SQL Server
             string query = @"
                 MERGE INTO ItemCarrito AS target
                 USING (SELECT @IdUsuario AS IdUsuario, @IdProducto AS IdProducto) AS source
@@ -58,7 +57,7 @@ namespace DAL
                     Precio = Convert.ToDecimal(row["Precio"]),
                     ImagenUrl = row["ImagenUrl"].ToString(),
                     Descripcion = row["Descripcion"].ToString(),
-                    Stock = Convert.ToInt32(row["Stock"]) // Usamos Stock temporalmente para la cantidad en el carrito
+                    Stock = Convert.ToInt32(row["Stock"])
                 });
             }
 
@@ -89,6 +88,22 @@ namespace DAL
             {
                 AgregarProducto(idUsuario, idProducto, 1);
             }
+        }
+
+        public HashSet<int> ObtenerIdsProductos(int idUsuario)
+        {
+            HashSet<int> ids = new HashSet<int>();
+            string query = "SELECT IdProducto FROM ItemCarrito WHERE IdUsuario = @IdUsuario";
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@IdUsuario", idUsuario)
+            };
+
+            DataTable dt = _acceso.Leer(query, parameters);
+            foreach (DataRow row in dt.Rows)
+                ids.Add(Convert.ToInt32(row["IdProducto"]));
+
+            return ids;
         }
 
         public void LimpiarCarrito(int idUsuario)
