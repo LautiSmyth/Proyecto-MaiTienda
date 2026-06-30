@@ -1,6 +1,9 @@
 using BLL;
 using SERVICIOS;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Script.Serialization;
 using System.Web.UI;
 
 public partial class Login : Page
@@ -63,6 +66,8 @@ public partial class Login : Page
             Session["nombreUsuario"] = usuario.NombreUsuario;
             Session["perfil"] = usuario.Perfil.ToString();
 
+            MigrarCarritoLocal(usuario.IdUsuario);
+
             Response.Redirect("~/Bienvenida.aspx");
         }
         catch (UnauthorizedAccessException ex)
@@ -74,6 +79,34 @@ public partial class Login : Page
         {
             pnlError.Visible = true;
             litError.Text = "Ocurrio un error al intentar iniciar sesion. Intente nuevamente.";
+        }
+    }
+
+    private void MigrarCarritoLocal(int idUsuario)
+    {
+        string carritoJson = hfCarritoLocal.Value;
+        if (string.IsNullOrEmpty(carritoJson) || carritoJson == "[]")
+            return;
+
+        try
+        {
+            var ids = new JavaScriptSerializer().Deserialize<List<int>>(carritoJson);
+            if (ids == null || ids.Count == 0)
+                return;
+
+            var bllCarrito = new BLLCarrito();
+            var agrupados = ids.GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
+
+            foreach (var entry in agrupados)
+            {
+                bllCarrito.AgregarProducto(idUsuario, entry.Key, entry.Value);
+            }
+
+            Session["LimpiarCarritoLocal"] = true;
+        }
+        catch
+        {
+            // Datos malformados en localStorage, ignorar
         }
     }
 }

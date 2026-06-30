@@ -67,6 +67,14 @@ public partial class SiteMaster : MasterPage
         liLogin.Visible = string.IsNullOrEmpty(perfilActual);
         liLogout.Visible = !string.IsNullOrEmpty(perfilActual);
 
+        // Limpiar carrito local si se acaba de migrar al servidor tras el login
+        if (Session["LimpiarCarritoLocal"] as bool? == true)
+        {
+            Session.Remove("LimpiarCarritoLocal");
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "clearLocalCart",
+                "localStorage.removeItem('carrito');", true);
+        }
+
         ActualizarCarritoContador();
     }
 

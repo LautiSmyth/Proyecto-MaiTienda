@@ -37,6 +37,8 @@
                             CssClass="g-validator" ErrorMessage="Ingrese la contraseña." Display="Dynamic" />
                     </div>
 
+                    <asp:HiddenField ID="hfCarritoLocal" runat="server" />
+
                     <asp:Button runat="server" ID="btnIngresar" Text="Ingresar" CssClass="g-btn"
                         OnClick="btnIngresar_Click" />
 
@@ -50,4 +52,11 @@
                 </div>
             </div>
         </div>
+
+        <script type="text/javascript">
+            document.getElementById('<%= btnIngresar.ClientID %>').addEventListener('click', function () {
+                var carrito = localStorage.getItem('carrito') || '[]';
+                document.getElementById('<%= hfCarritoLocal.ClientID %>').value = carrito;
+            });
+        </script>
     </asp:Content>
