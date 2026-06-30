@@ -171,14 +171,33 @@
                                         <p class="product-desc"><%# Eval("Descripcion") %></p>
                                         <div class="product-footer">
                                             <span class="product-price"><%# Eval("Precio", "{0:N2}") %></span>
-                                            <asp:LinkButton ID="btnAgregar" runat="server" CommandName="Agregar"
-                                                CommandArgument='<%# Eval("IdProducto") %>'
-                                                data-id='<%# Eval("IdProducto") %>'
-                                                OnCommand="AgregarAlCarrito_Click"
-                                                CssClass='<%# "g-btn g-btn-buy" + (IsEnCarrito(Eval("IdProducto")) ? " btn-en-carrito" : "") %>'>
-                                                <span class="btn-text-agregar">+ Agregar</span>
-                                                <span class="btn-text-encarrito">&#10003; En carrito</span>
-                                            </asp:LinkButton>
+                                            <%-- No en carrito (usuarios anon o logueados sin este producto) --%>
+                                            <asp:Panel runat="server" Visible='<%# !IsEnCarrito(Eval("IdProducto")) %>'>
+                                                <asp:LinkButton ID="btnAgregar" runat="server" CommandName="Agregar"
+                                                    CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
+                                                    data-id='<%# Eval("IdProducto") %>'
+                                                    OnCommand="AgregarAlCarrito_Click"
+                                                    Enabled='<%# (int)Eval("Stock") > 0 %>'
+                                                    CssClass='<%# (int)Eval("Stock") > 0 ? "g-btn g-btn-buy" : "g-btn g-btn-buy btn-sin-stock" %>'>
+                                                    <span class="btn-text-agregar"><%# (int)Eval("Stock") > 0 ? "+ Agregar" : "Sin stock" %></span>
+                                                    <span class="btn-text-encarrito">&#10003; En carrito</span>
+                                                </asp:LinkButton>
+                                            </asp:Panel>
+                                            <%-- En carrito (solo usuarios logueados) --%>
+                                            <asp:Panel runat="server" Visible='<%# IsEnCarrito(Eval("IdProducto")) %>' CssClass="carrito-inline-controls">
+                                                <a href="Carrito.aspx" class="g-btn btn-ir-carrito">&#10003; En carrito</a>
+                                                <div class="qty-ctrl">
+                                                    <asp:LinkButton ID="btnMenos" runat="server" CommandName="Decrementar"
+                                                        CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
+                                                        OnCommand="CambiarCantidad_Click" CssClass="qty-btn">&#8722;</asp:LinkButton>
+                                                    <span class="qty-val"><%# GetCantidadEnCarrito(Eval("IdProducto")) %></span>
+                                                    <asp:LinkButton ID="btnMas" runat="server" CommandName="Incrementar"
+                                                        CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
+                                                        OnCommand="CambiarCantidad_Click"
+                                                        Enabled='<%# GetCantidadEnCarrito(Eval("IdProducto")) < (int)Eval("Stock") %>'
+                                                        CssClass="qty-btn">+</asp:LinkButton>
+                                                </div>
+                                            </asp:Panel>
                                         </div>
                                     </div>
                                 </div>

@@ -10,10 +10,18 @@ public partial class _Default : Page
 {
     private readonly BLLProducto _bllProducto = new BLLProducto();
     private HashSet<int> _idsEnCarrito = new HashSet<int>();
+    private Dictionary<int, int> _cantidadesEnCarrito = new Dictionary<int, int>();
 
     protected bool IsEnCarrito(object idProducto)
     {
         return _idsEnCarrito.Contains(Convert.ToInt32(idProducto));
+    }
+
+    protected int GetCantidadEnCarrito(object idProducto)
+    {
+        int id = Convert.ToInt32(idProducto);
+        int qty;
+        return _cantidadesEnCarrito.TryGetValue(id, out qty) ? qty : 0;
     }
 
     public int PaginaActual
@@ -37,9 +45,14 @@ public partial class _Default : Page
             try
             {
                 BLLCarrito bllCarrito = new BLLCarrito();
-                _idsEnCarrito = bllCarrito.ObtenerIdsProductos(usuario.IdUsuario);
+                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+                _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
             }
-            catch { _idsEnCarrito = new HashSet<int>(); }
+            catch
+            {
+                _idsEnCarrito = new HashSet<int>();
+                _cantidadesEnCarrito = new Dictionary<int, int>();
+            }
         }
 
         if (!IsPostBack)
@@ -221,31 +234,59 @@ public partial class _Default : Page
 
     protected void AgregarAlCarrito_Click(object sender, CommandEventArgs e)
     {
-        int productoId = Convert.ToInt32(e.CommandArgument);
+        string[] args = e.CommandArgument.ToString().Split('|');
+        int productoId = Convert.ToInt32(args[0]);
+        int stock = args.Length > 1 ? Convert.ToInt32(args[1]) : int.MaxValue;
+
         var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
 
         if (usuario != null)
         {
-            BLLCarrito bllCarrito = new BLLCarrito();
-            bllCarrito.AgregarProducto(usuario.IdUsuario, productoId, 1);
-            _idsEnCarrito = bllCarrito.ObtenerIdsProductos(usuario.IdUsuario);
+            int cantidadActual;
+            _cantidadesEnCarrito.TryGetValue(productoId, out cantidadActual);
+
+            if (cantidadActual < stock)
+            {
+                BLLCarrito bllCarrito = new BLLCarrito();
+                bllCarrito.AgregarProducto(usuario.IdUsuario, productoId, 1);
+                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+                _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
+            }
         }
         else
         {
-            List<int> carrito = Session["Carrito"] as List<int>;
-            if (carrito == null)
-            {
-                carrito = new List<int>();
-            }
+            List<int> carrito = Session["Carrito"] as List<int> ?? new List<int>();
             carrito.Add(productoId);
             Session["Carrito"] = carrito;
         }
 
         var master = Master as SiteMaster;
-        if (master != null)
-        {
-            master.ActualizarCarritoContador();
-        }
+        if (master != null) master.ActualizarCarritoContador();
+
+        CargarProductos();
+    }
+
+    protected void CambiarCantidad_Click(object sender, CommandEventArgs e)
+    {
+        string[] args = e.CommandArgument.ToString().Split('|');
+        int productoId = Convert.ToInt32(args[0]);
+        int stock = args.Length > 1 ? Convert.ToInt32(args[1]) : int.MaxValue;
+
+        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        if (usuario == null) return;
+
+        int cantidadActual;
+        _cantidadesEnCarrito.TryGetValue(productoId, out cantidadActual);
+
+        int nuevaCantidad = e.CommandName == "Incrementar" ? cantidadActual + 1 : cantidadActual - 1;
+
+        BLLCarrito bllCarrito = new BLLCarrito();
+        bllCarrito.ActualizarCantidad(usuario.IdUsuario, productoId, nuevaCantidad, stock);
+        _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+        _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
+
+        var master = Master as SiteMaster;
+        if (master != null) master.ActualizarCarritoContador();
 
         CargarProductos();
     }

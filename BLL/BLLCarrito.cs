@@ -33,6 +33,18 @@ namespace BLL
             return _dalCarrito.ObtenerIdsProductos(idUsuario);
         }
 
+        public Dictionary<int, int> ObtenerCantidadesProductos(int idUsuario)
+        {
+            return _dalCarrito.ObtenerCantidadesProductos(idUsuario);
+        }
+
+        public void ActualizarCantidad(int idUsuario, int idProducto, int nuevaCantidad, int stockDisponible)
+        {
+            if (nuevaCantidad > stockDisponible) nuevaCantidad = stockDisponible;
+            if (nuevaCantidad < 0) nuevaCantidad = 0;
+            _dalCarrito.ActualizarCantidad(idUsuario, idProducto, nuevaCantidad);
+        }
+
         public void LimpiarCarrito(int idUsuario)
         {
             _dalCarrito.LimpiarCarrito(idUsuario);

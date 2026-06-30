@@ -985,6 +985,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
     padding-top: 15px;
     border-top: 1px dashed #ede5f8;
 }
@@ -1048,6 +1050,78 @@ body {
 
 .g-btn-buy.btn-en-carrito .btn-text-agregar  { display: none; }
 .g-btn-buy.btn-en-carrito .btn-text-encarrito { display: inline; }
+
+/* Botón sin stock */
+.g-btn-buy.btn-sin-stock {
+    background: #9ca3af !important;
+    border-color: #9ca3af !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Controles en-carrito: link + contador */
+.carrito-inline-controls {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-ir-carrito {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+    width: auto !important;
+    padding: 10px 12px !important;
+    font-size: 10px !important;
+    margin-top: 0 !important;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-ir-carrito:hover {
+    background: #059669 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+}
+
+.qty-ctrl {
+    display: flex;
+    align-items: center;
+    background: #f0ebfa;
+    border: 1.5px solid #ddd0f5;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.qty-btn {
+    background: none !important;
+    border: none !important;
+    padding: 6px 9px !important;
+    font-size: 15px !important;
+    font-weight: 700;
+    color: #7c3aed !important;
+    cursor: pointer;
+    line-height: 1;
+    width: auto !important;
+    margin-top: 0 !important;
+    min-width: 28px;
+    text-align: center;
+}
+
+.qty-btn:hover { background: #ede5f8 !important; }
+
+.qty-btn[disabled] { color: #c4b5fd !important; cursor: default; }
+
+.qty-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e0a3c;
+    min-width: 22px;
+    text-align: center;
+    padding: 0 2px;
+}
 
 /* ─────────────────────────────────────────────────────────────────── */
 

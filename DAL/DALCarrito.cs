@@ -106,6 +106,45 @@ namespace DAL
             return ids;
         }
 
+        public Dictionary<int, int> ObtenerCantidadesProductos(int idUsuario)
+        {
+            var dict = new Dictionary<int, int>();
+            string query = "SELECT IdProducto, Cantidad FROM ItemCarrito WHERE IdUsuario = @IdUsuario";
+            SqlParameter[] parameters = { new SqlParameter("@IdUsuario", idUsuario) };
+            DataTable dt = _acceso.Leer(query, parameters);
+            foreach (DataRow row in dt.Rows)
+                dict[Convert.ToInt32(row["IdProducto"])] = Convert.ToInt32(row["Cantidad"]);
+            return dict;
+        }
+
+        public void ActualizarCantidad(int idUsuario, int idProducto, int cantidad)
+        {
+            if (cantidad <= 0)
+            {
+                string query = "DELETE FROM ItemCarrito WHERE IdUsuario = @IdUsuario AND IdProducto = @IdProducto";
+                SqlParameter[] parameters = {
+                    new SqlParameter("@IdUsuario", idUsuario),
+                    new SqlParameter("@IdProducto", idProducto)
+                };
+                _acceso.Escribir(query, parameters);
+            }
+            else
+            {
+                string query = @"
+                    MERGE INTO ItemCarrito AS target
+                    USING (SELECT @IdUsuario AS IdUsuario, @IdProducto AS IdProducto) AS source
+                    ON (target.IdUsuario = source.IdUsuario AND target.IdProducto = source.IdProducto)
+                    WHEN MATCHED THEN UPDATE SET target.Cantidad = @Cantidad
+                    WHEN NOT MATCHED THEN INSERT (IdUsuario, IdProducto, Cantidad) VALUES (@IdUsuario, @IdProducto, @Cantidad);";
+                SqlParameter[] parameters = {
+                    new SqlParameter("@IdUsuario", idUsuario),
+                    new SqlParameter("@IdProducto", idProducto),
+                    new SqlParameter("@Cantidad", cantidad)
+                };
+                _acceso.Escribir(query, parameters);
+            }
+        }
+
         public void LimpiarCarrito(int idUsuario)
         {
             string query = "DELETE FROM ItemCarrito WHERE IdUsuario = @IdUsuario";
