@@ -101,6 +101,9 @@ public partial class SiteMaster : MasterPage
         }
 
         lblCarritoContador.InnerText = cantidad.ToString();
-        upContador.Update();
+
+        // Update counter in the DOM during async (UpdatePanel) postbacks
+        ScriptManager.RegisterStartupScript(this, this.GetType(), "updateCartCounter",
+            $"(function(){{ var lbl = document.querySelector('[id*=\"lblCarritoContador\"]'); if(lbl) lbl.innerText = '{cantidad}'; }})();", true);
     }
 }

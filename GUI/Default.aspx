@@ -1,5 +1,5 @@
 <%@ Page Title="Inicio" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Default.aspx.cs"
-    ResponseEncoding="utf-8" Inherits="_Default" %>
+    ResponseEncoding="utf-8" Inherits="_Default" MaintainScrollPositionOnPostback="true" %>
 
     <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
