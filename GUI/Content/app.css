@@ -1037,20 +1037,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     box-shadow: 0 8px 40px rgba(16, 185, 129, 0.18), 0 2px 8px rgba(16, 185, 129, 0.10) !important;
 }
 
-/* Textos dentro del botón */
-.btn-text-agregar  { display: inline; }
-.btn-text-encarrito { display: none; }
-
-/* Botón en estado "en carrito" */
-.g-btn-buy.btn-en-carrito {
-    background: #10b981 !important;
-    border-color: #10b981 !important;
-    color: #ffffff !important;
-    cursor: default;
-}
-
-.g-btn-buy.btn-en-carrito .btn-text-agregar  { display: none; }
-.g-btn-buy.btn-en-carrito .btn-text-encarrito { display: inline; }
 
 /* Botón sin stock */
 .g-btn-buy.btn-sin-stock {
@@ -1117,12 +1103,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     margin-top: 0 !important;
 }
 
-.btn-en-carrito-anon {
-    display: block;
-    background: #059669 !important;
-    cursor: default;
-    opacity: 0.9;
-}
 
 .g-btn-buy .btn-plus {
     font-size: 18px;

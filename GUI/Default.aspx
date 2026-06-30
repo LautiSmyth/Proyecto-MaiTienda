@@ -243,31 +243,6 @@
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', function () {
-                var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
-
-                if (logueado) {
-                    // Sincronizar carrito local si existe tras iniciar sesión
-                    var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
-                    if (carritoLocal.length > 0) {
-                        fetch('<%= ResolveUrl("~/Default.aspx/SincronizarCarritoTemporal") %>', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json; charset=utf-8'
-                            },
-                            body: JSON.stringify({ productoIds: carritoLocal })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.d) {
-                                localStorage.removeItem('carrito');
-                                window.location.reload(); // Recargar para actualizar contador del servidor
-                            }
-                        })
-                        .catch(err => console.error("Error al sincronizar carrito:", err));
-                    }
-                }
-            });
 
             function toggleCategoryCollapse() {
                 var content = document.getElementById('categoryCollapseContent');

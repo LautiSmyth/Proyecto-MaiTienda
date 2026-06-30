@@ -67,10 +67,6 @@ public partial class SiteMaster : MasterPage
         liLogin.Visible = string.IsNullOrEmpty(perfilActual);
         liLogout.Visible = !string.IsNullOrEmpty(perfilActual);
 
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-        string script = $"var usuarioLogueado = {(usuario != null ? "true" : "false")};";
-        Page.ClientScript.RegisterStartupScript(GetType(), "sessionInfoGlobal", script, true);
-
         ActualizarCarritoContador();
     }
 

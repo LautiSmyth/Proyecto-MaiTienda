@@ -17,11 +17,6 @@ public partial class _Default : Page
         return _idsEnCarrito.Contains(Convert.ToInt32(idProducto));
     }
 
-    protected bool IsLogueado()
-    {
-        return SERVICIOS.SessionManager.GetInstance().Usuario != null;
-    }
-
     protected int GetCantidadEnCarrito(object idProducto)
     {
         int id = Convert.ToInt32(idProducto);
@@ -353,22 +348,4 @@ public partial class _Default : Page
         CargarProductos();
     }
 
-    [System.Web.Services.WebMethod(EnableSession = true)]
-    public static bool SincronizarCarritoTemporal(List<int> productoIds)
-    {
-        try
-        {
-            var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-            if (usuario != null && productoIds != null && productoIds.Count > 0)
-            {
-                BLLCarrito bllCarrito = new BLLCarrito();
-                bllCarrito.SincronizarCarrito(usuario.IdUsuario, productoIds);
-                return true;
-            }
-        }
-        catch
-        {
-        }
-        return false;
-    }
 }
