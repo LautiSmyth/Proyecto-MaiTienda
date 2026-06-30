@@ -1,4 +1,4 @@
-<%@ Page Title="Quiénes Somos" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true"
+﻿<%@ Page Title="Quiénes Somos" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true"
     CodeFile="QuienesSomos.aspx.cs" Inherits="QuienesSomos" ResponseEncoding="utf-8" %>
 
     <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
@@ -57,8 +57,7 @@
                     </p>
                     <div style="border: 2px solid #ddd0f5; padding: 4px; background: #ffffff; border-radius: 4px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.05); margin-bottom: 25px;">
                         <iframe 
-                            src="https://maps.google.com/maps?q=Universidad%20Abierta%20Interamericana%20-%20UAI%20Lomas&t=&z=16&ie=UTF8&iwloc=&output=embed" 
-                            width="100%" 
+                            src="https://maps.google.com/maps?q=-34.7576984,-58.3957057&z=19&output=embed"                            width="100%" 
                             height="350" 
                             style="border:0; display: block;" 
                             allowfullscreen="" 
