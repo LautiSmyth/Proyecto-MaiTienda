@@ -130,6 +130,8 @@
 
                 <!-- Columna Derecha: Catálogo de productos -->
                 <div class="store-content">
+                <asp:UpdatePanel ID="upCatalogo" runat="server" UpdateMode="Conditional">
+                <ContentTemplate>
                     <!-- Paginador Superior -->
                     <asp:Panel ID="pnlPaginadorSup" runat="server" CssClass="store-pager"
                         style="margin-top: 0; margin-bottom: 25px;">
@@ -160,7 +162,7 @@
                                 <div class='<%# "g-card product-card" + (IsEnCarrito(Eval("IdProducto")) ? " en-carrito" : "") %>'>
                                     <div class="product-image-area">
                                         <span class="product-badge"><%# Eval("Categoria") %></span>
-                                        <div class="en-carrito-ribbon"><span>&#10003; En carrito</span></div>
+                                        <a href="Carrito.aspx" class='<%# IsEnCarrito(Eval("IdProducto")) ? "en-carrito-ribbon" : "en-carrito-ribbon" %>' style='<%# IsEnCarrito(Eval("IdProducto")) ? "pointer-events:auto;text-decoration:none;" : "pointer-events:none;" %>'><span>&#10003; En carrito</span></a>
                                         <img class="product-img" src='<%# ResolveUrl(Eval("ImagenUrl").ToString()) %>'
                                             alt='<%# Eval("Nombre") %>'
                                             onerror="this.onerror=null;this.src='https://placehold.co/300x160/faf7ff/7c3aed?text=Hardware';" />
@@ -171,7 +173,7 @@
                                         <p class="product-desc"><%# Eval("Descripcion") %></p>
                                         <div class="product-footer">
                                             <span class="product-price"><%# Eval("Precio", "{0:N2}") %></span>
-                                            <%-- No en carrito (usuarios anon o logueados sin este producto) --%>
+                                            <%-- No en carrito --%>
                                             <asp:Panel runat="server" Visible='<%# !IsEnCarrito(Eval("IdProducto")) %>'>
                                                 <asp:LinkButton ID="btnAgregar" runat="server" CommandName="Agregar"
                                                     CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
@@ -179,24 +181,20 @@
                                                     OnCommand="AgregarAlCarrito_Click"
                                                     Enabled='<%# (int)Eval("Stock") > 0 %>'
                                                     CssClass='<%# (int)Eval("Stock") > 0 ? "g-btn g-btn-buy" : "g-btn g-btn-buy btn-sin-stock" %>'>
-                                                    <span class="btn-text-agregar"><%# (int)Eval("Stock") > 0 ? "+ Agregar" : "Sin stock" %></span>
-                                                    <span class="btn-text-encarrito">&#10003; En carrito</span>
+                                                    <span class="btn-plus">+</span> <span class="btn-label">Agregar</span>
                                                 </asp:LinkButton>
                                             </asp:Panel>
-                                            <%-- En carrito (solo usuarios logueados) --%>
-                                            <asp:Panel runat="server" Visible='<%# IsEnCarrito(Eval("IdProducto")) %>' CssClass="carrito-inline-controls">
-                                                <a href="Carrito.aspx" class="g-btn btn-ir-carrito">&#10003; En carrito</a>
-                                                <div class="qty-ctrl">
-                                                    <asp:LinkButton ID="btnMenos" runat="server" CommandName="Decrementar"
-                                                        CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
-                                                        OnCommand="CambiarCantidad_Click" CssClass="qty-btn">&#8722;</asp:LinkButton>
-                                                    <span class="qty-val"><%# GetCantidadEnCarrito(Eval("IdProducto")) %></span>
-                                                    <asp:LinkButton ID="btnMas" runat="server" CommandName="Incrementar"
-                                                        CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
-                                                        OnCommand="CambiarCantidad_Click"
-                                                        Enabled='<%# GetCantidadEnCarrito(Eval("IdProducto")) < (int)Eval("Stock") %>'
-                                                        CssClass="qty-btn">+</asp:LinkButton>
-                                                </div>
+                                            <%-- En carrito: controles qty (logueado y anónimo) --%>
+                                            <asp:Panel runat="server" Visible='<%# IsEnCarrito(Eval("IdProducto")) %>' CssClass="qty-ctrl">
+                                                <asp:LinkButton ID="btnMenos" runat="server" CommandName="Decrementar"
+                                                    CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
+                                                    OnCommand="CambiarCantidad_Click" CssClass="qty-btn">&#8722;</asp:LinkButton>
+                                                <span class="qty-val"><%# GetCantidadEnCarrito(Eval("IdProducto")) %></span>
+                                                <asp:LinkButton ID="btnMas" runat="server" CommandName="Incrementar"
+                                                    CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
+                                                    OnCommand="CambiarCantidad_Click"
+                                                    Enabled='<%# GetCantidadEnCarrito(Eval("IdProducto")) < (int)Eval("Stock") %>'
+                                                    CssClass="qty-btn">+</asp:LinkButton>
                                             </asp:Panel>
                                         </div>
                                     </div>
@@ -222,6 +220,8 @@
                                 <asp:LinkButton ID="btnSigInf" runat="server" OnClick="btnSiguiente_Click"
                                     CssClass="g-btn-page">Siguiente ></asp:LinkButton>
                     </asp:Panel>
+                </ContentTemplate>
+                </asp:UpdatePanel>
                 </div>
             </div>
         </div>
@@ -265,54 +265,6 @@
                             }
                         })
                         .catch(err => console.error("Error al sincronizar carrito:", err));
-                    }
-                } else {
-                    // Si no está logueado, actualizar contador y marcar productos desde localStorage
-                    actualizarContadorCliente();
-                    marcarProductosEnCarrito();
-
-                    // Interceptar clics de botones "Agregar" en el cliente
-                    var botonesAgregar = document.querySelectorAll('.g-btn-buy');
-                    botonesAgregar.forEach(function (btn) {
-                        btn.addEventListener('click', function (e) {
-                            var productoId = parseInt(btn.getAttribute('data-id'));
-                            if (!isNaN(productoId)) {
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
-                                carritoLocal.push(productoId);
-                                localStorage.setItem('carrito', JSON.stringify(carritoLocal));
-
-                                actualizarContadorCliente();
-
-                                // Marcar la card como "en carrito"
-                                var card = btn.closest('.product-card');
-                                if (card) card.classList.add('en-carrito');
-                                btn.classList.add('btn-en-carrito');
-                            }
-                        });
-                    });
-                }
-
-                function marcarProductosEnCarrito() {
-                    var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
-                    if (carritoLocal.length === 0) return;
-                    document.querySelectorAll('.g-btn-buy').forEach(function (btn) {
-                        var id = parseInt(btn.getAttribute('data-id'));
-                        if (carritoLocal.indexOf(id) !== -1) {
-                            btn.classList.add('btn-en-carrito');
-                            var card = btn.closest('.product-card');
-                            if (card) card.classList.add('en-carrito');
-                        }
-                    });
-                }
-
-                function actualizarContadorCliente() {
-                    var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
-                    var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
-                    if (lblContador) {
-                        lblContador.innerText = carritoLocal.length.toString();
                     }
                 }
             });

@@ -1,6 +1,7 @@
 using BLL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
@@ -92,10 +93,11 @@ public partial class SiteMaster : MasterPage
         }
         else
         {
-            var carrito = Session["Carrito"] as List<int>;
-            cantidad = carrito?.Count ?? 0;
+            var carrito = Session["CarritoAnon"] as Dictionary<int, int>;
+            cantidad = carrito?.Values.Sum() ?? 0;
         }
 
         lblCarritoContador.InnerText = cantidad.ToString();
+        upContador.Update();
     }
 }
