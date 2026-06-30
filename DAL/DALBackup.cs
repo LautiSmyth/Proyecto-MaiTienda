@@ -40,5 +40,39 @@ namespace DAL
 
             return rutaCompleta;
         }
+
+        public void EjecutarRestore(string rutaArchivo)
+        {
+            if (string.IsNullOrEmpty(_cadenaConexion))
+                throw new InvalidOperationException("No se encontró la cadena de conexión.");
+
+            var builder = new SqlConnectionStringBuilder(_cadenaConexion);
+            string dbName = builder.InitialCatalog;
+            builder.InitialCatalog = "master";
+            string masterConnection = builder.ConnectionString;
+
+            SqlConnection.ClearAllPools();
+
+            using (SqlConnection conexion = new SqlConnection(masterConnection))
+            {
+                conexion.Open();
+
+                using (SqlCommand cmd = new SqlCommand(
+                    $"ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE", conexion))
+                    cmd.ExecuteNonQuery();
+
+                using (SqlCommand cmd = new SqlCommand(
+                    $@"RESTORE DATABASE [{dbName}] FROM DISK = N'{rutaArchivo}'
+                       WITH FILE = 1, NOUNLOAD, REPLACE, RECOVERY, STATS = 10", conexion))
+                {
+                    cmd.CommandTimeout = 600;
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (SqlCommand cmd = new SqlCommand(
+                    $"ALTER DATABASE [{dbName}] SET MULTI_USER", conexion))
+                    cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

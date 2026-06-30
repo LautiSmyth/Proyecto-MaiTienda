@@ -1,5 +1,7 @@
 using BE;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace SERVICIOS
 {
@@ -20,9 +22,9 @@ namespace SERVICIOS
             return Encriptador.HashIntegridad(data);
         }
 
-        public string CalcularDVV(System.Collections.Generic.List<string> listaHashesDVH)
+        public string CalcularDVV(List<string> listaHashesDVH)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            StringBuilder sb = new StringBuilder();
             foreach (string hash in listaHashesDVH)
             {
                 sb.Append(hash);

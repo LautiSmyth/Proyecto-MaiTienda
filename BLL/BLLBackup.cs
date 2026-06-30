@@ -27,5 +27,16 @@ namespace BLL
             _sBitacora.RegistrarEventoSistema($"Backup automatico generado: {ruta}");
             return ruta;
         }
+
+        public void EjecutarRestore(string rutaArchivo)
+        {
+            _dalBackup.EjecutarRestore(rutaArchivo);
+            _sBitacora.RegistrarEventoSistema($"Restore ejecutado desde: {rutaArchivo}");
+        }
+
+        public string ObtenerCarpetaBackup()
+        {
+            return ObtenerCarpeta();
+        }
     }
 }

@@ -11,6 +11,11 @@ namespace SERVICIOS
         public void RegistrarEvento(string accion)
         {
             BEUsuario usuario = SessionManager.GetInstance().Usuario;
+            if (usuario == null)
+            {
+                RegistrarEventoSistema(accion);
+                return;
+            }
             _dalBitacora.RegistrarEvento(new BEBitacora
             {
                 IdUsuario = usuario.IdUsuario,

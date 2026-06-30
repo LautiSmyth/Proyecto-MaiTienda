@@ -73,15 +73,12 @@ namespace BLL
             Acceso acceso = Acceso.GetInstance();
             bool recienCreado = false;
 
-            // Check and add DVH column in Usuario
             string checkUsuario = "SELECT COUNT(*) FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Usuario]') AND name = 'DVH'";
             DataTable dtUsr = acceso.Leer(checkUsuario, null);
             bool tieneDVHUsuario = dtUsr.Rows.Count > 0 && Convert.ToInt32(dtUsr.Rows[0][0]) > 0;
 
             if (!tieneDVHUsuario)
             {
-                // If there's an old DV column from previous attempts, let's drop it or keep it.
-                // Just to be safe, drop the old 'DV' column if it exists.
                 string checkDVOld = "SELECT COUNT(*) FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Usuario]') AND name = 'DV'";
                 DataTable dtOld = acceso.Leer(checkDVOld, null);
                 if (dtOld.Rows.Count > 0 && Convert.ToInt32(dtOld.Rows[0][0]) > 0)
@@ -93,14 +90,12 @@ namespace BLL
                 recienCreado = true;
             }
 
-            // Check and add DVH column in Producto
             string checkProducto = "SELECT COUNT(*) FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Producto]') AND name = 'DVH'";
             DataTable dtProd = acceso.Leer(checkProducto, null);
             bool tieneDVHProducto = dtProd.Rows.Count > 0 && Convert.ToInt32(dtProd.Rows[0][0]) > 0;
 
             if (!tieneDVHProducto)
             {
-                // Drop 'DV' if exists
                 string checkDVOld = "SELECT COUNT(*) FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Producto]') AND name = 'DV'";
                 DataTable dtOld = acceso.Leer(checkDVOld, null);
                 if (dtOld.Rows.Count > 0 && Convert.ToInt32(dtOld.Rows[0][0]) > 0)
@@ -112,7 +107,6 @@ namespace BLL
                 recienCreado = true;
             }
 
-            // Check and create DVV table
             string checkDVV = "SELECT COUNT(*) FROM sys.tables WHERE name = 'DVV'";
             DataTable dtDvv = acceso.Leer(checkDVV, null);
             bool tieneDVV = dtDvv.Rows.Count > 0 && Convert.ToInt32(dtDvv.Rows[0][0]) > 0;

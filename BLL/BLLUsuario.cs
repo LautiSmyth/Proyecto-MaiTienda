@@ -3,6 +3,7 @@ using BE.Enums;
 using SERVICIOS;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace BLL
 {
@@ -100,6 +101,12 @@ namespace BLL
         {
             _sBitacora.RegistrarEvento("Cierre de sesion");
             SessionManager.GetInstance().Logout();
+        }
+
+        public bool ValidarConPasskey(string passkey)
+        {
+            string passkeyConfigurado = ConfigurationManager.AppSettings["WebMasterPasskey"];
+            return !string.IsNullOrEmpty(passkeyConfigurado) && passkey == passkeyConfigurado;
         }
 
         public bool VerificarConexion()
