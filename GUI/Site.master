@@ -85,6 +85,9 @@
         </div>
     </form>
     <script type="text/javascript">
+        var usuarioLogueado = <%= Session["perfil"] != null ? "true" : "false" %>;
+    </script>
+    <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
             var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
             if (!logueado) {
