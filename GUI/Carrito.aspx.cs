@@ -104,19 +104,22 @@ public partial class Carrito : Page
         var todos = new BLLProducto().ObtenerProductos();
 
         return agrupados
-            .Select(entry => todos.FirstOrDefault(p => p.IdProducto == entry.Key) is BEProducto p
-                ? new BEProducto
+            .Select(entry =>
+            {
+                var prod = todos.FirstOrDefault(p => p.IdProducto == entry.Key);
+                if (prod == null) return null;
+                return new BEProducto
                 {
-                    IdProducto  = p.IdProducto,
-                    Nombre      = p.Nombre,
-                    Categoria   = p.Categoria,
-                    Precio      = p.Precio,
-                    ImagenUrl   = p.ImagenUrl,
-                    Descripcion = p.Descripcion,
+                    IdProducto  = prod.IdProducto,
+                    Nombre      = prod.Nombre,
+                    Categoria   = prod.Categoria,
+                    Precio      = prod.Precio,
+                    ImagenUrl   = prod.ImagenUrl,
+                    Descripcion = prod.Descripcion,
                     Stock       = entry.Value
-                }
-                : null)
-            .Where(p => p != null)
+                };
+            })
+            .Where(x => x != null)
             .ToList();
     }
 }
