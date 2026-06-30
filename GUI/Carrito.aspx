@@ -100,12 +100,29 @@
                             <span id="lblEnvio" runat="server" style="color: #9f7cc0; font-weight: 600;">Calculando...</span>
                         </div>
 
-                        <!-- Info de distancia -->
-                        <div id="divDistanciaInfo" style="display: none; text-align: right; margin-bottom: 12px;">
+                        <!-- Info de distancia (geo exitosa) -->
+                        <div id="divDistanciaInfo" style="display: none; text-align: right; margin-bottom: 4px;">
                             <span style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #9f7cc0;">📍 <span id="spanDistancia"></span></span>
                         </div>
-                        <div id="divGeoError" style="display: none; text-align: right; margin-bottom: 12px;">
-                            <span style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #ef4444;">⚠️ Ubicación no disponible</span>
+
+                        <!-- Link para modificar ubicación (visible tras geo exitosa) -->
+                        <div id="divModificarUbicacion" style="display: none; text-align: right; margin-bottom: 8px;">
+                            <a href="javascript:void(0)" onclick="mostrarInputManual()"
+                               style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #7c3aed; text-decoration: underline; cursor: pointer;">✏️ Modificar ubicación</a>
+                        </div>
+
+                        <!-- Input manual de ubicación -->
+                        <div id="divUbicacionManual" style="display: none; margin-bottom: 12px;">
+                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 5px;">📍 Ingresá tu dirección:</label>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="text" id="txtDireccion" placeholder="Ej: Av. Corrientes 1234, CABA"
+                                       style="flex: 1; font-family: 'Exo 2', sans-serif; font-size: 11px; padding: 6px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
+                                <button type="button" id="btnCalcularEnvio" onclick="geocodificarDireccion()"
+                                        style="font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 600; padding: 6px 12px; background: #7c3aed; color: #fff; border: none; border-radius: 3px; cursor: pointer; white-space: nowrap; letter-spacing: 0.5px;">
+                                    Calcular
+                                </button>
+                            </div>
+                            <span id="lblGeocodingError" style="font-family: 'Exo 2', sans-serif; font-size: 10px; color: #ef4444; display: none; margin-top: 4px;">⚠️ No se encontró la dirección. Intentá con más detalle.</span>
                         </div>
 
                         <div style="margin: 20px 0; border-top: 1.5px dashed #ede5f8; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
@@ -155,15 +172,12 @@
 
         function calcularCostoEnvio(distanciaKm) {
             if (distanciaKm <= FREE_SHIPPING_KM) return 0;
-            // Progresivo: $5000 base a 10 km, crece con potencia 0.6
             var costo = 5000 * Math.pow(distanciaKm / FREE_SHIPPING_KM, 0.6);
-            // Redondear a los $500 más cercanos
             return Math.round(costo / 500) * 500;
         }
 
         function parsearPrecio(texto) {
             var s = (texto || '').replace(/\$/g, '').trim();
-            // Detectar formato: si la última coma aparece después del último punto -> es-AR
             var ultimoPunto = s.lastIndexOf('.');
             var ultimaComa = s.lastIndexOf(',');
             if (ultimaComa > ultimoPunto) {
@@ -175,15 +189,19 @@
         }
 
         function actualizarEnvioEnUI(distanciaKm, costo) {
-            var envioEl = document.getElementById('<%= lblEnvio.ClientID %>');
-            var totalEl = document.getElementById('<%= lblTotal.ClientID %>');
+            var envioEl   = document.getElementById('<%= lblEnvio.ClientID %>');
+            var totalEl   = document.getElementById('<%= lblTotal.ClientID %>');
             var subtotalEl = document.getElementById('<%= lblSubtotal.ClientID %>');
-            var divDistancia = document.getElementById('divDistanciaInfo');
-            var spanDistancia = document.getElementById('spanDistancia');
-            var divGeoError = document.getElementById('divGeoError');
+            var divDistancia     = document.getElementById('divDistanciaInfo');
+            var spanDistancia    = document.getElementById('spanDistancia');
+            var divModificar     = document.getElementById('divModificarUbicacion');
+            var divInputManual   = document.getElementById('divUbicacionManual');
+            var lblError         = document.getElementById('lblGeocodingError');
 
-            if (divGeoError) divGeoError.style.display = 'none';
+            // Ocultar error de geocoding si estaba visible
+            if (lblError) lblError.style.display = 'none';
 
+            // Envío
             if (envioEl) {
                 if (costo === 0) {
                     envioEl.innerText = 'Bonificado';
@@ -194,31 +212,33 @@
                 }
             }
 
+            // Total
             var subtotal = subtotalEl ? parsearPrecio(subtotalEl.innerText) : 0;
-            var total = subtotal + costo;
             if (totalEl) {
-                totalEl.innerText = '$' + total.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+                totalEl.innerText = '$' + (subtotal + costo).toLocaleString('es-AR', { minimumFractionDigits: 2 });
             }
 
-            if (spanDistancia && divDistancia) {
-                spanDistancia.innerText = distanciaKm.toFixed(1) + ' km del negocio';
-                divDistancia.style.display = 'block';
-            }
+            // Mostrar distancia y link "Modificar", ocultar input manual
+            if (spanDistancia) spanDistancia.innerText = distanciaKm.toFixed(1) + ' km del negocio';
+            if (divDistancia)  divDistancia.style.display  = 'block';
+            if (divModificar)  divModificar.style.display  = 'block';
+            if (divInputManual) divInputManual.style.display = 'none';
         }
 
         function mostrarErrorGeo() {
-            var envioEl = document.getElementById('<%= lblEnvio.ClientID %>');
-            var divGeoError = document.getElementById('divGeoError');
-            var divDistancia = document.getElementById('divDistanciaInfo');
+            var envioEl        = document.getElementById('<%= lblEnvio.ClientID %>');
+            var divDistancia   = document.getElementById('divDistanciaInfo');
+            var divModificar   = document.getElementById('divModificarUbicacion');
+            var divInputManual = document.getElementById('divUbicacionManual');
 
-            // Sin ubicación: cobrar envío base por precaución
             costoEnvio = 0;
             if (envioEl) {
-                envioEl.innerText = 'No disponible';
+                envioEl.innerText = 'Ingresá tu dirección';
                 envioEl.style.color = '#9f7cc0';
             }
-            if (divGeoError) divGeoError.style.display = 'block';
-            if (divDistancia) divDistancia.style.display = 'none';
+            if (divDistancia)   divDistancia.style.display   = 'none';
+            if (divModificar)   divModificar.style.display   = 'none';
+            if (divInputManual) divInputManual.style.display = 'block';
         }
 
         function iniciarGeolocalizacion() {
@@ -246,67 +266,116 @@
             );
         }
 
+        // Muestra el input manual (desde el link "Modificar ubicación")
+        window.mostrarInputManual = function () {
+            var divDistancia   = document.getElementById('divDistanciaInfo');
+            var divModificar   = document.getElementById('divModificarUbicacion');
+            var divInputManual = document.getElementById('divUbicacionManual');
+            if (divDistancia)   divDistancia.style.display   = 'none';
+            if (divModificar)   divModificar.style.display   = 'none';
+            if (divInputManual) divInputManual.style.display = 'block';
+            var input = document.getElementById('txtDireccion');
+            if (input) input.focus();
+        };
+
+        // Geocodifica la dirección ingresada via Nominatim (OpenStreetMap)
+        window.geocodificarDireccion = function () {
+            var input    = document.getElementById('txtDireccion');
+            var btnCalc  = document.getElementById('btnCalcularEnvio');
+            var lblError = document.getElementById('lblGeocodingError');
+
+            if (!input || !input.value.trim()) return;
+            if (lblError) lblError.style.display = 'none';
+
+            // Estado "cargando"
+            if (btnCalc) { btnCalc.disabled = true; btnCalc.innerText = '...'; }
+
+            var url = 'https://nominatim.openstreetmap.org/search?q='
+                + encodeURIComponent(input.value.trim())
+                + '&format=json&limit=1&countrycodes=ar';
+
+            fetch(url, { headers: { 'Accept-Language': 'es' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (btnCalc) { btnCalc.disabled = false; btnCalc.innerText = 'Calcular'; }
+
+                    if (!data || data.length === 0) {
+                        if (lblError) lblError.style.display = 'block';
+                        return;
+                    }
+
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    var distancia = haversineKm(lat, lon, STORE_LAT, STORE_LNG);
+                    costoEnvio = calcularCostoEnvio(distancia);
+                    actualizarEnvioEnUI(distancia, costoEnvio);
+                })
+                .catch(function () {
+                    if (btnCalc) { btnCalc.disabled = false; btnCalc.innerText = 'Calcular'; }
+                    if (lblError) lblError.style.display = 'block';
+                });
+        };
+
         // =============================================
         // LÓGICA DEL CARRITO
         // =============================================
         document.addEventListener('DOMContentLoaded', function () {
             var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
 
-            // Iniciar geolocalización siempre (para ambos tipos de usuario)
+            // Iniciar geolocalización siempre
             iniciarGeolocalizacion();
 
+            // Enter en el campo de dirección
+            var inputDir = document.getElementById('txtDireccion');
+            if (inputDir) {
+                inputDir.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') { e.preventDefault(); geocodificarDireccion(); }
+                });
+            }
+
             if (!logueado) {
-                // Mostrar panel de login recomendado
                 var sugerencia = document.getElementById('pnlSugerenciaLogin');
                 if (sugerencia) sugerencia.style.display = 'flex';
                 cargarCarritoCliente();
             }
 
             function cargarCarritoCliente() {
-                var carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-                var container = document.getElementById('carritoClienteContainer');
-                var emptyDiv = document.getElementById('<%= divCarritoVacio.ClientID %>');
+                var carrito    = JSON.parse(localStorage.getItem('carrito')) || [];
+                var container  = document.getElementById('carritoClienteContainer');
+                var emptyDiv   = document.getElementById('<%= divCarritoVacio.ClientID %>');
                 var checkoutBtn = document.getElementById('<%= btnCheckout.ClientID %>');
 
                 if (carrito.length === 0) {
                     container.style.display = 'none';
-                    if (emptyDiv) emptyDiv.style.display = 'block';
-                    if (checkoutBtn) checkoutBtn.disabled = true;
+                    if (emptyDiv)    emptyDiv.style.display    = 'block';
+                    if (checkoutBtn) checkoutBtn.disabled      = true;
                     actualizarResumenPrecios(0);
                     return;
                 }
 
-                if (emptyDiv) emptyDiv.style.display = 'none';
+                if (emptyDiv)    emptyDiv.style.display    = 'none';
                 container.style.display = 'flex';
                 if (checkoutBtn) checkoutBtn.disabled = false;
 
-                console.log("Enviando IDs al WebMethod:", carrito);
                 fetch('<%= ResolveUrl("~/Carrito.aspx/ObtenerDetallesCarritoLocal") %>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json; charset=utf-8' },
                     body: JSON.stringify({ productoIds: carrito })
                 })
-                .then(response => {
-                    console.log("Estado de la respuesta HTTP:", response.status);
-                    if (!response.ok) throw new Error("HTTP error " + response.status);
-                    return response.json();
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.json();
                 })
-                .then(data => {
-                    console.log("Respuesta JSON recibida:", data);
+                .then(function (data) {
                     var productos = data.d;
                     if (!productos || productos.length === 0) {
-                        container.innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; padding:15px; color:#991b1b; font-family:'Exo 2', sans-serif; font-size:12px;">
-                            <strong>Depuración Servidor:</strong> El backend devolvió un array vacío de productos para los IDs locales: ${JSON.stringify(carrito)}.
-                        </div>`;
+                        container.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;padding:15px;color:#991b1b;font-family:\'Exo 2\',sans-serif;font-size:12px;"><strong>Error:</strong> No se obtuvieron productos del servidor.</div>';
                         return;
                     }
                     renderizarCarritoCliente(productos);
                 })
-                .catch(err => {
-                    console.error("Error en la petición de detalles de carrito local:", err);
-                    container.innerHTML = `<div style="background:#fee2e2; border:1px solid #fca5a5; padding:15px; color:#991b1b; font-family:'Exo 2', sans-serif; font-size:12px;">
-                            <strong>Depuración JS Error:</strong> Falló la llamada Fetch. Detalle: ${err.message}
-                        </div>`;
+                .catch(function (err) {
+                    container.innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;padding:15px;color:#991b1b;font-family:\'Exo 2\',sans-serif;font-size:12px;"><strong>Error:</strong> ' + err.message + '</div>';
                 });
             }
 
@@ -318,166 +387,128 @@
                 productos.forEach(function (p) {
                     var itemSubtotal = p.Precio * p.Stock;
                     subtotal += itemSubtotal;
-
-                    var html = `
-                        <div class="g-card" style="display: flex; align-items: center; padding: 15px 20px; gap: 20px; flex-wrap: wrap;">
-                            <img src="${p.ImagenUrl.replace('~/', '')}" alt="${p.Nombre}" 
-                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ede5f8;"
+                    container.innerHTML += `
+                        <div class="g-card" style="display:flex;align-items:center;padding:15px 20px;gap:20px;flex-wrap:wrap;">
+                            <img src="${p.ImagenUrl.replace('~/', '')}" alt="${p.Nombre}"
+                                 style="width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid #ede5f8;"
                                  onerror="this.onerror=null;this.src='https://placehold.co/80x80/faf7ff/7c3aed?text=Hardware';" />
-                            
-                            <div style="flex: 1; min-width: 200px;">
-                                <span style="font-family: 'Exo 2', sans-serif; font-size: 10px; font-weight: 600; color: #9f7cc0; text-transform: uppercase;">${p.Categoria}</span>
-                                <h3 style="font-family: 'Exo 2', sans-serif; font-size: 16px; font-weight: 600; color: #1e0a3c; margin: 2px 0 0 0;">${p.Nombre}</h3>
+                            <div style="flex:1;min-width:200px;">
+                                <span style="font-family:'Exo 2',sans-serif;font-size:10px;font-weight:600;color:#9f7cc0;text-transform:uppercase;">${p.Categoria}</span>
+                                <h3 style="font-family:'Exo 2',sans-serif;font-size:16px;font-weight:600;color:#1e0a3c;margin:2px 0 0 0;">${p.Nombre}</h3>
                             </div>
-
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto}, -1)" 
-                                     style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #faf7ff; border: 1px solid #ddd0f5; color: #7c3aed; font-weight: bold; cursor: pointer;">-</button>
-                                <span style="font-family: 'Orbitron', sans-serif; font-weight: 900; width: 30px; text-align: center; color: #1e0a3c;">${p.Stock}</span>
-                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto}, 1)"
-                                     style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #faf7ff; border: 1px solid #ddd0f5; color: #7c3aed; font-weight: bold; cursor: pointer;">+</button>
+                            <div style="display:flex;align-items:center;gap:5px;">
+                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto},-1)"
+                                     style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#faf7ff;border:1px solid #ddd0f5;color:#7c3aed;font-weight:bold;cursor:pointer;">-</button>
+                                <span style="font-family:'Orbitron',sans-serif;font-weight:900;width:30px;text-align:center;color:#1e0a3c;">${p.Stock}</span>
+                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto},1)"
+                                     style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#faf7ff;border:1px solid #ddd0f5;color:#7c3aed;font-weight:bold;cursor:pointer;">+</button>
                             </div>
-
-                            <div style="text-align: right; min-width: 120px;">
-                                <div style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #9f7cc0;">Unitario: $${p.Precio.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
-                                <div style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #7c3aed;">
-                                    $${itemSubtotal.toLocaleString('es-AR', {minimumFractionDigits: 2})}
-                                </div>
+                            <div style="text-align:right;min-width:120px;">
+                                <div style="font-family:'Exo 2',sans-serif;font-size:11px;color:#9f7cc0;">Unitario: $${p.Precio.toLocaleString('es-AR',{minimumFractionDigits:2})}</div>
+                                <div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#7c3aed;">$${itemSubtotal.toLocaleString('es-AR',{minimumFractionDigits:2})}</div>
                             </div>
-
-                            <button type="button" onclick="eliminarProductoLocal(${p.IdProducto})" 
-                                 style="color: #ef4444; background: none; border: none; cursor: pointer; padding: 5px; font-size: 16px;">✕</button>
-                        </div>
-                    `;
-                    container.innerHTML += html;
+                            <button type="button" onclick="eliminarProductoLocal(${p.IdProducto})"
+                                 style="color:#ef4444;background:none;border:none;cursor:pointer;padding:5px;font-size:16px;">✕</button>
+                        </div>`;
                 });
 
                 actualizarResumenPrecios(subtotal);
             }
 
-            window.modificarCantidadLocal = function(id, cambio) {
+            window.modificarCantidadLocal = function (id, cambio) {
                 var carrito = JSON.parse(localStorage.getItem('carrito')) || [];
                 if (cambio === 1) {
                     carrito.push(id);
-                } else if (cambio === -1) {
-                    var index = carrito.indexOf(id);
-                    if (index > -1) carrito.splice(index, 1);
+                } else {
+                    var idx = carrito.indexOf(id);
+                    if (idx > -1) carrito.splice(idx, 1);
                 }
                 localStorage.setItem('carrito', JSON.stringify(carrito));
                 cargarCarritoCliente();
-                var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
-                if (lblContador) lblContador.innerText = carrito.length.toString();
+                var lbl = document.querySelector('[id*="lblCarritoContador"]');
+                if (lbl) lbl.innerText = carrito.length.toString();
             };
 
-            window.eliminarProductoLocal = function(id) {
+            window.eliminarProductoLocal = function (id) {
                 var carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-                carrito = carrito.filter(x => x !== id);
+                carrito = carrito.filter(function (x) { return x !== id; });
                 localStorage.setItem('carrito', JSON.stringify(carrito));
                 cargarCarritoCliente();
-                var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
-                if (lblContador) lblContador.innerText = carrito.length.toString();
+                var lbl = document.querySelector('[id*="lblCarritoContador"]');
+                if (lbl) lbl.innerText = carrito.length.toString();
             };
 
             function actualizarResumenPrecios(subtotal) {
                 var subtotalSpan = document.getElementById('<%= lblSubtotal.ClientID %>');
-                var totalSpan = document.getElementById('<%= lblTotal.ClientID %>');
-                if (subtotalSpan) subtotalSpan.innerText = '$' + subtotal.toLocaleString('es-AR', {minimumFractionDigits: 2});
-                var total = subtotal + costoEnvio;
-                if (totalSpan) totalSpan.innerText = '$' + total.toLocaleString('es-AR', {minimumFractionDigits: 2});
+                var totalSpan    = document.getElementById('<%= lblTotal.ClientID %>');
+                if (subtotalSpan) subtotalSpan.innerText = '$' + subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+                if (totalSpan)    totalSpan.innerText    = '$' + (subtotal + costoEnvio).toLocaleString('es-AR', { minimumFractionDigits: 2 });
             }
 
-            // --- Lógica del Canvas de Firma Digital ---
-            var sigCanvas = document.getElementById('signature-canvas');
+            // --- Canvas de Firma Digital ---
+            var sigCanvas  = document.getElementById('signature-canvas');
             var btnClearSig = document.getElementById('btnClearSignature');
             var lblSigError = document.getElementById('lblSignatureError');
-            var hasSigned = false;
+            var hasSigned  = false;
 
             if (sigCanvas) {
-                var sigCtx = sigCanvas.getContext('2d');
+                var sigCtx  = sigCanvas.getContext('2d');
                 var drawing = false;
 
-                function resizeSigCanvas() {
-                    var tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = sigCanvas.width;
-                    tempCanvas.height = sigCanvas.height;
-                    var tempCtx = tempCanvas.getContext('2d');
-                    tempCtx.drawImage(sigCanvas, 0, 0);
-                    sigCanvas.width = sigCanvas.offsetWidth;
-                    sigCanvas.height = sigCanvas.offsetHeight;
-                    sigCtx.drawImage(tempCanvas, 0, 0);
+                function initCtx() {
                     sigCtx.strokeStyle = '#7c3aed';
-                    sigCtx.lineWidth = 3;
-                    sigCtx.lineCap = 'round';
-                    sigCtx.lineJoin = 'round';
+                    sigCtx.lineWidth   = 3;
+                    sigCtx.lineCap     = 'round';
+                    sigCtx.lineJoin    = 'round';
                 }
-                window.addEventListener('resize', resizeSigCanvas);
-                sigCanvas.width = sigCanvas.offsetWidth;
-                sigCanvas.height = sigCanvas.offsetHeight;
-                sigCtx.strokeStyle = '#7c3aed';
-                sigCtx.lineWidth = 3;
-                sigCtx.lineCap = 'round';
-                sigCtx.lineJoin = 'round';
 
-                sigCanvas.addEventListener('mousedown', function (e) {
-                    drawing = true;
-                    sigCtx.beginPath();
-                    var pos = getMousePos(sigCanvas, e);
-                    sigCtx.moveTo(pos.x, pos.y);
-                });
+                function resizeSigCanvas() {
+                    var tmp = document.createElement('canvas');
+                    tmp.width  = sigCanvas.width;
+                    tmp.height = sigCanvas.height;
+                    tmp.getContext('2d').drawImage(sigCanvas, 0, 0);
+                    sigCanvas.width  = sigCanvas.offsetWidth;
+                    sigCanvas.height = sigCanvas.offsetHeight;
+                    sigCtx.drawImage(tmp, 0, 0);
+                    initCtx();
+                }
+
+                window.addEventListener('resize', resizeSigCanvas);
+                sigCanvas.width  = sigCanvas.offsetWidth;
+                sigCanvas.height = sigCanvas.offsetHeight;
+                initCtx();
+
+                function pos(canvas, e)  { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+                function tpos(canvas, t) { var r = canvas.getBoundingClientRect(); return { x: t.clientX - r.left, y: t.clientY - r.top }; }
+
+                sigCanvas.addEventListener('mousedown', function (e) { drawing = true; sigCtx.beginPath(); var p = pos(sigCanvas, e); sigCtx.moveTo(p.x, p.y); });
                 sigCanvas.addEventListener('mousemove', function (e) {
                     if (!drawing) return;
-                    var pos = getMousePos(sigCanvas, e);
-                    sigCtx.lineTo(pos.x, pos.y);
-                    sigCtx.stroke();
-                    hasSigned = true;
-                    if (lblSigError) lblSigError.style.display = 'none';
+                    var p = pos(sigCanvas, e); sigCtx.lineTo(p.x, p.y); sigCtx.stroke();
+                    hasSigned = true; if (lblSigError) lblSigError.style.display = 'none';
                 });
                 window.addEventListener('mouseup', function () { drawing = false; });
 
-                sigCanvas.addEventListener('touchstart', function (e) {
-                    drawing = true;
-                    sigCtx.beginPath();
-                    var pos = getTouchPos(sigCanvas, e.touches[0]);
-                    sigCtx.moveTo(pos.x, pos.y);
-                    e.preventDefault();
-                }, { passive: false });
-                sigCanvas.addEventListener('touchmove', function (e) {
+                sigCanvas.addEventListener('touchstart', function (e) { drawing = true; sigCtx.beginPath(); var p = tpos(sigCanvas, e.touches[0]); sigCtx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
+                sigCanvas.addEventListener('touchmove',  function (e) {
                     if (!drawing) return;
-                    var pos = getTouchPos(sigCanvas, e.touches[0]);
-                    sigCtx.lineTo(pos.x, pos.y);
-                    sigCtx.stroke();
-                    hasSigned = true;
-                    if (lblSigError) lblSigError.style.display = 'none';
-                    e.preventDefault();
+                    var p = tpos(sigCanvas, e.touches[0]); sigCtx.lineTo(p.x, p.y); sigCtx.stroke();
+                    hasSigned = true; if (lblSigError) lblSigError.style.display = 'none'; e.preventDefault();
                 }, { passive: false });
                 sigCanvas.addEventListener('touchend', function () { drawing = false; });
-
-                function getMousePos(canvasEl, evt) {
-                    var rect = canvasEl.getBoundingClientRect();
-                    return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
-                }
-                function getTouchPos(canvasEl, touchEl) {
-                    var rect = canvasEl.getBoundingClientRect();
-                    return { x: touchEl.clientX - rect.left, y: touchEl.clientY - rect.top };
-                }
 
                 if (btnClearSig) {
                     btnClearSig.addEventListener('click', function () {
                         sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-                        hasSigned = false;
-                        sigCtx.strokeStyle = '#7c3aed';
-                        sigCtx.lineWidth = 3;
-                        sigCtx.lineCap = 'round';
-                        sigCtx.lineJoin = 'round';
+                        hasSigned = false; initCtx();
                         if (lblSigError) lblSigError.style.display = 'none';
                     });
                 }
             }
 
             window.validarFirmaDigital = function () {
-                var sigError = document.getElementById('lblSignatureError');
                 if (!hasSigned) {
-                    if (sigError) sigError.style.display = 'block';
+                    if (lblSigError) lblSigError.style.display = 'block';
                     sigCanvas.parentElement.style.borderColor = '#ef4444';
                     setTimeout(function () { sigCanvas.parentElement.style.borderColor = '#ddd0f5'; }, 1000);
                     return false;
