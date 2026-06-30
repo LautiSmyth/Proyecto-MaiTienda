@@ -70,10 +70,14 @@ public partial class SiteMaster : MasterPage
         if (Session["LimpiarCarritoLocal"] as bool? == true)
         {
             Session.Remove("LimpiarCarritoLocal");
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "clearLocalCart",
+            ScriptManager.RegisterStartupScript(this.Page, this.Page.GetType(), "clearLocalCart",
                 "localStorage.removeItem('carrito');", true);
+            LimpiarCarritoCookie(Context);
         }
+    }
 
+    protected void Page_PreRender(object sender, EventArgs e)
+    {
         ActualizarCarritoContador();
     }
 
@@ -83,6 +87,69 @@ public partial class SiteMaster : MasterPage
         Session.Clear();
         Session.Abandon();
         Response.Redirect("~/Default.aspx");
+    }
+
+    public static Dictionary<int, int> ObtenerCarritoDesdeCookie(HttpContext context)
+    {
+        var carrito = new Dictionary<int, int>();
+        var cookie = context.Request.Cookies["carrito_anon"];
+        if (cookie != null && !string.IsNullOrEmpty(cookie.Value))
+        {
+            try
+            {
+                string decodedValue = context.Server.UrlDecode(cookie.Value);
+                var jsSerializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                var ids = jsSerializer.Deserialize<List<int>>(decodedValue);
+                if (ids != null)
+                {
+                    foreach (var id in ids)
+                    {
+                        if (carrito.ContainsKey(id))
+                            carrito[id]++;
+                        else
+                            carrito[id] = 1;
+                    }
+                }
+            }
+            catch { }
+        }
+        return carrito;
+    }
+
+    public static void GuardarCarritoEnCookie(HttpContext context, Dictionary<int, int> carrito)
+    {
+        var ids = new List<int>();
+        if (carrito != null)
+        {
+            foreach (var entry in carrito)
+            {
+                for (int i = 0; i < entry.Value; i++)
+                {
+                    ids.Add(entry.Key);
+                }
+            }
+        }
+
+        var jsSerializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+        string json = jsSerializer.Serialize(ids);
+        string encodedJson = context.Server.UrlEncode(json);
+
+        var cookie = new HttpCookie("carrito_anon", encodedJson)
+        {
+            Path = "/",
+            Expires = DateTime.Now.AddYears(1)
+        };
+        context.Response.Cookies.Set(cookie);
+    }
+
+    public static void LimpiarCarritoCookie(HttpContext context)
+    {
+        var cookie = new HttpCookie("carrito_anon", "")
+        {
+            Path = "/",
+            Expires = DateTime.Now.AddDays(-1)
+        };
+        context.Response.Cookies.Set(cookie);
     }
 
     public void ActualizarCarritoContador()
@@ -97,13 +164,32 @@ public partial class SiteMaster : MasterPage
         else
         {
             var carrito = Session["CarritoAnon"] as Dictionary<int, int>;
-            cantidad = carrito?.Values.Sum() ?? 0;
+            if (carrito == null)
+            {
+                carrito = ObtenerCarritoDesdeCookie(Context);
+                Session["CarritoAnon"] = carrito;
+            }
+            cantidad = carrito.Values.Sum();
+
+            // Sincronizar el localStorage con el carrito de la sesion
+            var ids = new List<int>();
+            foreach (var entry in carrito)
+            {
+                for (int i = 0; i < entry.Value; i++)
+                {
+                    ids.Add(entry.Key);
+                }
+            }
+            var jsSerializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            string json = jsSerializer.Serialize(ids);
+            ScriptManager.RegisterStartupScript(this.Page, this.Page.GetType(), "syncLocalCart",
+                $"localStorage.setItem('carrito', '{json}');", true);
         }
 
         lblCarritoContador.InnerText = cantidad.ToString();
 
         // Update counter in the DOM during async (UpdatePanel) postbacks
-        ScriptManager.RegisterStartupScript(this, this.GetType(), "updateCartCounter",
+        ScriptManager.RegisterStartupScript(this.Page, this.Page.GetType(), "updateCartCounter",
             $"(function(){{ var lbl = document.querySelector('[id*=\"lblCarritoContador\"]'); if(lbl) lbl.innerText = '{cantidad}'; }})();", true);
     }
 }

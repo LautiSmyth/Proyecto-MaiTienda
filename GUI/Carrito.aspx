@@ -294,7 +294,7 @@
                 var subtotal = 0;
 
                 productos.forEach(function (p) {
-                    var itemSubtotal = p.Precio * p.Stock;
+                    var itemSubtotal = p.Precio * p.Cantidad;
                     subtotal += itemSubtotal;
                     container.innerHTML += `
                         <div class="g-card" style="display:flex;align-items:center;padding:15px 20px;gap:20px;flex-wrap:wrap;">
@@ -308,8 +308,8 @@
                             <div style="display:flex;align-items:center;gap:5px;">
                                 <button type="button" onclick="modificarCantidadLocal(${p.IdProducto},-1)"
                                      style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#faf7ff;border:1px solid #ddd0f5;color:#7c3aed;font-weight:bold;cursor:pointer;">-</button>
-                                <span style="font-family:'Orbitron',sans-serif;font-weight:900;width:30px;text-align:center;color:#1e0a3c;">${p.Stock}</span>
-                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto},1)"
+                                <span style="font-family:'Orbitron',sans-serif;font-weight:900;width:30px;text-align:center;color:#1e0a3c;">${p.Cantidad}</span>
+                                <button type="button" onclick="modificarCantidadLocal(${p.IdProducto},1,${p.Stock})"
                                      style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#faf7ff;border:1px solid #ddd0f5;color:#7c3aed;font-weight:bold;cursor:pointer;">+</button>
                             </div>
                             <div style="text-align:right;min-width:120px;">
@@ -324,16 +324,30 @@
                 actualizarResumenPrecios(subtotal);
             }
 
+            function guardarCarritoCookie(carrito) {
+                var json = JSON.stringify(carrito);
+                var encoded = encodeURIComponent(json);
+                document.cookie = "carrito_anon=" + encoded + "; path=/; max-age=31536000";
+            }
+
             function actualizarContadorNavbar(carrito) {
                 var lbl = document.querySelector('[id*="lblCarritoContador"]');
                 if (lbl) lbl.innerText = carrito.length;
             }
 
-            window.modificarCantidadLocal = function (id, cambio) {
+            window.modificarCantidadLocal = function (id, cambio, stockMax) {
                 var carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-                if (cambio === 1) carrito.push(id);
+                if (cambio === 1) {
+                    var currentQty = carrito.filter(function(x) { return x === id; }).length;
+                    if (currentQty >= stockMax) {
+                        alert("No hay suficiente stock disponible para este producto.");
+                        return;
+                    }
+                    carrito.push(id);
+                }
                 else { var idx = carrito.indexOf(id); if (idx > -1) carrito.splice(idx, 1); }
                 localStorage.setItem('carrito', JSON.stringify(carrito));
+                guardarCarritoCookie(carrito);
                 cargarCarritoCliente();
                 actualizarContadorNavbar(carrito);
             };
@@ -341,6 +355,7 @@
             window.eliminarProductoLocal = function (id) {
                 var carrito = (JSON.parse(localStorage.getItem('carrito')) || []).filter(function (x) { return x !== id; });
                 localStorage.setItem('carrito', JSON.stringify(carrito));
+                guardarCarritoCookie(carrito);
                 cargarCarritoCliente();
                 actualizarContadorNavbar(carrito);
             };

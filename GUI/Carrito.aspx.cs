@@ -52,7 +52,24 @@ public partial class Carrito : Page
         int idProducto = Convert.ToInt32(e.CommandArgument);
 
         if (e.CommandName == "Sumar")
-            _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, 1);
+        {
+            var prodReal = new BLLProducto().ObtenerProductos().FirstOrDefault(p => p.IdProducto == idProducto);
+            int stockDisponible = prodReal != null ? prodReal.Stock : 0;
+
+            var itemsEnCarrito = _bllCarrito.ObtenerProductos(usuario.IdUsuario);
+            var itemActual = itemsEnCarrito.FirstOrDefault(p => p.IdProducto == idProducto);
+            int cantidadActual = itemActual != null ? itemActual.Stock : 0;
+
+            if (cantidadActual < stockDisponible)
+            {
+                _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, 1);
+            }
+            else
+            {
+                ScriptManager.RegisterStartupScript(this.Page, this.Page.GetType(), "noStockAlert",
+                    "alert('No hay suficiente stock disponible para este producto.');", true);
+            }
+        }
         else if (e.CommandName == "Restar")
             _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, -1);
         else if (e.CommandName == "Eliminar")
@@ -87,7 +104,8 @@ public partial class Carrito : Page
         else
         {
             ClientScript.RegisterStartupScript(this.GetType(), "clearCart", "localStorage.removeItem('carrito');", true);
-            Session["Carrito"] = null;
+            Session["CarritoAnon"] = null;
+            SiteMaster.LimpiarCarritoCookie(Context);
         }
 
         (Master as SiteMaster)?.ActualizarCarritoContador();
@@ -95,31 +113,32 @@ public partial class Carrito : Page
     }
 
     [WebMethod(EnableSession = true)]
-    public static List<BEProducto> ObtenerDetallesCarritoLocal(List<int> productoIds)
+    public static object ObtenerDetallesCarritoLocal(List<int> productoIds)
     {
         if (productoIds == null || productoIds.Count == 0)
-            return new List<BEProducto>();
+            return new List<object>();
 
         var agrupados = productoIds.GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
         var todos = new BLLProducto().ObtenerProductos();
 
         return agrupados
-            .Select(entry =>
-            {
-                var prod = todos.FirstOrDefault(p => p.IdProducto == entry.Key);
-                if (prod == null) return null;
-                return new BEProducto
-                {
-                    IdProducto  = prod.IdProducto,
-                    Nombre      = prod.Nombre,
-                    Categoria   = prod.Categoria,
-                    Precio      = prod.Precio,
-                    ImagenUrl   = prod.ImagenUrl,
-                    Descripcion = prod.Descripcion,
-                    Stock       = entry.Value
-                };
-            })
-            .Where(x => x != null)
-            .ToList();
+             .Select(entry =>
+             {
+                 var prod = todos.FirstOrDefault(p => p.IdProducto == entry.Key);
+                 if (prod == null) return null;
+                 return new
+                 {
+                     IdProducto  = prod.IdProducto,
+                     Nombre      = prod.Nombre,
+                     Categoria   = prod.Categoria,
+                     Precio      = prod.Precio,
+                     ImagenUrl   = prod.ImagenUrl,
+                     Descripcion = prod.Descripcion,
+                     Stock       = prod.Stock,
+                     Cantidad    = entry.Value
+                 };
+             })
+             .Where(x => x != null)
+             .ToList();
     }
 }

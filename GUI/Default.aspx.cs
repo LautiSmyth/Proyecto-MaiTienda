@@ -56,12 +56,10 @@ public partial class _Default : Page
         }
         else
         {
-            var carritoAnon = Session["CarritoAnon"] as Dictionary<int, int>;
-            if (carritoAnon != null)
-            {
-                _cantidadesEnCarrito = carritoAnon;
-                _idsEnCarrito = new HashSet<int>(carritoAnon.Keys);
-            }
+            var carritoAnon = SiteMaster.ObtenerCarritoDesdeCookie(Context);
+            Session["CarritoAnon"] = carritoAnon;
+            _cantidadesEnCarrito = carritoAnon;
+            _idsEnCarrito = new HashSet<int>(carritoAnon.Keys);
         }
 
         if (!IsPostBack)
@@ -271,6 +269,7 @@ public partial class _Default : Page
             {
                 carrito[productoId] = cantidadActual + 1;
                 Session["CarritoAnon"] = carrito;
+                SiteMaster.GuardarCarritoEnCookie(Context, carrito);
                 _cantidadesEnCarrito = carrito;
                 _idsEnCarrito = new HashSet<int>(carrito.Keys);
             }
@@ -309,6 +308,7 @@ public partial class _Default : Page
             else
                 carrito[productoId] = Math.Min(nuevaCantidad, stock);
             Session["CarritoAnon"] = carrito;
+            SiteMaster.GuardarCarritoEnCookie(Context, carrito);
             _cantidadesEnCarrito = carrito;
             _idsEnCarrito = new HashSet<int>(carrito.Keys);
         }

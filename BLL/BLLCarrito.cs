@@ -10,7 +10,21 @@ namespace BLL
 
         public void AgregarProducto(int idUsuario, int idProducto, int cantidad = 1)
         {
-            _dalCarrito.AgregarProducto(idUsuario, idProducto, cantidad);
+            var bllProducto = new BLLProducto();
+            var prod = bllProducto.ObtenerProductos().Find(p => p.IdProducto == idProducto);
+            if (prod == null) return;
+
+            int stockDisponible = prod.Stock;
+
+            var cantidades = _dalCarrito.ObtenerCantidadesProductos(idUsuario);
+            int cantidadActual = 0;
+            cantidades.TryGetValue(idProducto, out cantidadActual);
+
+            int nuevaCantidad = cantidadActual + cantidad;
+            if (nuevaCantidad > stockDisponible) nuevaCantidad = stockDisponible;
+            if (nuevaCantidad < 0) nuevaCantidad = 0;
+
+            _dalCarrito.ActualizarCantidad(idUsuario, idProducto, nuevaCantidad);
         }
 
         public List<BEProducto> ObtenerProductos(int idUsuario)
