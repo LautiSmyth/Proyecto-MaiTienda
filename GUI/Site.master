@@ -4,24 +4,20 @@
 
 <html lang="es">
 <head runat="server">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%: Page.Title %> - MaiTienda</title>
-
-<link href="Content/bootstrap.css" rel="stylesheet" type="text/css" />
-<link href="Content/Site.css" rel="stylesheet" type="text/css" />
-<link href="Content/app.css?v=13" rel="stylesheet" type="text/css" />
-<script src="Scripts/modernizr-2.8.3.js"></script>
+    <link href="Content/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link href="Content/Site.css" rel="stylesheet" type="text/css" />
+    <link href="Content/app.css?v=13" rel="stylesheet" type="text/css" />
+    <script src="Scripts/modernizr-2.8.3.js"></script>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-
 </head>
 <body>
     <form runat="server">
         <asp:ScriptManager runat="server">
             <Scripts>
-                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
-                <%--Framework Scripts--%>
                 <asp:ScriptReference Name="MsAjaxBundle" />
                 <asp:ScriptReference Name="jquery" />
                 <asp:ScriptReference Name="bootstrap" />
@@ -34,7 +30,6 @@
                 <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
                 <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
                 <asp:ScriptReference Name="WebFormsBundle" />
-                <%--Site Scripts--%>
             </Scripts>
         </asp:ScriptManager>
 
@@ -64,9 +59,9 @@
                                     </svg>
                                     <span style="vertical-align: middle;">Carrito</span>
                                     <asp:UpdatePanel ID="upContador" runat="server" UpdateMode="Conditional">
-                                    <ContentTemplate>
-                                    <span id="lblCarritoContador" runat="server" class="badge" style="background-color: #7c3aed; color: #ffffff; font-family: 'Orbitron', sans-serif; vertical-align: middle;">0</span>
-                                    </ContentTemplate>
+                                        <ContentTemplate>
+                                            <span id="lblCarritoContador" runat="server" class="badge" style="background-color: #7c3aed; color: #ffffff; font-family: 'Orbitron', sans-serif; vertical-align: middle;">0</span>
+                                        </ContentTemplate>
                                     </asp:UpdatePanel>
                                 </a>
                             </li>
@@ -78,7 +73,6 @@
             </nav>
         </asp:Panel>
 
-
         <div class="container body-content">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
@@ -86,16 +80,11 @@
     </form>
     <script type="text/javascript">
         var usuarioLogueado = <%= Session["perfil"] != null ? "true" : "false" %>;
-    </script>
-    <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            var logueado = typeof usuarioLogueado !== 'undefined' ? usuarioLogueado : false;
-            if (!logueado) {
-                var carritoLocal = JSON.parse(localStorage.getItem('carrito')) || [];
-                var lblContador = document.getElementById('lblCarritoContador') || document.querySelector('[id*="lblCarritoContador"]');
-                if (lblContador) {
-                    lblContador.innerText = carritoLocal.length.toString();
-                }
+            if (!usuarioLogueado) {
+                var carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+                var lbl = document.querySelector('[id*="lblCarritoContador"]');
+                if (lbl) lbl.innerText = carrito.length;
             }
         });
     </script>

@@ -95,18 +95,11 @@ public partial class Login : Page
                 return;
 
             var bllCarrito = new BLLCarrito();
-            var agrupados = ids.GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
-
-            foreach (var entry in agrupados)
-            {
+            foreach (var entry in ids.GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count()))
                 bllCarrito.AgregarProducto(idUsuario, entry.Key, entry.Value);
-            }
 
             Session["LimpiarCarritoLocal"] = true;
         }
-        catch
-        {
-            // Datos malformados en localStorage, ignorar
-        }
+        catch { }
     }
 }

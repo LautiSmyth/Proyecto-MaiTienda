@@ -1,24 +1,21 @@
 using BE;
 using BLL;
-using System.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Web.Services;
 
 public partial class Carrito : Page
 {
     private readonly BLLCarrito _bllCarrito = new BLLCarrito();
-    private readonly BLLProducto _bllProducto = new BLLProducto();
 
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!IsPostBack)
-        {
             CargarCarrito();
-        }
     }
 
     private void CargarCarrito()
@@ -27,7 +24,7 @@ public partial class Carrito : Page
 
         if (usuario != null)
         {
-            List<BEProducto> productos = _bllCarrito.ObtenerProductos(usuario.IdUsuario);
+            var productos = _bllCarrito.ObtenerProductos(usuario.IdUsuario);
 
             phCarritoServidor.Visible = true;
             divCarritoVacio.Style["display"] = productos.Any() ? "none" : "block";
@@ -55,13 +52,9 @@ public partial class Carrito : Page
         int idProducto = Convert.ToInt32(e.CommandArgument);
 
         if (e.CommandName == "Sumar")
-        {
             _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, 1);
-        }
         else if (e.CommandName == "Restar")
-        {
             _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, -1);
-        }
         else if (e.CommandName == "Eliminar")
         {
             _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, -9999);
@@ -76,17 +69,10 @@ public partial class Carrito : Page
 
         DAL.Acceso.GetInstance().Escribir(
             "DELETE FROM ItemCarrito WHERE IdUsuario = @IdUsuario AND Cantidad <= 0",
-            new SqlParameter[] {
-                new SqlParameter("@IdUsuario", usuario.IdUsuario)
-            }
+            new SqlParameter[] { new SqlParameter("@IdUsuario", usuario.IdUsuario) }
         );
 
-        var master = Master as SiteMaster;
-        if (master != null)
-        {
-            master.ActualizarCarritoContador();
-        }
-
+        (Master as SiteMaster)?.ActualizarCarritoContador();
         CargarCarrito();
     }
 
@@ -104,12 +90,7 @@ public partial class Carrito : Page
             Session["Carrito"] = null;
         }
 
-        var master = Master as SiteMaster;
-        if (master != null)
-        {
-            master.ActualizarCarritoContador();
-        }
-
+        (Master as SiteMaster)?.ActualizarCarritoContador();
         Response.Redirect("~/Bienvenida.aspx");
     }
 
@@ -120,31 +101,22 @@ public partial class Carrito : Page
             return new List<BEProducto>();
 
         var agrupados = productoIds.GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
+        var todos = new BLLProducto().ObtenerProductos();
 
-        BLLProducto bllProducto = new BLLProducto();
-        List<BEProducto> todosLosProductos = bllProducto.ObtenerProductos();
-
-        List<BEProducto> productosFiltrados = new List<BEProducto>();
-
-        foreach (var entry in agrupados)
-        {
-            var p = todosLosProductos.FirstOrDefault(prod => prod.IdProducto == entry.Key);
-            if (p != null)
-            {
-                // Clonar objeto y usar Stock para guardar la cantidad
-                productosFiltrados.Add(new BEProducto
+        return agrupados
+            .Select(entry => todos.FirstOrDefault(p => p.IdProducto == entry.Key) is BEProducto p
+                ? new BEProducto
                 {
-                    IdProducto = p.IdProducto,
-                    Nombre = p.Nombre,
-                    Categoria = p.Categoria,
-                    Precio = p.Precio,
-                    ImagenUrl = p.ImagenUrl,
+                    IdProducto  = p.IdProducto,
+                    Nombre      = p.Nombre,
+                    Categoria   = p.Categoria,
+                    Precio      = p.Precio,
+                    ImagenUrl   = p.ImagenUrl,
                     Descripcion = p.Descripcion,
-                    Stock = entry.Value
-                });
-            }
-        }
-
-        return productosFiltrados;
+                    Stock       = entry.Value
+                }
+                : null)
+            .Where(p => p != null)
+            .ToList();
     }
 }
