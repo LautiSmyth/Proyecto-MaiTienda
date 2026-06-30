@@ -48,6 +48,7 @@
     <Compile Include="DALUsuario.cs" />
     <Compile Include="DALProducto.cs" />
     <Compile Include="DALCarrito.cs" />
+    <Compile Include="DALDVV.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

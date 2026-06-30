@@ -1,4 +1,4 @@
-﻿namespace BE
+namespace BE
 {
     public class BEUsuario
     {
@@ -8,5 +8,6 @@
         public Enums.EstadoUsuario Estado { get; set; }
         public Enums.Perfil Perfil { get; set; }
         public int IntentosFallidos { get; set; }
+        public string DVH { get; set; }
     }
 }

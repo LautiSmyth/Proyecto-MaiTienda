@@ -19,7 +19,7 @@ namespace DAL
             string marca = null)
         {
             List<BEProducto> lista = new List<BEProducto>();
-            string consulta = "SELECT IdProducto, Nombre, Categoria, Precio, ImagenUrl, Descripcion, Stock FROM Producto WHERE 1=1";
+            string consulta = "SELECT IdProducto, Nombre, Categoria, Precio, ImagenUrl, Descripcion, Stock, DVH FROM Producto WHERE 1=1";
             List<SqlParameter> parametros = new List<SqlParameter>();
 
             if (!string.IsNullOrEmpty(categoria) && categoria != "Todos")
@@ -76,11 +76,29 @@ namespace DAL
                     Precio = Convert.ToDecimal(row["Precio"]),
                     ImagenUrl = row["ImagenUrl"].ToString(),
                     Descripcion = row["Descripcion"].ToString(),
-                    Stock = Convert.ToInt32(row["Stock"])
+                    Stock = Convert.ToInt32(row["Stock"]),
+                    DVH = row["DVH"] == DBNull.Value ? null : row["DVH"].ToString()
                 });
             }
 
             return lista;
+        }
+
+        public void Actualizar(BEProducto producto)
+        {
+            string query = "UPDATE Producto SET Nombre = @Nombre, Categoria = @Categoria, Precio = @Precio, ImagenUrl = @ImagenUrl, Descripcion = @Descripcion, Stock = @Stock, DVH = @DVH WHERE IdProducto = @IdProducto";
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Nombre", producto.Nombre),
+                new SqlParameter("@Categoria", producto.Categoria),
+                new SqlParameter("@Precio", producto.Precio),
+                new SqlParameter("@ImagenUrl", producto.ImagenUrl),
+                new SqlParameter("@Descripcion", (object)producto.Descripcion ?? DBNull.Value),
+                new SqlParameter("@Stock", producto.Stock),
+                new SqlParameter("@DVH", (object)producto.DVH ?? DBNull.Value),
+                new SqlParameter("@IdProducto", producto.IdProducto)
+            };
+            _acceso.Escribir(query, parameters);
         }
         public List<string> ObtenerCategorias()
         {

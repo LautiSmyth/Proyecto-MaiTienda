@@ -8,6 +8,8 @@ namespace BLL
     {
         private DALProducto _dalProducto = new DALProducto();
 
+        private readonly SERVICIOS.GestorIntegridad _gestorIntegridad = new SERVICIOS.GestorIntegridad();
+
         public List<BEProducto> ObtenerProductos(
             string categoria = null, 
             string busqueda = null, 
@@ -16,7 +18,16 @@ namespace BLL
             decimal? precioMax = null, 
             string marca = null)
         {
-            return _dalProducto.ObtenerProductos(categoria, busqueda, orden, precioMin, precioMax, marca);
+            List<BEProducto> productos = _dalProducto.ObtenerProductos(categoria, busqueda, orden, precioMin, precioMax, marca);
+            foreach (var producto in productos)
+            {
+                string dvCalculado = _gestorIntegridad.CalcularDVH(producto);
+                if (producto.DVH != dvCalculado)
+                {
+                    throw new System.InvalidOperationException("Error de integridad de datos: Un registro de producto ha sido alterado externamente.");
+                }
+            }
+            return productos;
         }
 
         public List<string> ObtenerCategorias()

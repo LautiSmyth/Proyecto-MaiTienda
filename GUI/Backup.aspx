@@ -69,5 +69,29 @@
             </div>
         </div>
 
+        <%-- Integridad de Datos (Dígitos Verificadores) --%>
+        <div class="g-card" style="padding: 30px; margin-top: 30px; max-width: 100%;">
+            <h4 style="margin-top: 0;">Integridad de Datos (Dígitos Verificadores)</h4>
+            <p>Verifique la integridad física de las tablas de usuarios y productos del sistema.</p>
+            
+            <asp:Panel ID="pnlIntegridadExito" runat="server" CssClass="alert alert-success" Visible="false">
+                <strong>✔ La base de datos es íntegra. Todos los dígitos verificadores coinciden.</strong>
+            </asp:Panel>
+            
+            <asp:Panel ID="pnlIntegridadError" runat="server" CssClass="alert alert-danger" Visible="false" style="background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <strong>⚠ Se han detectado discrepancias en los dígitos verificadores de las siguientes tablas:</strong>
+                <asp:Label ID="lblDetalleErrorIntegridad" runat="server" style="display: block; margin-top: 10px; white-space: pre-line; font-family: monospace; font-size: 13px;" />
+            </asp:Panel>
+            
+            <div style="margin-top: 15px;">
+                <asp:Button ID="btnVerificarIntegridad" runat="server" Text="Verificar Integridad Ahora"
+                    CssClass="btn btn-info" OnClick="btnVerificarIntegridad_Click" style="margin-right: 10px;" />
+                    
+                <asp:Button ID="btnRecalcularDVs" runat="server" Text="Recalcular Dígitos Verificadores"
+                    CssClass="btn btn-warning" OnClick="btnRecalcularDVs_Click" 
+                    OnClientClick="return confirm('¿Está seguro de que desea recalcular los dígitos verificadores? Esto sobrescribirá los valores de DV con el estado actual de los registros.');" />
+            </div>
+        </div>
+
     </div>
 </asp:Content>

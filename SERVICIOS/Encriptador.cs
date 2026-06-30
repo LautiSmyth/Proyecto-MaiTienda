@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Cryptography;
 
 namespace SERVICIOS
@@ -8,6 +8,27 @@ namespace SERVICIOS
         private const int SaltSize = 16;
         private const int HashSize = 32;
         private const int Iterations = 100000;
+
+        private const string SALT_SECRETO = "Ing_Soft-Tesis!-SanAg+Siuu";
+
+        public static string HashIntegridad(string texto)
+        {
+            if (string.IsNullOrEmpty(texto))
+            {
+                return string.Empty;
+            }
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                string textoConSalt = texto + SALT_SECRETO;
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(textoConSalt));
+                System.Text.StringBuilder builder = new System.Text.StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
+        }
 
         public static string Hash(string contraseña)
         {

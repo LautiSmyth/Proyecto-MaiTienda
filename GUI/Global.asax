@@ -13,6 +13,15 @@
         RouteConfig.RegisterRoutes(RouteTable.Routes);
         BundleConfig.RegisterBundles(BundleTable.Bundles);
         IniciarBackupAutomatico();
+        
+        try
+        {
+            new BLL.BLLIntegridad().ValidarIntegridadGlobal();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("ERROR CRITICO DE INTEGRIDAD DE BASE DE DATOS: " + ex.Message, ex);
+        }
     }
 
     void Application_End(object sender, EventArgs e)

@@ -2,6 +2,7 @@ using BE;
 using BE.Enums;
 using SERVICIOS;
 using System;
+using System.Collections.Generic;
 
 namespace BLL
 {
@@ -10,9 +11,20 @@ namespace BLL
         private readonly DAL.DALUsuario _dalUsuario = new DAL.DALUsuario();
         private readonly ServicioBitacora _sBitacora = new ServicioBitacora();
 
+        private readonly GestorIntegridad _gestorIntegridad = new GestorIntegridad();
+
         public BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
         {
-            return _dalUsuario.BuscarPorNombreUsuario(nombreUsuario);
+            BEUsuario usuario = _dalUsuario.BuscarPorNombreUsuario(nombreUsuario);
+            if (usuario != null)
+            {
+                string dvCalculado = _gestorIntegridad.CalcularDVH(usuario);
+                if (usuario.DVH != dvCalculado)
+                {
+                    throw new InvalidOperationException("Error de integridad de datos: El registro del usuario ha sido alterado externamente.");
+                }
+            }
+            return usuario;
         }
 
         public void Insertar(string nombreUsuario, string password, Perfil perfil)
@@ -25,6 +37,26 @@ namespace BLL
                 Perfil = perfil
             };
             _dalUsuario.Insertar(usuario);
+            Actualizar(usuario);
+        }
+
+        public void Actualizar(BEUsuario usuario)
+        {
+            usuario.DVH = _gestorIntegridad.CalcularDVH(usuario);
+            _dalUsuario.Actualizar(usuario);
+            RecalcularDVV();
+        }
+
+        private void RecalcularDVV()
+        {
+            var usuarios = _dalUsuario.ObtenerTodos();
+            var dvhs = new List<string>();
+            foreach (var u in usuarios)
+            {
+                dvhs.Add(u.DVH ?? _gestorIntegridad.CalcularDVH(u));
+            }
+            string dvv = _gestorIntegridad.CalcularDVV(dvhs);
+            new DAL.DALDVV().GuardarDVV("Usuario", dvv);
         }
 
         public void ValidarCredenciales(string nombreUsuario, string password)
@@ -41,13 +73,13 @@ namespace BLL
                     if (usuario.IntentosFallidos >= 2)
                     {
                         usuario.Estado = EstadoUsuario.Bloqueado;
-                        _dalUsuario.Actualizar(usuario);
+                        Actualizar(usuario);
                         _sBitacora.RegistrarEvento("bloqueado por intentos fallidos", usuario);
                     }
                     else
                     {
                         usuario.IntentosFallidos++;
-                        _dalUsuario.Actualizar(usuario);
+                        Actualizar(usuario);
                         _sBitacora.RegistrarEvento($"Intento fallido {usuario.IntentosFallidos}", usuario);
                     }
                     throw new UnauthorizedAccessException();
@@ -55,7 +87,7 @@ namespace BLL
 
                 SessionManager.GetInstance().Login(usuario);
                 usuario.IntentosFallidos = 0;
-                _dalUsuario.Actualizar(usuario);
+                Actualizar(usuario);
                 _sBitacora.RegistrarEvento("Inicio de sesion");
             }
             catch (UnauthorizedAccessException)
