@@ -171,7 +171,6 @@ public partial class SiteMaster : MasterPage
             }
             cantidad = carrito.Values.Sum();
 
-            // Sincronizar el localStorage con el carrito de la sesion
             var ids = new List<int>();
             foreach (var entry in carrito)
             {
@@ -188,7 +187,6 @@ public partial class SiteMaster : MasterPage
 
         lblCarritoContador.InnerText = cantidad.ToString();
 
-        // Update counter in the DOM during async (UpdatePanel) postbacks
         ScriptManager.RegisterStartupScript(this.Page, this.Page.GetType(), "updateCartCounter",
             $"(function(){{ var lbl = document.querySelector('[id*=\"lblCarritoContador\"]'); if(lbl) lbl.innerText = '{cantidad}'; }})();", true);
     }
