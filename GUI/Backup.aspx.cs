@@ -103,7 +103,10 @@ public partial class Backup : Page
             var bllIntegridad = new BLL.BLLIntegridad();
             bllIntegridad.RecalcularDVUsuarios();
             bllIntegridad.RecalcularDVProductos();
-            
+
+            Application["IntegridadFallida"] = false;
+            Application["MensajeIntegridad"] = null;
+
             btnVerificarIntegridad_Click(sender, e);
         }
         catch (Exception ex)

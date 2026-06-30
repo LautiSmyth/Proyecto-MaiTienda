@@ -9,6 +9,17 @@ public partial class Login : Page
     {
         if (!IsPostBack)
         {
+            bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
+            if (integridadFallida)
+            {
+                string msg = Application["MensajeIntegridad"] as string;
+                pnlError.Visible = true;
+                litError.Text = "Sistema bloqueado por problema de integridad de datos. " +
+                    "Solo el WebMaster puede acceder usando el passkey de emergencia." +
+                    (string.IsNullOrEmpty(msg) ? "" : " Detalle: " + msg);
+                return;
+            }
+
             bool conectado = new BLLUsuario().VerificarConexion();
             if (conectado)
             {
@@ -25,9 +36,28 @@ public partial class Login : Page
 
     protected void btnIngresar_Click(object sender, EventArgs e)
     {
+        string nombreUsuario = txtUsuario.Text.Trim();
+        string password = txtPassword.Text;
+
+        if (new BLLUsuario().ValidarConPasskey(password))
+        {
+            Session["perfil"] = "WebMaster";
+            Session["nombreUsuario"] = nombreUsuario;
+            Response.Redirect("~/Backup.aspx");
+            return;
+        }
+
+        bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
+        if (integridadFallida)
+        {
+            pnlError.Visible = true;
+            litError.Text = "Sistema bloqueado. Ingrese el passkey de emergencia para acceder como WebMaster.";
+            return;
+        }
+
         try
         {
-            new BLLUsuario().ValidarCredenciales(txtUsuario.Text.Trim(), txtPassword.Text);
+            new BLLUsuario().ValidarCredenciales(nombreUsuario, password);
 
             var usuario = SessionManager.GetInstance().Usuario;
             Session["nombreUsuario"] = usuario.NombreUsuario;

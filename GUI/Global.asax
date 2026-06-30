@@ -13,24 +13,51 @@
         RouteConfig.RegisterRoutes(RouteTable.Routes);
         BundleConfig.RegisterBundles(BundleTable.Bundles);
         IniciarBackupAutomatico();
-        
-        try
+    }
+
+    void Application_BeginRequest(object sender, EventArgs e)
+    {
+        string path = Request.AppRelativeCurrentExecutionFilePath.ToLower();
+
+        bool esRecursoEstatico =
+            path.EndsWith(".axd") || path.EndsWith(".ico") ||
+            path.StartsWith("~/scripts/") || path.StartsWith("~/content/") ||
+            path.StartsWith("~/assets/") || path.StartsWith("~/bundles/");
+
+        if (!esRecursoEstatico)
         {
-            new BLL.BLLIntegridad().ValidarIntegridadGlobal();
+            DateTime? ultima = Application["IntegridadUltimaVerificacion"] as DateTime?;
+            if (!ultima.HasValue || (DateTime.Now - ultima.Value).TotalSeconds >= 30)
+            {
+                Application["IntegridadUltimaVerificacion"] = DateTime.Now;
+                try
+                {
+                    new BLL.BLLIntegridad().ValidarIntegridadGlobal();
+                    Application["IntegridadFallida"] = false;
+                    Application["MensajeIntegridad"] = null;
+                }
+                catch (Exception ex)
+                {
+                    Application["IntegridadFallida"] = true;
+                    Application["MensajeIntegridad"] = ex.Message;
+                }
+            }
         }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException("ERROR CRITICO DE INTEGRIDAD DE BASE DE DATOS: " + ex.Message, ex);
-        }
+
+        bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
+        if (!integridadFallida) return;
+
+        if (path == "~/mantenimiento.aspx" ||
+            path == "~/gestionintegridad.aspx" ||
+            esRecursoEstatico)
+            return;
+
+        Response.Redirect("~/Mantenimiento.aspx");
     }
 
     void Application_End(object sender, EventArgs e)
     {
-        if (_timerBackup != null)
-        {
-            _timerBackup.Dispose();
-            _timerBackup = null;
-        }
+        if (_timerBackup != null) { _timerBackup.Dispose(); _timerBackup = null; }
     }
 
     private void IniciarBackupAutomatico()
