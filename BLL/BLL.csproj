@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BLLBackup.cs" />
+    <Compile Include="BLLCotizacion.cs" />
     <Compile Include="BLLUsuario.cs" />
     <Compile Include="BLLProducto.cs" />
     <Compile Include="BLLCarrito.cs" />

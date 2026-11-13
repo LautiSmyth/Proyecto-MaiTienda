@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:tns="http://maitienda.com/ws/catalogo" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://maitienda.com/ws/catalogo" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MaiTienda - Consulta de catálogo, stock y cotización de pedidos.</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://maitienda.com/ws/catalogo">
+      <s:element name="ObtenerCategorias">
+        <s:complexType />
+      </s:element>
+      <s:element name="ObtenerCategoriasResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObtenerCategoriasResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ObtenerCatalogo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="categoria" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ObtenerCatalogoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ObtenerCatalogoResult" type="tns:ArrayOfProductoWS" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfProductoWS">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="ProductoWS" nillable="true" type="tns:ProductoWS" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ProductoWS">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdProducto" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Nombre" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Categoria" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Precio" type="s:decimal" />
+          <s:element minOccurs="0" maxOccurs="1" name="Descripcion" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Stock" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="HayStock" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ConsultarProducto">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="idProducto" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ConsultarProductoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ConsultarProductoResult" type="tns:ProductoWS" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CotizarProducto">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="idProducto" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="cantidad" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="CotizarProductoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CotizarProductoResult" type="tns:BECotizacion" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="BECotizacion">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Fecha" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="VigenteHasta" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Lineas" type="tns:ArrayOfBELineaCotizacion" />
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadTotalUnidades" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Total" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="PedidoDisponible" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Mensaje" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfBELineaCotizacion">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="BELineaCotizacion" nillable="true" type="tns:BELineaCotizacion" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="BELineaCotizacion">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdProducto" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Nombre" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PrecioUnitario" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="CantidadSolicitada" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="StockDisponible" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Subtotal" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="Disponible" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Observacion" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CotizarPedido">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="items" type="tns:ArrayOfBEItemPedido" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfBEItemPedido">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="BEItemPedido" nillable="true" type="tns:BEItemPedido" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="BEItemPedido">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IdProducto" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Cantidad" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="CotizarPedidoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CotizarPedidoResult" type="tns:BECotizacion" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ObtenerCategoriasSoapIn">
+    <wsdl:part name="parameters" element="tns:ObtenerCategorias" />
+  </wsdl:message>
+  <wsdl:message name="ObtenerCategoriasSoapOut">
+    <wsdl:part name="parameters" element="tns:ObtenerCategoriasResponse" />
+  </wsdl:message>
+  <wsdl:message name="ObtenerCatalogoSoapIn">
+    <wsdl:part name="parameters" element="tns:ObtenerCatalogo" />
+  </wsdl:message>
+  <wsdl:message name="ObtenerCatalogoSoapOut">
+    <wsdl:part name="parameters" element="tns:ObtenerCatalogoResponse" />
+  </wsdl:message>
+  <wsdl:message name="ConsultarProductoSoapIn">
+    <wsdl:part name="parameters" element="tns:ConsultarProducto" />
+  </wsdl:message>
+  <wsdl:message name="ConsultarProductoSoapOut">
+    <wsdl:part name="parameters" element="tns:ConsultarProductoResponse" />
+  </wsdl:message>
+  <wsdl:message name="CotizarProductoSoapIn">
+    <wsdl:part name="parameters" element="tns:CotizarProducto" />
+  </wsdl:message>
+  <wsdl:message name="CotizarProductoSoapOut">
+    <wsdl:part name="parameters" element="tns:CotizarProductoResponse" />
+  </wsdl:message>
+  <wsdl:message name="CotizarPedidoSoapIn">
+    <wsdl:part name="parameters" element="tns:CotizarPedido" />
+  </wsdl:message>
+  <wsdl:message name="CotizarPedidoSoapOut">
+    <wsdl:part name="parameters" element="tns:CotizarPedidoResponse" />
+  </wsdl:message>
+  <wsdl:portType name="WSCatalogoSoap">
+    <wsdl:operation name="ObtenerCategorias">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Devuelve las categorías de productos disponibles.</wsdl:documentation>
+      <wsdl:input message="tns:ObtenerCategoriasSoapIn" />
+      <wsdl:output message="tns:ObtenerCategoriasSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerCatalogo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Devuelve los productos del catálogo. Dejar 'categoria' vacío para traer todos.</wsdl:documentation>
+      <wsdl:input message="tns:ObtenerCatalogoSoapIn" />
+      <wsdl:output message="tns:ObtenerCatalogoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarProducto">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Devuelve un producto con su precio y stock actual. Devuelve vacío si no existe.</wsdl:documentation>
+      <wsdl:input message="tns:ConsultarProductoSoapIn" />
+      <wsdl:output message="tns:ConsultarProductoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CotizarProducto">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Cotiza un único producto. Versión simple de CotizarPedido, se puede probar desde el navegador.</wsdl:documentation>
+      <wsdl:input message="tns:CotizarProductoSoapIn" />
+      <wsdl:output message="tns:CotizarProductoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="CotizarPedido">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Cotiza un pedido con varios productos: valida stock, calcula subtotales y total.</wsdl:documentation>
+      <wsdl:input message="tns:CotizarPedidoSoapIn" />
+      <wsdl:output message="tns:CotizarPedidoSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSCatalogoSoap" type="tns:WSCatalogoSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ObtenerCategorias">
+      <soap:operation soapAction="http://maitienda.com/ws/catalogo/ObtenerCategorias" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerCatalogo">
+      <soap:operation soapAction="http://maitienda.com/ws/catalogo/ObtenerCatalogo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarProducto">
+      <soap:operation soapAction="http://maitienda.com/ws/catalogo/ConsultarProducto" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CotizarProducto">
+      <soap:operation soapAction="http://maitienda.com/ws/catalogo/CotizarProducto" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CotizarPedido">
+      <soap:operation soapAction="http://maitienda.com/ws/catalogo/CotizarPedido" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSCatalogoSoap12" type="tns:WSCatalogoSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ObtenerCategorias">
+      <soap12:operation soapAction="http://maitienda.com/ws/catalogo/ObtenerCategorias" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerCatalogo">
+      <soap12:operation soapAction="http://maitienda.com/ws/catalogo/ObtenerCatalogo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarProducto">
+      <soap12:operation soapAction="http://maitienda.com/ws/catalogo/ConsultarProducto" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CotizarProducto">
+      <soap12:operation soapAction="http://maitienda.com/ws/catalogo/CotizarProducto" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CotizarPedido">
+      <soap12:operation soapAction="http://maitienda.com/ws/catalogo/CotizarPedido" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSCatalogo">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MaiTienda - Consulta de catálogo, stock y cotización de pedidos.</wsdl:documentation>
+    <wsdl:port name="WSCatalogoSoap" binding="tns:WSCatalogoSoap">
+      <soap:address location="http://localhost:51856/WSCatalogo.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSCatalogoSoap12" binding="tns:WSCatalogoSoap12">
+      <soap12:address location="http://localhost:51856/WSCatalogo.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

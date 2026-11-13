@@ -124,6 +124,7 @@
                             style="width: 100% !important; padding: 14px 0 !important; font-size: 12px !important; margin-top: 10px !important;" />
 
                         <a href="Default.aspx" style="display: block; text-align: center; margin-top: 15px; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 600;">← Seguir Comprando</a>
+                        <a href="Cotizador.aspx" style="display: block; text-align: center; margin-top: 10px; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 600;">📄 Cotizar pedido</a>
                     </div>
                 </div>
             </div>
