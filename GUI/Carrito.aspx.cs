@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.IO;
+using System.Xml;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -14,13 +16,63 @@ public partial class Carrito : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        Form.Enctype = "multipart/form-data";
         if (!IsPostBack)
             CargarCarrito();
     }
 
+    private BEUsuario ObtenerUsuarioSesion()
+    {
+        string nombre = Session["nombreUsuario"] as string;
+        return Session["perfil"] == null || string.IsNullOrEmpty(nombre)
+            ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
+    }
+
+    protected void btnExportarXml_Click(object sender, EventArgs e)
+    {
+        var usuario = ObtenerUsuarioSesion();
+        if (usuario == null) { lblXml.Text = "Iniciá sesión para exportar tu carrito."; return; }
+        var items = _bllCarrito.ObtenerProductos(usuario.IdUsuario)
+            .Select(p => new BEItemPedido { IdProducto = p.IdProducto, Cantidad = p.Stock }).ToList();
+        byte[] archivo = CarritoXml.GuardarCarrito(items);
+        Response.Clear();
+        Response.ContentType = "application/xml";
+        Response.AddHeader("Content-Disposition", "attachment; filename=carrito.xml");
+        Response.BinaryWrite(archivo);
+        Response.End();
+    }
+
+    protected void btnImportarXml_Click(object sender, EventArgs e)
+    {
+        var usuario = ObtenerUsuarioSesion();
+        if (usuario == null) { lblXml.Text = "Iniciá sesión para importar tu carrito."; return; }
+        if (!archivoCarritoXml.HasFile || archivoCarritoXml.PostedFile.ContentLength > 65536 ||
+            !string.Equals(Path.GetExtension(archivoCarritoXml.FileName), ".xml", StringComparison.OrdinalIgnoreCase))
+        {
+            lblXml.Text = "Seleccioná un archivo .xml de hasta 64 KB.";
+            return;
+        }
+        try
+        {
+            using (var archivo = archivoCarritoXml.PostedFile.InputStream)
+                _bllCarrito.ImportarCarrito(usuario.IdUsuario, CarritoXml.LeerCarrito(archivo));
+        }
+        catch (XmlException) { lblXml.Text = "El XML no tiene el formato de un carrito válido."; return; }
+        catch (ArgumentException ex) { lblXml.Text = Server.HtmlEncode(ex.Message); return; }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError(ex.ToString());
+            lblXml.Text = "No se pudo importar el archivo. Tu carrito no fue reemplazado.";
+            return;
+        }
+        CargarCarrito();
+        (Master as SiteMaster)?.ActualizarCarritoContador();
+        lblXml.Text = "Carrito importado correctamente.";
+    }
+
     private void CargarCarrito()
     {
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        var usuario = ObtenerUsuarioSesion();
 
         if (usuario != null)
         {
@@ -46,7 +98,7 @@ public partial class Carrito : Page
 
     protected void repCarrito_ItemCommand(object source, RepeaterCommandEventArgs e)
     {
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        var usuario = ObtenerUsuarioSesion();
         if (usuario == null) return;
 
         int idProducto = Convert.ToInt32(e.CommandArgument);
@@ -95,7 +147,7 @@ public partial class Carrito : Page
 
     protected void btnCheckout_Click(object sender, EventArgs e)
     {
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        var usuario = ObtenerUsuarioSesion();
 
         if (usuario != null)
         {

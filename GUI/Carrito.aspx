@@ -13,6 +13,18 @@
                 <div class="g-divider" style="margin: 15px auto 0; width: 60px;"></div>
             </div>
 
+            <div class="g-card" style="max-width: none; padding: 20px; margin-bottom: 20px;">
+                <h3>Guardar y recuperar carrito</h3>
+                <p>Con tu sesión iniciada, exportá el carrito o recuperalo desde un archivo XML.</p>
+                <asp:Button ID="btnExportarXml" runat="server" Text="Exportar XML" CssClass="btn btn-default"
+                    CausesValidation="false" OnClick="btnExportarXml_Click" />
+                <asp:FileUpload ID="archivoCarritoXml" runat="server" accept=".xml" />
+                <asp:Button ID="btnImportarXml" runat="server" Text="Importar XML" CssClass="btn btn-default"
+                    CausesValidation="false" OnClick="btnImportarXml_Click" />
+                <p>Importar reemplaza el carrito actual. Archivo XML de hasta 64 KB; los precios se consultan en la tienda.</p>
+                <asp:Label ID="lblXml" runat="server" role="status" style="display: block; margin-top: 10px;" />
+            </div>
+
             <div class="row" style="display: flex; flex-wrap: wrap; gap: 30px;">
 
                 <div style="flex: 1 1 700px; display: flex; flex-direction: column; gap: 20px;">
