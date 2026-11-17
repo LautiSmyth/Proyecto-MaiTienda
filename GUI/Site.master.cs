@@ -64,6 +64,7 @@ public partial class SiteMaster : MasterPage
 
         liBitacora.Visible = esWebMaster;
         liBackup.Visible = esWebMaster;
+        liMisCompras.Visible = !string.IsNullOrEmpty(perfilActual) && !esWebMaster;
         liLogin.Visible = string.IsNullOrEmpty(perfilActual);
         liLogout.Visible = !string.IsNullOrEmpty(perfilActual);
 

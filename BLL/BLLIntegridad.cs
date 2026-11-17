@@ -123,6 +123,8 @@ namespace BLL
                 recienCreado = true;
             }
 
+            new DALPedido().AsegurarEsquema();
+
             if (recienCreado)
             {
                 RecalcularDVUsuarios();

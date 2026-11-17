@@ -131,6 +131,29 @@ Proyecto-MaiTienda/
 | `Accion` | VARCHAR(200) | Descripción del evento |
 | `Fecha` | DATETIME | Timestamp del evento |
 
+### Tabla `Pedido`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdPedido` | INT PK IDENTITY | Identificador único |
+| `IdUsuario` | INT FK | Usuario que compró |
+| `Fecha` | DATETIME | Momento de la compra |
+| `NombreCliente` / `DocumentoCliente` / `DireccionEnvio` | NVARCHAR | Datos ingresados al comprar |
+| `DistanciaKm` | DECIMAL(9,2) | Distancia al negocio calculada en el servidor |
+| `Subtotal` / `Envio` / `Total` | DECIMAL(18,2) | Monto de la compra, con el envío calculado en el servidor |
+
+### Tabla `LineaPedido`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdLineaPedido` | INT PK IDENTITY | Identificador único |
+| `IdPedido` | INT FK | Pedido al que pertenece |
+| `IdProducto` | INT FK | Producto comprado |
+| `Nombre` / `PrecioUnitario` | NVARCHAR / DECIMAL(18,2) | Nombre y precio del producto al momento de la compra |
+| `Cantidad` | INT | Unidades compradas |
+
+Las tablas `Pedido` y `LineaPedido` también las crea la aplicación si no existen (`DALPedido.AsegurarEsquema`, invocado por la verificación de integridad), así que una base creada con el `db.sql` anterior se actualiza sola.
+
 ---
 
 ## Funcionalidades implementadas
@@ -158,6 +181,13 @@ Proyecto-MaiTienda/
 ### Bitácora
 - Registro automático de: inicio de sesión, cierre de sesión, intentos fallidos y bloqueo por intentos
 - Soporte para registro con usuario de sesión o usuario explícito (`ServicioBitacora`)
+
+### Compra y pedidos
+- *Finalizar compra* exige sesión iniciada y pide nombre, DNI o CUIT y dirección de entrega
+- El costo de envío lo calcula el servidor (`BLLEnvio`) a partir de la ubicación; el navegador solo lo muestra
+- La compra queda guardada como pedido con sus ítems y el monto (`BLLPedido.FinalizarCompra`)
+- En una sola transacción se guarda el pedido, se descuenta el stock, se recalculan el DVH del producto y el DVV de `Producto`, y se vacía el carrito
+- *Mis compras* muestra el historial de pedidos del usuario
 
 ---
 

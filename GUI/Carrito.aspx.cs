@@ -2,6 +2,7 @@ using BE;
 using BLL;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.IO;
 using System.Xml;
@@ -78,6 +79,7 @@ public partial class Carrito : Page
             var productos = _bllCarrito.ObtenerProductos(usuario.IdUsuario);
 
             phCarritoServidor.Visible = true;
+            pnlDatosCompra.Visible = true;
             divCarritoVacio.Style["display"] = productos.Any() ? "none" : "block";
             btnCheckout.Enabled = productos.Any();
 
@@ -91,6 +93,8 @@ public partial class Carrito : Page
         else
         {
             phCarritoServidor.Visible = false;
+            pnlDatosCompra.Visible = false;
+            btnCheckout.Text = "Iniciar sesión para comprar";
             divCarritoVacio.Style["display"] = "none";
         }
     }
@@ -133,20 +137,54 @@ public partial class Carrito : Page
     protected void btnCheckout_Click(object sender, EventArgs e)
     {
         var usuario = ObtenerUsuarioSesion();
-
-        if (usuario != null)
+        if (usuario == null)
         {
-            _bllCarrito.LimpiarCarrito(usuario.IdUsuario);
+            Response.Redirect("~/Login.aspx");
+            return;
         }
-        else
+
+        double latitud, longitud;
+        if (!double.TryParse(hdnLatitud.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out latitud) ||
+            !double.TryParse(hdnLongitud.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out longitud))
         {
-            ClientScript.RegisterStartupScript(this.GetType(), "clearCart", "localStorage.removeItem('carrito');", true);
-            Session["CarritoAnon"] = null;
-            SiteMaster.LimpiarCarritoCookie(Context);
+            MostrarErrorCompra("Calculá el costo de envío antes de finalizar la compra.");
+            return;
+        }
+
+        BEPedido pedido;
+        try
+        {
+            pedido = new BLLPedido().FinalizarCompra(usuario, txtNombreCliente.Text, txtDocumentoCliente.Text,
+                txtDireccionEnvio.Text, latitud, longitud);
+        }
+        catch (ArgumentException ex)
+        {
+            MostrarErrorCompra(ex.Message);
+            return;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError(ex.ToString());
+            MostrarErrorCompra("No se pudo registrar la compra. Tu carrito y el stock no fueron modificados.");
+            return;
         }
 
         (Master as SiteMaster)?.ActualizarCarritoContador();
-        Response.Redirect("~/Bienvenida.aspx");
+        Response.Redirect("~/MisCompras.aspx?pedido=" + pedido.IdPedido);
+    }
+
+    private void MostrarErrorCompra(string mensaje)
+    {
+        lblCompra.Text = Server.HtmlEncode(mensaje);
+        CargarCarrito();
+    }
+
+    [WebMethod]
+    public static object CalcularEnvio(double latitud, double longitud)
+    {
+        var bllEnvio = new BLLEnvio();
+        double distanciaKm = bllEnvio.CalcularDistanciaKm(latitud, longitud);
+        return new { DistanciaKm = Math.Round(distanciaKm, 1), Costo = bllEnvio.CalcularCosto(distanciaKm) };
     }
 
     [WebMethod(EnableSession = true)]

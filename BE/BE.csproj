@@ -45,6 +45,8 @@
     <Compile Include="BECotizacion.cs" />
     <Compile Include="BEItemPedido.cs" />
     <Compile Include="BELineaCotizacion.cs" />
+    <Compile Include="BELineaPedido.cs" />
+    <Compile Include="BEPedido.cs" />
     <Compile Include="BEUsuario.cs" />
     <Compile Include="BEProducto.cs" />
     <Compile Include="Enums\EstadoUsuario.cs" />
