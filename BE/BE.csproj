@@ -43,12 +43,16 @@
   <ItemGroup>
     <Compile Include="BEBitacora.cs" />
     <Compile Include="BECotizacion.cs" />
+    <Compile Include="BEFactura.cs" />
     <Compile Include="BEItemPedido.cs" />
     <Compile Include="BELineaCotizacion.cs" />
+    <Compile Include="BELineaPedido.cs" />
+    <Compile Include="BEPedido.cs" />
     <Compile Include="BEUsuario.cs" />
     <Compile Include="BEProducto.cs" />
     <Compile Include="Enums\EstadoUsuario.cs" />
     <Compile Include="Enums\Perfil.cs" />
+    <Compile Include="Enums\ResultadoPasskey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

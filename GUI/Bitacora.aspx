@@ -74,6 +74,7 @@
                                     <asp:ListItem Value="Cierre de sesión" Text="Cierre de sesión" />
                                     <asp:ListItem Value="bloqueado por intentos fallidos" Text="Bloqueado por intentos" />
                                     <asp:ListItem Value="Intento fallido" Text="Intento fallido" />
+                                    <asp:ListItem Value="Compra registrada" Text="Compra registrada" />
                                 </asp:DropDownList>
                             </div>
                         </div>

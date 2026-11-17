@@ -60,6 +60,11 @@ namespace BLL
             _dalCarrito.ActualizarCantidad(idUsuario, idProducto, nuevaCantidad);
         }
 
+        public void EliminarProducto(int idUsuario, int idProducto)
+        {
+            _dalCarrito.ActualizarCantidad(idUsuario, idProducto, 0);
+        }
+
         public void ImportarCarrito(int idUsuario, List<BEItemPedido> items)
         {
             if (items == null) throw new ArgumentException("El carrito XML no es válido.");

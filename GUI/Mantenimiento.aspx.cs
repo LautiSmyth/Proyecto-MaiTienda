@@ -1,3 +1,4 @@
+using BE.Enums;
 using BLL;
 using System;
 using System.Web;
@@ -14,15 +15,15 @@ public partial class Mantenimiento : Page
     }
 
     [WebMethod(EnableSession = true)]
-    public static bool VerificarPasskey(string passkey)
+    public static string VerificarPasskey(string passkey)
     {
-        bool valido = new BLLUsuario().ValidarConPasskey(passkey);
-        if (valido)
+        ResultadoPasskey resultado = new BLLUsuario().ValidarConPasskey(passkey, HttpContext.Current.Request.UserHostAddress);
+        if (resultado == ResultadoPasskey.Valido)
         {
             HttpContext.Current.Session["PasskeyVerificado"] = true;
             HttpContext.Current.Session["perfil"] = "WebMaster";
             HttpContext.Current.Session["nombreUsuario"] = "WebMaster";
         }
-        return valido;
+        return resultado.ToString();
     }
 }

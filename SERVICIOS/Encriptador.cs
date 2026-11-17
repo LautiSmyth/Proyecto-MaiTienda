@@ -55,12 +55,27 @@ namespace SERVICIOS
             using (var pbkdf2 = new Rfc2898DeriveBytes(contraseñaIngresada, salt, Iterations, HashAlgorithmName.SHA256))
             {
                 byte[] hashCalculado = pbkdf2.GetBytes(HashSize);
+                int diferencia = 0;
                 for (int i = 0; i < HashSize; i++)
                 {
-                    if (hashBytes[i + SaltSize] != hashCalculado[i])
-                        return false;
+                    diferencia |= hashBytes[i + SaltSize] ^ hashCalculado[i];
                 }
-                return true;
+                return diferencia == 0;
+            }
+        }
+
+        public static bool CompararSeguro(string valorIngresado, string valorEsperado)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hashIngresado = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(valorIngresado ?? string.Empty));
+                byte[] hashEsperado = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(valorEsperado ?? string.Empty));
+                int diferencia = 0;
+                for (int i = 0; i < hashIngresado.Length; i++)
+                {
+                    diferencia |= hashIngresado[i] ^ hashEsperado[i];
+                }
+                return diferencia == 0;
             }
         }
     }

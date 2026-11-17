@@ -123,6 +123,19 @@
                             <span id="lblTotal" runat="server" style="font-family: 'Orbitron', sans-serif; font-weight: 900; color: #7c3aed; font-size: 24px;">$0,00</span>
                         </div>
 
+                        <asp:Panel ID="pnlDatosCompra" runat="server" Visible="false" style="margin-bottom: 20px;">
+                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 8px;">Datos para la factura y la entrega:</label>
+                            <asp:TextBox ID="txtNombreCliente" runat="server" MaxLength="100" placeholder="Nombre y apellido"
+                                style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-family: 'Exo 2', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
+                            <asp:TextBox ID="txtDocumentoCliente" runat="server" MaxLength="20" placeholder="DNI o CUIT (solo números)"
+                                style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-family: 'Exo 2', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
+                            <asp:TextBox ID="txtDireccionEnvio" runat="server" MaxLength="200" placeholder="Dirección de entrega"
+                                style="width: 100%; box-sizing: border-box; font-family: 'Exo 2', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
+                        </asp:Panel>
+
+                        <asp:HiddenField ID="hdnLatitud" runat="server" />
+                        <asp:HiddenField ID="hdnLongitud" runat="server" />
+
                         <div id="pnlSignature" style="margin-bottom: 20px;">
                             <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 8px;">Firme aquí para autorizar el despacho de hardware:</label>
                             <div style="border: 1px solid #ddd0f5; background: #faf7ff; border-radius: 4px; position: relative;">
@@ -131,6 +144,9 @@
                             </div>
                             <span id="lblSignatureError" style="font-family: 'Exo 2', sans-serif; font-size: 10px; color: #ef4444; display: none; margin-top: 5px;">⚠️ Se requiere firma de conformidad para proceder.</span>
                         </div>
+
+                        <span id="lblEnvioError" style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #ef4444; display: none; margin-bottom: 8px;">⚠️ Calculá el costo de envío con tu ubicación o tu dirección antes de finalizar la compra.</span>
+                        <asp:Label ID="lblCompra" runat="server" role="alert" style="display: block; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #b91c1c; margin-bottom: 8px;" />
 
                         <asp:Button ID="btnCheckout" runat="server" Text="Finalizar Compra" CssClass="g-btn" OnClick="btnCheckout_Click" OnClientClick="return validarFirmaDigital();"
                             style="width: 100% !important; padding: 14px 0 !important; font-size: 12px !important; margin-top: 10px !important;" />
@@ -144,25 +160,7 @@
     </div>
 
     <script type="text/javascript">
-        var STORE_LAT = -34.7621;
-        var STORE_LNG = -58.3940;
-        var FREE_SHIPPING_KM = 10;
         var costoEnvio = 0;
-
-        function haversineKm(lat1, lon1, lat2, lon2) {
-            var R = 6371;
-            var dLat = (lat2 - lat1) * Math.PI / 180;
-            var dLon = (lon2 - lon1) * Math.PI / 180;
-            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
-        function calcularCostoEnvio(distanciaKm) {
-            if (distanciaKm <= FREE_SHIPPING_KM) return 0;
-            return Math.round(5000 * Math.pow(distanciaKm / FREE_SHIPPING_KM, 0.6) / 500) * 500;
-        }
 
         function parsearPrecio(texto) {
             var s = (texto || '').replace(/\$/g, '').trim();
@@ -172,6 +170,26 @@
         }
 
         function el(id) { return document.getElementById(id); }
+
+        function consultarEnvio(lat, lng) {
+            return fetch('<%= ResolveUrl("~/Carrito.aspx/CalcularEnvio") %>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                body: JSON.stringify({ latitud: lat, longitud: lng })
+            })
+            .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(function (data) { return data.d; });
+        }
+
+        function aplicarUbicacion(lat, lng) {
+            return consultarEnvio(lat, lng).then(function (envio) {
+                costoEnvio = envio.Costo;
+                el('<%= hdnLatitud.ClientID %>').value = lat;
+                el('<%= hdnLongitud.ClientID %>').value = lng;
+                if (el('lblEnvioError')) el('lblEnvioError').style.display = 'none';
+                actualizarEnvioEnUI(envio.DistanciaKm, envio.Costo);
+            });
+        }
 
         function actualizarEnvioEnUI(distanciaKm, costo) {
             var envioEl = el('<%= lblEnvio.ClientID %>');
@@ -196,6 +214,8 @@
 
         function mostrarInputManual() {
             costoEnvio = 0;
+            el('<%= hdnLatitud.ClientID %>').value = '';
+            el('<%= hdnLongitud.ClientID %>').value = '';
             if (el('divDistanciaInfo'))    el('divDistanciaInfo').style.display    = 'none';
             if (el('divModificarUbicacion')) el('divModificarUbicacion').style.display = 'none';
             if (el('divUbicacionManual'))  el('divUbicacionManual').style.display  = 'block';
@@ -215,9 +235,7 @@
 
             navigator.geolocation.getCurrentPosition(
                 function (pos) {
-                    var distancia = haversineKm(pos.coords.latitude, pos.coords.longitude, STORE_LAT, STORE_LNG);
-                    costoEnvio = calcularCostoEnvio(distancia);
-                    actualizarEnvioEnUI(distancia, costoEnvio);
+                    aplicarUbicacion(pos.coords.latitude, pos.coords.longitude).catch(mostrarInputManual);
                 },
                 function () { mostrarInputManual(); },
                 { timeout: 10000, maximumAge: 300000 }
@@ -241,9 +259,9 @@
                 .then(function (data) {
                     if (btnCalc) { btnCalc.disabled = false; btnCalc.innerText = 'Calcular'; }
                     if (!data || data.length === 0) { if (lblErr) lblErr.style.display = 'block'; return; }
-                    var distancia = haversineKm(parseFloat(data[0].lat), parseFloat(data[0].lon), STORE_LAT, STORE_LNG);
-                    costoEnvio = calcularCostoEnvio(distancia);
-                    actualizarEnvioEnUI(distancia, costoEnvio);
+                    var dirEnvio = el('<%= txtDireccionEnvio.ClientID %>');
+                    if (dirEnvio && !dirEnvio.value.trim()) dirEnvio.value = input.value.trim();
+                    return aplicarUbicacion(parseFloat(data[0].lat), parseFloat(data[0].lon));
                 })
                 .catch(function () {
                     if (btnCalc) { btnCalc.disabled = false; btnCalc.innerText = 'Calcular'; }
@@ -252,7 +270,12 @@
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-            iniciarGeolocalizacion();
+            var latGuardada = parseFloat(el('<%= hdnLatitud.ClientID %>').value);
+            var lngGuardada = parseFloat(el('<%= hdnLongitud.ClientID %>').value);
+            if (!isNaN(latGuardada) && !isNaN(lngGuardada))
+                aplicarUbicacion(latGuardada, lngGuardada).catch(function () { iniciarGeolocalizacion(); });
+            else
+                iniciarGeolocalizacion();
 
             var inputDir = el('txtDireccion');
             if (inputDir) inputDir.addEventListener('keydown', function (e) {
@@ -435,13 +458,17 @@
             }
 
             window.validarFirmaDigital = function () {
+                if (!usuarioLogueado) return true;
+                if (!el('<%= hdnLatitud.ClientID %>').value || !el('<%= hdnLongitud.ClientID %>').value) {
+                    if (el('lblEnvioError')) el('lblEnvioError').style.display = 'block';
+                    return false;
+                }
                 if (!hasSigned) {
                     if (lblSigError) lblSigError.style.display = 'block';
                     sigCanvas.parentElement.style.borderColor = '#ef4444';
                     setTimeout(function () { sigCanvas.parentElement.style.borderColor = '#ddd0f5'; }, 1000);
                     return false;
                 }
-                if (!usuarioLogueado) localStorage.removeItem('carrito');
                 return true;
             };
         });

@@ -131,6 +131,39 @@ Proyecto-MaiTienda/
 | `Accion` | VARCHAR(200) | Descripción del evento |
 | `Fecha` | DATETIME | Timestamp del evento |
 
+### Tabla `Pedido`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdPedido` | INT PK IDENTITY | Identificador único |
+| `IdUsuario` | INT FK | Usuario que compró |
+| `Fecha` | DATETIME | Momento de la compra |
+| `NombreCliente` / `DocumentoCliente` / `DireccionEnvio` | NVARCHAR | Datos ingresados al comprar |
+| `DistanciaKm` | DECIMAL(9,2) | Distancia al negocio calculada en el servidor |
+| `Subtotal` / `Envio` / `Total` | DECIMAL(18,2) | Monto de la compra, con el envío calculado en el servidor |
+
+### Tabla `LineaPedido`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdLineaPedido` | INT PK IDENTITY | Identificador único |
+| `IdPedido` | INT FK | Pedido al que pertenece |
+| `IdProducto` | INT FK | Producto comprado |
+| `Nombre` / `PrecioUnitario` | NVARCHAR / DECIMAL(18,2) | Nombre y precio del producto al momento de la compra |
+| `Cantidad` | INT | Unidades compradas |
+
+### Tabla `Factura`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdFactura` | INT PK IDENTITY | Identificador único |
+| `Numero` | INT UNIQUE | Número correlativo, sin saltos (se toma dentro de la transacción de la compra) |
+| `IdPedido` | INT FK UNIQUE | Pedido facturado (una factura por pedido) |
+| `Fecha` | DATETIME | Fecha de emisión |
+| `Neto` / `IVA` / `Total` | DECIMAL(18,2) | Importe neto gravado, IVA 21% y total |
+
+Las tablas `Pedido`, `LineaPedido` y `Factura` también las crea la aplicación si no existen (`DALPedido.AsegurarEsquema`, invocado por la verificación de integridad), así que una base creada con el `db.sql` anterior se actualiza sola.
+
 ---
 
 ## Funcionalidades implementadas
@@ -159,6 +192,19 @@ Proyecto-MaiTienda/
 - Registro automático de: inicio de sesión, cierre de sesión, intentos fallidos y bloqueo por intentos
 - Soporte para registro con usuario de sesión o usuario explícito (`ServicioBitacora`)
 
+### Compra y pedidos
+- *Finalizar compra* exige sesión iniciada y pide nombre, DNI o CUIT y dirección de entrega
+- El costo de envío lo calcula el servidor (`BLLEnvio`) a partir de la ubicación; el navegador solo lo muestra
+- La compra queda guardada como pedido con sus ítems y el monto (`BLLPedido.FinalizarCompra`)
+- En una sola transacción se guarda el pedido, se emite la factura, se descuenta el stock, se recalculan el DVH del producto y el DVV de `Producto`, y se vacía el carrito
+- *Mis compras* muestra el historial de pedidos del usuario y enlaza cada factura
+
+### Factura
+- Cada compra emite una factura B con numeración correlativa (`0001-00000001`, `0001-00000002`, …)
+- Los precios del catálogo ya incluyen IVA: la factura discrimina el neto y el IVA 21% sobre el total (`BLLFactura`)
+- `Factura.aspx?pedido=N` muestra el comprobante con los datos del cliente, el detalle y los totales, y se puede imprimir; solo lo ve el dueño del pedido, el Administrador o el WebMaster
+- Los datos del emisor (razón social, CUIT, domicilio) son valores de ejemplo en `BLLFactura`
+
 ---
 
 ## Seguridad
@@ -171,6 +217,7 @@ Proyecto-MaiTienda/
 | Control de estado | Solo estado `Activo` permite acceder; `Bloqueado` e `Inactivo` son rechazados |
 | Protección de páginas | Verificación de sesión en `Page_Load` de cada página protegida |
 | Sin Identity/OWIN | Autenticación 100% propia, sin dependencias externas de identidad |
+| Passkey de emergencia | Tras 3 intentos fallidos el origen queda bloqueado 15 minutos; los accesos y los intentos quedan en la bitácora. En el login se usa con el usuario `WebMaster` |
 
 ---
 

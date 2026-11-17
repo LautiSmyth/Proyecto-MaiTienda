@@ -13,6 +13,7 @@ namespace BLL
         private readonly ServicioBitacora _sBitacora = new ServicioBitacora();
 
         private readonly GestorIntegridad _gestorIntegridad = new GestorIntegridad();
+        private readonly GestorIntentos _gestorIntentos = new GestorIntentos();
 
         public BEUsuario BuscarPorNombreUsuario(string nombreUsuario)
         {
@@ -103,10 +104,43 @@ namespace BLL
             SessionManager.GetInstance().Logout();
         }
 
-        public bool ValidarConPasskey(string passkey)
+        public ResultadoPasskey ValidarConPasskey(string passkey, string origen)
         {
+            if (_gestorIntentos.EstaBloqueado(origen))
+            {
+                RegistrarEventoPasskey($"Intento fallido de passkey desde {origen}: origen bloqueado temporalmente");
+                return ResultadoPasskey.Bloqueado;
+            }
+
             string passkeyConfigurado = ConfigurationManager.AppSettings["WebMasterPasskey"];
-            return !string.IsNullOrEmpty(passkeyConfigurado) && passkey == passkeyConfigurado;
+            bool valido = !string.IsNullOrEmpty(passkeyConfigurado) && Encriptador.CompararSeguro(passkey, passkeyConfigurado);
+
+            if (valido)
+            {
+                _gestorIntentos.Reiniciar(origen);
+                RegistrarEventoPasskey($"Inicio de sesion con passkey desde {origen}");
+                return ResultadoPasskey.Valido;
+            }
+
+            if (_gestorIntentos.RegistrarFallo(origen))
+            {
+                RegistrarEventoPasskey($"Passkey: bloqueado por intentos fallidos desde {origen}");
+                return ResultadoPasskey.Bloqueado;
+            }
+
+            RegistrarEventoPasskey($"Intento fallido de passkey desde {origen}");
+            return ResultadoPasskey.Incorrecto;
+        }
+
+        private void RegistrarEventoPasskey(string accion)
+        {
+            try
+            {
+                _sBitacora.RegistrarEventoSistema(accion);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public bool VerificarConexion()
