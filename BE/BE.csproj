@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="BEBitacora.cs" />
     <Compile Include="BECotizacion.cs" />
+    <Compile Include="BEFactura.cs" />
     <Compile Include="BEItemPedido.cs" />
     <Compile Include="BELineaCotizacion.cs" />
     <Compile Include="BELineaPedido.cs" />

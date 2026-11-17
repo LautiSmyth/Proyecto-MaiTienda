@@ -45,6 +45,7 @@
     <Compile Include="BLLBackup.cs" />
     <Compile Include="BLLCotizacion.cs" />
     <Compile Include="BLLEnvio.cs" />
+    <Compile Include="BLLFactura.cs" />
     <Compile Include="BLLPedido.cs" />
     <Compile Include="BLLUsuario.cs" />
     <Compile Include="BLLProducto.cs" />

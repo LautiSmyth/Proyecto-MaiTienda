@@ -44,6 +44,22 @@ namespace DAL
                     CONSTRAINT [FK_LineaPedido_Pedido] FOREIGN KEY ([IdPedido]) REFERENCES [dbo].[Pedido] ([IdPedido]),
                     CONSTRAINT [FK_LineaPedido_Producto] FOREIGN KEY ([IdProducto]) REFERENCES [dbo].[Producto] ([IdProducto])
                 )", null);
+
+            _acceso.Escribir(@"
+                IF OBJECT_ID(N'[dbo].[Factura]', N'U') IS NULL
+                CREATE TABLE [dbo].[Factura](
+                    [IdFactura] [int] IDENTITY(1,1) NOT NULL,
+                    [Numero] [int] NOT NULL,
+                    [IdPedido] [int] NOT NULL,
+                    [Fecha] [datetime] NOT NULL,
+                    [Neto] [decimal](18, 2) NOT NULL,
+                    [IVA] [decimal](18, 2) NOT NULL,
+                    [Total] [decimal](18, 2) NOT NULL,
+                    CONSTRAINT [PK_Factura] PRIMARY KEY CLUSTERED ([IdFactura] ASC),
+                    CONSTRAINT [UQ_Factura_Numero] UNIQUE ([Numero]),
+                    CONSTRAINT [UQ_Factura_IdPedido] UNIQUE ([IdPedido]),
+                    CONSTRAINT [FK_Factura_Pedido] FOREIGN KEY ([IdPedido]) REFERENCES [dbo].[Pedido] ([IdPedido])
+                )", null);
         }
 
         public void RegistrarPedido(BEPedido pedido, List<BEProducto> productosActualizados, string dvvProducto)
@@ -51,7 +67,7 @@ namespace DAL
             using (var conexion = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 conexion.Open();
-                // Si una escritura falla, Dispose revierte el pedido, el stock y el carrito juntos.
+                // Si una escritura falla, Dispose revierte el pedido, la factura, el stock y el carrito juntos.
                 using (var transaccion = conexion.BeginTransaction())
                 {
                     using (var cmd = new SqlCommand(@"
@@ -131,8 +147,40 @@ namespace DAL
                         cmd.ExecuteNonQuery();
                     }
 
+                    if (pedido.Factura != null)
+                        RegistrarFactura(pedido, conexion, transaccion);
+
                     transaccion.Commit();
                 }
+            }
+        }
+
+        private static void RegistrarFactura(BEPedido pedido, SqlConnection conexion, SqlTransaction transaccion)
+        {
+            BEFactura factura = pedido.Factura;
+
+            // El bloqueo evita que dos compras simultáneas tomen el mismo número: la numeración sale correlativa y sin saltos.
+            using (var cmd = new SqlCommand("SELECT ISNULL(MAX(Numero), 0) + 1 FROM Factura WITH (UPDLOCK, HOLDLOCK)", conexion, transaccion))
+            {
+                factura.Numero = Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
+            using (var cmd = new SqlCommand(@"
+                INSERT INTO Factura (Numero, IdPedido, Fecha, Neto, IVA, Total)
+                VALUES (@Numero, @IdPedido, @Fecha, @Neto, @IVA, @Total);
+                SELECT CAST(SCOPE_IDENTITY() AS INT);", conexion, transaccion))
+            {
+                cmd.Parameters.AddRange(new SqlParameter[]
+                {
+                    new SqlParameter("@Numero", factura.Numero),
+                    new SqlParameter("@IdPedido", pedido.IdPedido),
+                    new SqlParameter("@Fecha", factura.Fecha),
+                    new SqlParameter("@Neto", factura.Neto),
+                    new SqlParameter("@IVA", factura.IVA),
+                    new SqlParameter("@Total", factura.Total)
+                });
+                factura.IdFactura = Convert.ToInt32(cmd.ExecuteScalar());
+                factura.IdPedido = pedido.IdPedido;
             }
         }
 
@@ -153,12 +201,51 @@ namespace DAL
                 ORDER BY lp.IdLineaPedido",
                 new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) });
 
+            DataTable dtFacturas = _acceso.Leer(@"
+                SELECT f.IdFactura, f.Numero, f.IdPedido, f.Fecha, f.Neto, f.IVA, f.Total
+                FROM Factura f
+                INNER JOIN Pedido p ON f.IdPedido = p.IdPedido
+                WHERE p.IdUsuario = @IdUsuario",
+                new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) });
+
+            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas);
+        }
+
+        public BEPedido ObtenerPorId(int idPedido)
+        {
+            DataTable dtPedidos = _acceso.Leer(@"
+                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total
+                FROM Pedido
+                WHERE IdPedido = @IdPedido",
+                new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
+
+            DataTable dtLineas = _acceso.Leer(@"
+                SELECT IdPedido, IdProducto, Nombre, PrecioUnitario, Cantidad
+                FROM LineaPedido
+                WHERE IdPedido = @IdPedido
+                ORDER BY IdLineaPedido",
+                new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
+
+            DataTable dtFacturas = _acceso.Leer(@"
+                SELECT IdFactura, Numero, IdPedido, Fecha, Neto, IVA, Total
+                FROM Factura
+                WHERE IdPedido = @IdPedido",
+                new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
+
+            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas).FirstOrDefault();
+        }
+
+        private static List<BEPedido> ArmarPedidos(DataTable dtPedidos, DataTable dtLineas, DataTable dtFacturas)
+        {
             List<BEPedido> pedidos = new List<BEPedido>();
             foreach (DataRow row in dtPedidos.Rows)
             {
                 BEPedido pedido = MapearPedido(row);
                 foreach (DataRow fila in dtLineas.Select("IdPedido = " + pedido.IdPedido))
                     pedido.Lineas.Add(MapearLinea(fila));
+                DataRow[] facturas = dtFacturas.Select("IdPedido = " + pedido.IdPedido);
+                if (facturas.Length > 0)
+                    pedido.Factura = MapearFactura(facturas[0]);
                 pedidos.Add(pedido);
             }
             return pedidos;
@@ -189,6 +276,20 @@ namespace DAL
                 Nombre = row["Nombre"].ToString(),
                 PrecioUnitario = Convert.ToDecimal(row["PrecioUnitario"]),
                 Cantidad = Convert.ToInt32(row["Cantidad"])
+            };
+        }
+
+        private static BEFactura MapearFactura(DataRow row)
+        {
+            return new BEFactura
+            {
+                IdFactura = Convert.ToInt32(row["IdFactura"]),
+                Numero = Convert.ToInt32(row["Numero"]),
+                IdPedido = Convert.ToInt32(row["IdPedido"]),
+                Fecha = Convert.ToDateTime(row["Fecha"]),
+                Neto = Convert.ToDecimal(row["Neto"]),
+                IVA = Convert.ToDecimal(row["IVA"]),
+                Total = Convert.ToDecimal(row["Total"])
             };
         }
     }

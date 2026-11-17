@@ -13,9 +13,6 @@
                 <div class="g-divider" style="margin: 15px auto 0; width: 60px;"></div>
             </div>
 
-            <asp:Label ID="lblMensaje" runat="server" Visible="false" role="status"
-                style="display: block; font-family: 'Exo 2', sans-serif; font-size: 13px; padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; background: #e7f6ec; color: #1e6b3a;" />
-
             <asp:Panel ID="pnlVacio" runat="server" Visible="false" CssClass="g-card" style="max-width: none; padding: 40px; text-align: center;">
                 <h3 style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #7c3aed; margin-bottom: 5px;">Todavía no hiciste compras</h3>
                 <p style="font-family: 'Exo 2', sans-serif; color: #9f7cc0; font-size: 13px; margin-bottom: 20px;">Cuando finalices una compra desde el carrito, el pedido queda guardado acá.</p>
@@ -33,6 +30,9 @@
                     <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
                     <asp:BoundField DataField="Envio" HeaderText="Envío" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
                     <asp:BoundField DataField="Total" HeaderText="Total" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
+                    <asp:TemplateField HeaderText="Factura" ItemStyle-Wrap="false">
+                        <ItemTemplate><%# DescribirFactura((BE.BEPedido)Container.DataItem) %></ItemTemplate>
+                    </asp:TemplateField>
                 </Columns>
             </asp:GridView>
 

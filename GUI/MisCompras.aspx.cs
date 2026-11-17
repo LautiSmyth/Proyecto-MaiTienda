@@ -7,6 +7,8 @@ using System.Web.UI;
 
 public partial class MisCompras : Page
 {
+    private readonly BLLFactura _bllFactura = new BLLFactura();
+
     protected void Page_Load(object sender, EventArgs e)
     {
         string nombreUsuario = Session["nombreUsuario"] as string;
@@ -31,17 +33,19 @@ public partial class MisCompras : Page
         gvCompras.Visible = compras.Count > 0;
         gvCompras.DataSource = compras;
         gvCompras.DataBind();
-
-        int idPedido;
-        if (int.TryParse(Request.QueryString["pedido"], out idPedido) && compras.Any(c => c.IdPedido == idPedido))
-        {
-            lblMensaje.Text = "¡Compra registrada! Tu pedido Nº " + idPedido + " quedó guardado.";
-            lblMensaje.Visible = true;
-        }
     }
 
     protected string DescribirLineas(BEPedido pedido)
     {
         return string.Join("<br />", pedido.Lineas.Select(l => Server.HtmlEncode(l.Nombre) + " × " + l.Cantidad));
+    }
+
+    protected string DescribirFactura(BEPedido pedido)
+    {
+        if (pedido.Factura == null)
+            return "—";
+
+        return "<a href=\"" + ResolveUrl("~/Factura.aspx?pedido=" + pedido.IdPedido) + "\">" +
+            BLLFactura.Tipo + " " + _bllFactura.FormatearNumero(pedido.Factura) + "</a>";
     }
 }

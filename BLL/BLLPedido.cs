@@ -16,6 +16,7 @@ namespace BLL
         private readonly DALCarrito _dalCarrito = new DALCarrito();
         private readonly BLLProducto _bllProducto = new BLLProducto();
         private readonly BLLEnvio _bllEnvio = new BLLEnvio();
+        private readonly BLLFactura _bllFactura = new BLLFactura();
         private readonly GestorIntegridad _gestorIntegridad = new GestorIntegridad();
         private readonly ServicioBitacora _sBitacora = new ServicioBitacora();
 
@@ -82,18 +83,29 @@ namespace BLL
                 pedido.Fecha = DateTime.Now;
                 pedido.Subtotal = pedido.Lineas.Sum(l => l.Subtotal);
                 pedido.Total = pedido.Subtotal + pedido.Envio;
+                pedido.Factura = _bllFactura.Emitir(pedido);
 
                 string dvv = _gestorIntegridad.CalcularDVV(catalogo.Select(p => p.DVH).ToList());
                 _dalPedido.RegistrarPedido(pedido, comprados, dvv);
             }
 
-            RegistrarEventoCompra($"Compra registrada: pedido {pedido.IdPedido} por ${pedido.Total:N2}", usuario);
+            RegistrarEventoCompra($"Compra registrada: pedido {pedido.IdPedido}, factura {BLLFactura.Tipo} {_bllFactura.FormatearNumero(pedido.Factura)}, por ${pedido.Total:N2}", usuario);
             return pedido;
         }
 
         public List<BEPedido> ObtenerMisCompras(int idUsuario)
         {
             return _dalPedido.ObtenerPorUsuario(idUsuario);
+        }
+
+        public BEPedido ObtenerPedido(int idPedido, BEUsuario usuario, bool veTodos)
+        {
+            BEPedido pedido = _dalPedido.ObtenerPorId(idPedido);
+            if (pedido == null)
+                return null;
+            if (!veTodos && (usuario == null || pedido.IdUsuario != usuario.IdUsuario))
+                return null;
+            return pedido;
         }
 
         private static string NormalizarDocumento(string documento)

@@ -170,7 +170,7 @@ public partial class Carrito : Page
         }
 
         (Master as SiteMaster)?.ActualizarCarritoContador();
-        Response.Redirect("~/MisCompras.aspx?pedido=" + pedido.IdPedido);
+        Response.Redirect("~/Factura.aspx?pedido=" + pedido.IdPedido + "&nueva=1");
     }
 
     private void MostrarErrorCompra(string mensaje)
