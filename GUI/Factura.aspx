@@ -106,6 +106,19 @@
                         </tr>
                     </table>
 
+                    <asp:Panel ID="pnlPago" runat="server" Visible="false" style="margin-top: 20px; border-top: 1.5px solid #1e0a3c; padding-top: 10px; font-size: 13px;">
+                        <div><strong>Forma de pago:</strong> <asp:Literal ID="litMedioPago" runat="server" /></div>
+                        <div><strong>Estado del pago:</strong> <asp:Literal ID="litEstadoPago" runat="server" /></div>
+                        <asp:Panel ID="pnlReferenciaPago" runat="server" Visible="false">
+                            <strong>Referencia de pago:</strong> <asp:Literal ID="litReferenciaPago" runat="server" />
+                        </asp:Panel>
+                        <asp:Panel ID="pnlFirmaPago" runat="server" Visible="false" style="margin-top: 8px;">
+                            <div><strong>Firma del cliente (autoriza el pago):</strong></div>
+                            <asp:Literal ID="litFirmaPago" runat="server" />
+                            <div style="font-size: 11px; color: #7c5ea8; margin-top: 4px;">Pago simulado: no se realizó ningún cobro real.</div>
+                        </asp:Panel>
+                    </asp:Panel>
+
                     <p style="font-size: 11px; color: #7c5ea8; margin: 20px 0 0 0;">Los precios del detalle incluyen IVA; el neto y el IVA se discriminan sobre el total.</p>
                 </div>
 

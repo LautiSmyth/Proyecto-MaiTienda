@@ -8,6 +8,7 @@ using System.Web.UI;
 public partial class MisCompras : Page
 {
     private readonly BLLFactura _bllFactura = new BLLFactura();
+    private readonly BLLPago _bllPago = new BLLPago();
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -38,6 +39,15 @@ public partial class MisCompras : Page
     protected string DescribirLineas(BEPedido pedido)
     {
         return string.Join("<br />", pedido.Lineas.Select(l => Server.HtmlEncode(l.Nombre) + " × " + l.Cantidad));
+    }
+
+    protected string DescribirPago(BEPedido pedido)
+    {
+        if (pedido.Pago == null)
+            return "—";
+
+        return Server.HtmlEncode(_bllPago.Describir(pedido.Pago.Medio)) + "<br />" +
+            Server.HtmlEncode(_bllPago.Describir(pedido.Pago.Estado));
     }
 
     protected string DescribirFactura(BEPedido pedido)

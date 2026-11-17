@@ -6,6 +6,7 @@ using System.Web.UI;
 public partial class Factura : Page
 {
     private readonly BLLFactura _bllFactura = new BLLFactura();
+    private readonly BLLPago _bllPago = new BLLPago();
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -69,7 +70,30 @@ public partial class Factura : Page
         litIva.Text = factura.IVA.ToString("N2");
         litTotal.Text = factura.Total.ToString("N2");
 
+        if (pedido.Pago != null)
+            MostrarPago(pedido.Pago);
+
         lblNueva.Visible = Request.QueryString["nueva"] == "1";
         pnlFactura.Visible = true;
+    }
+
+    private void MostrarPago(BEPago pago)
+    {
+        litMedioPago.Text = Server.HtmlEncode(_bllPago.Describir(pago.Medio));
+        litEstadoPago.Text = Server.HtmlEncode(_bllPago.Describir(pago.Estado));
+        pnlPago.Visible = true;
+
+        if (!string.IsNullOrEmpty(pago.Referencia))
+        {
+            litReferenciaPago.Text = Server.HtmlEncode(pago.Referencia);
+            pnlReferenciaPago.Visible = true;
+        }
+
+        if (_bllPago.EsBase64Png(pago.Firma))
+        {
+            litFirmaPago.Text = "<img alt=\"Firma del cliente\" src=\"data:image/png;base64," + pago.Firma +
+                "\" style=\"max-width: 320px; border: 1px solid #ede5f8;\" />";
+            pnlFirmaPago.Visible = true;
+        }
     }
 }

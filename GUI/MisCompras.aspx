@@ -30,6 +30,9 @@
                     <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
                     <asp:BoundField DataField="Envio" HeaderText="Envío" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
                     <asp:BoundField DataField="Total" HeaderText="Total" ItemStyle-Wrap="false" DataFormatString="${0:N2}" />
+                    <asp:TemplateField HeaderText="Pago">
+                        <ItemTemplate><%# DescribirPago((BE.BEPedido)Container.DataItem) %></ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderText="Factura" ItemStyle-Wrap="false">
                         <ItemTemplate><%# DescribirFactura((BE.BEPedido)Container.DataItem) %></ItemTemplate>
                     </asp:TemplateField>

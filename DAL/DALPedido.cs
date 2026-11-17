@@ -1,4 +1,5 @@
 using BE;
+using BE.Enums;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -59,6 +60,21 @@ namespace DAL
                     CONSTRAINT [UQ_Factura_Numero] UNIQUE ([Numero]),
                     CONSTRAINT [UQ_Factura_IdPedido] UNIQUE ([IdPedido]),
                     CONSTRAINT [FK_Factura_Pedido] FOREIGN KEY ([IdPedido]) REFERENCES [dbo].[Pedido] ([IdPedido])
+                )", null);
+
+            _acceso.Escribir(@"
+                IF OBJECT_ID(N'[dbo].[Pago]', N'U') IS NULL
+                CREATE TABLE [dbo].[Pago](
+                    [IdPago] [int] IDENTITY(1,1) NOT NULL,
+                    [IdPedido] [int] NOT NULL,
+                    [Medio] [int] NOT NULL,
+                    [Estado] [int] NOT NULL,
+                    [Referencia] [nvarchar](40) NULL,
+                    [Fecha] [datetime] NOT NULL,
+                    [Firma] [nvarchar](max) NULL,
+                    CONSTRAINT [PK_Pago] PRIMARY KEY CLUSTERED ([IdPago] ASC),
+                    CONSTRAINT [UQ_Pago_IdPedido] UNIQUE ([IdPedido]),
+                    CONSTRAINT [FK_Pago_Pedido] FOREIGN KEY ([IdPedido]) REFERENCES [dbo].[Pedido] ([IdPedido])
                 )", null);
         }
 
@@ -150,8 +166,34 @@ namespace DAL
                     if (pedido.Factura != null)
                         RegistrarFactura(pedido, conexion, transaccion);
 
+                    if (pedido.Pago != null)
+                        RegistrarPago(pedido, conexion, transaccion);
+
                     transaccion.Commit();
                 }
+            }
+        }
+
+        private static void RegistrarPago(BEPedido pedido, SqlConnection conexion, SqlTransaction transaccion)
+        {
+            BEPago pago = pedido.Pago;
+
+            using (var cmd = new SqlCommand(@"
+                INSERT INTO Pago (IdPedido, Medio, Estado, Referencia, Fecha, Firma)
+                VALUES (@IdPedido, @Medio, @Estado, @Referencia, @Fecha, @Firma);
+                SELECT CAST(SCOPE_IDENTITY() AS INT);", conexion, transaccion))
+            {
+                cmd.Parameters.AddRange(new SqlParameter[]
+                {
+                    new SqlParameter("@IdPedido", pedido.IdPedido),
+                    new SqlParameter("@Medio", (int)pago.Medio),
+                    new SqlParameter("@Estado", (int)pago.Estado),
+                    new SqlParameter("@Referencia", (object)pago.Referencia ?? DBNull.Value),
+                    new SqlParameter("@Fecha", pago.Fecha),
+                    new SqlParameter("@Firma", (object)pago.Firma ?? DBNull.Value)
+                });
+                pago.IdPago = Convert.ToInt32(cmd.ExecuteScalar());
+                pago.IdPedido = pedido.IdPedido;
             }
         }
 
@@ -208,7 +250,14 @@ namespace DAL
                 WHERE p.IdUsuario = @IdUsuario",
                 new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) });
 
-            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas);
+            DataTable dtPagos = _acceso.Leer(@"
+                SELECT pg.IdPago, pg.IdPedido, pg.Medio, pg.Estado, pg.Referencia, pg.Fecha, pg.Firma
+                FROM Pago pg
+                INNER JOIN Pedido p ON pg.IdPedido = p.IdPedido
+                WHERE p.IdUsuario = @IdUsuario",
+                new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) });
+
+            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas, dtPagos);
         }
 
         public BEPedido ObtenerPorId(int idPedido)
@@ -232,10 +281,16 @@ namespace DAL
                 WHERE IdPedido = @IdPedido",
                 new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
 
-            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas).FirstOrDefault();
+            DataTable dtPagos = _acceso.Leer(@"
+                SELECT IdPago, IdPedido, Medio, Estado, Referencia, Fecha, Firma
+                FROM Pago
+                WHERE IdPedido = @IdPedido",
+                new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
+
+            return ArmarPedidos(dtPedidos, dtLineas, dtFacturas, dtPagos).FirstOrDefault();
         }
 
-        private static List<BEPedido> ArmarPedidos(DataTable dtPedidos, DataTable dtLineas, DataTable dtFacturas)
+        private static List<BEPedido> ArmarPedidos(DataTable dtPedidos, DataTable dtLineas, DataTable dtFacturas, DataTable dtPagos)
         {
             List<BEPedido> pedidos = new List<BEPedido>();
             foreach (DataRow row in dtPedidos.Rows)
@@ -246,9 +301,26 @@ namespace DAL
                 DataRow[] facturas = dtFacturas.Select("IdPedido = " + pedido.IdPedido);
                 if (facturas.Length > 0)
                     pedido.Factura = MapearFactura(facturas[0]);
+                DataRow[] pagos = dtPagos.Select("IdPedido = " + pedido.IdPedido);
+                if (pagos.Length > 0)
+                    pedido.Pago = MapearPago(pagos[0]);
                 pedidos.Add(pedido);
             }
             return pedidos;
+        }
+
+        private static BEPago MapearPago(DataRow row)
+        {
+            return new BEPago
+            {
+                IdPago = Convert.ToInt32(row["IdPago"]),
+                IdPedido = Convert.ToInt32(row["IdPedido"]),
+                Medio = (MedioPago)Convert.ToInt32(row["Medio"]),
+                Estado = (EstadoPago)Convert.ToInt32(row["Estado"]),
+                Referencia = row["Referencia"] == DBNull.Value ? null : row["Referencia"].ToString(),
+                Fecha = Convert.ToDateTime(row["Fecha"]),
+                Firma = row["Firma"] == DBNull.Value ? null : row["Firma"].ToString()
+            };
         }
 
         private static BEPedido MapearPedido(DataRow row)

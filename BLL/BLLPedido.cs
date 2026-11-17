@@ -1,4 +1,5 @@
 using BE;
+using BE.Enums;
 using DAL;
 using SERVICIOS;
 using System;
@@ -17,10 +18,12 @@ namespace BLL
         private readonly BLLProducto _bllProducto = new BLLProducto();
         private readonly BLLEnvio _bllEnvio = new BLLEnvio();
         private readonly BLLFactura _bllFactura = new BLLFactura();
+        private readonly BLLPago _bllPago = new BLLPago();
         private readonly GestorIntegridad _gestorIntegridad = new GestorIntegridad();
         private readonly ServicioBitacora _sBitacora = new ServicioBitacora();
 
-        public BEPedido FinalizarCompra(BEUsuario usuario, string nombreCliente, string documentoCliente, string direccionEnvio, double latitud, double longitud)
+        public BEPedido FinalizarCompra(BEUsuario usuario, string nombreCliente, string documentoCliente, string direccionEnvio, double latitud, double longitud,
+            MedioPago medioPago, string firma)
         {
             if (usuario == null)
                 throw new ArgumentException("Iniciá sesión para finalizar la compra.");
@@ -35,7 +38,10 @@ namespace BLL
                 throw new ArgumentException("Ingresá un DNI (7 u 8 dígitos) o un CUIT/CUIL (11 dígitos) válido.");
             if (direccionEnvio.Length < 5 || direccionEnvio.Length > 200)
                 throw new ArgumentException("Ingresá la dirección de entrega (entre 5 y 200 caracteres).");
+            if (!Enum.IsDefined(typeof(MedioPago), medioPago))
+                throw new ArgumentException("Elegí un medio de pago válido.");
 
+            string firmaValidada = _bllPago.ValidarFirma(medioPago, firma);
             double distanciaKm = _bllEnvio.CalcularDistanciaKm(latitud, longitud);
 
             BEPedido pedido = new BEPedido
@@ -84,12 +90,14 @@ namespace BLL
                 pedido.Subtotal = pedido.Lineas.Sum(l => l.Subtotal);
                 pedido.Total = pedido.Subtotal + pedido.Envio;
                 pedido.Factura = _bllFactura.Emitir(pedido);
+                pedido.Pago = _bllPago.Preparar(pedido, medioPago, firmaValidada);
 
                 string dvv = _gestorIntegridad.CalcularDVV(catalogo.Select(p => p.DVH).ToList());
                 _dalPedido.RegistrarPedido(pedido, comprados, dvv);
             }
 
-            RegistrarEventoCompra($"Compra registrada: pedido {pedido.IdPedido}, factura {BLLFactura.Tipo} {_bllFactura.FormatearNumero(pedido.Factura)}, por ${pedido.Total:N2}", usuario);
+            string detallePago = _bllPago.Describir(pedido.Pago.Medio) + (pedido.Pago.EstaFirmado ? ", con firma" : string.Empty);
+            RegistrarEventoCompra($"Compra registrada: pedido {pedido.IdPedido}, factura {BLLFactura.Tipo} {_bllFactura.FormatearNumero(pedido.Factura)}, pago {detallePago}, por ${pedido.Total:N2}", usuario);
             return pedido;
         }
 

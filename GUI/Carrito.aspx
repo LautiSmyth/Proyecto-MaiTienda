@@ -131,18 +131,28 @@
                                 style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-family: 'Exo 2', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
                             <asp:TextBox ID="txtDireccionEnvio" runat="server" MaxLength="200" placeholder="Dirección de entrega"
                                 style="width: 100%; box-sizing: border-box; font-family: 'Exo 2', sans-serif; font-size: 12px; padding: 8px 10px; border: 1px solid #ddd0f5; border-radius: 3px; color: #1e0a3c; background: #faf7ff; outline: none;" />
+
+                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin: 14px 0 6px 0;">Medio de pago:</label>
+                            <asp:RadioButtonList ID="rblMedioPago" runat="server" RepeatLayout="Flow"
+                                style="font-family: 'Exo 2', sans-serif; font-size: 12px; color: #1e0a3c;">
+                                <asp:ListItem Value="1" Text="Efectivo (se abona al recibir)" Selected="True" />
+                                <asp:ListItem Value="2" Text="Tarjeta de débito" />
+                                <asp:ListItem Value="3" Text="Tarjeta de crédito" />
+                                <asp:ListItem Value="4" Text="Mercado Pago (simulado)" />
+                            </asp:RadioButtonList>
                         </asp:Panel>
 
                         <asp:HiddenField ID="hdnLatitud" runat="server" />
                         <asp:HiddenField ID="hdnLongitud" runat="server" />
+                        <asp:HiddenField ID="hdnFirma" runat="server" />
 
-                        <div id="pnlSignature" style="margin-bottom: 20px;">
-                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 8px;">Firme aquí para autorizar el despacho de hardware:</label>
+                        <div id="pnlSignature" style="margin-bottom: 20px; display: none;">
+                            <label style="font-family: 'Exo 2', sans-serif; font-size: 11px; font-weight: 600; color: #7c5ea8; display: block; margin-bottom: 8px;">Firmá acá para autorizar el pago (simulado):</label>
                             <div style="border: 1px solid #ddd0f5; background: #faf7ff; border-radius: 4px; position: relative;">
                                 <canvas id="signature-canvas" style="display: block; width: 100%; height: 110px; cursor: crosshair; touch-action: none; background: #faf7ff;"></canvas>
                                 <button type="button" id="btnClearSignature" style="position: absolute; bottom: 5px; right: 5px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; font-family: 'Exo 2', sans-serif; font-size: 10px; padding: 2px 8px; cursor: pointer; border-radius: 3px;">Borrar</button>
                             </div>
-                            <span id="lblSignatureError" style="font-family: 'Exo 2', sans-serif; font-size: 10px; color: #ef4444; display: none; margin-top: 5px;">⚠️ Se requiere firma de conformidad para proceder.</span>
+                            <span id="lblSignatureError" style="font-family: 'Exo 2', sans-serif; font-size: 10px; color: #ef4444; display: none; margin-top: 5px;">⚠️ Se requiere tu firma para autorizar el pago.</span>
                         </div>
 
                         <span id="lblEnvioError" style="font-family: 'Exo 2', sans-serif; font-size: 11px; color: #ef4444; display: none; margin-bottom: 8px;">⚠️ Calculá el costo de envío con tu ubicación o tu dirección antes de finalizar la compra.</span>
@@ -170,6 +180,17 @@
         }
 
         function el(id) { return document.getElementById(id); }
+
+        function medioElectronico() {
+            var elegido = document.querySelector('input[name="<%= rblMedioPago.UniqueID %>"]:checked');
+            return !!elegido && elegido.value !== '1';
+        }
+
+        function actualizarMedioPago() {
+            var mostrar = usuarioLogueado && medioElectronico();
+            el('pnlSignature').style.display = mostrar ? 'block' : 'none';
+            if (mostrar && window.ajustarLienzoFirma) window.ajustarLienzoFirma();
+        }
 
         function consultarEnvio(lat, lng) {
             return fetch('<%= ResolveUrl("~/Carrito.aspx/CalcularEnvio") %>', {
@@ -420,6 +441,10 @@
                 }
 
                 function resizeSigCanvas() {
+                    if (!sigCanvas.width || !sigCanvas.offsetWidth) {
+                        sigCanvas.width = sigCanvas.offsetWidth; sigCanvas.height = sigCanvas.offsetHeight; initCtx();
+                        return;
+                    }
                     var tmp = document.createElement('canvas');
                     tmp.width = sigCanvas.width; tmp.height = sigCanvas.height;
                     tmp.getContext('2d').drawImage(sigCanvas, 0, 0);
@@ -428,6 +453,7 @@
                 }
 
                 window.addEventListener('resize', resizeSigCanvas);
+                window.ajustarLienzoFirma = resizeSigCanvas;
                 sigCanvas.width = sigCanvas.offsetWidth; sigCanvas.height = sigCanvas.offsetHeight;
                 initCtx();
 
@@ -463,14 +489,24 @@
                     if (el('lblEnvioError')) el('lblEnvioError').style.display = 'block';
                     return false;
                 }
-                if (!hasSigned) {
-                    if (lblSigError) lblSigError.style.display = 'block';
-                    sigCanvas.parentElement.style.borderColor = '#ef4444';
-                    setTimeout(function () { sigCanvas.parentElement.style.borderColor = '#ddd0f5'; }, 1000);
-                    return false;
+                if (medioElectronico()) {
+                    if (!hasSigned) {
+                        if (lblSigError) lblSigError.style.display = 'block';
+                        sigCanvas.parentElement.style.borderColor = '#ef4444';
+                        setTimeout(function () { sigCanvas.parentElement.style.borderColor = '#ddd0f5'; }, 1000);
+                        return false;
+                    }
+                    el('<%= hdnFirma.ClientID %>').value = sigCanvas.toDataURL('image/png');
+                } else {
+                    el('<%= hdnFirma.ClientID %>').value = '';
                 }
                 return true;
             };
+
+            var opcionesMedioPago = document.querySelectorAll('input[name="<%= rblMedioPago.UniqueID %>"]');
+            for (var i = 0; i < opcionesMedioPago.length; i++)
+                opcionesMedioPago[i].addEventListener('change', actualizarMedioPago);
+            actualizarMedioPago();
         });
     </script>
 </asp:Content>

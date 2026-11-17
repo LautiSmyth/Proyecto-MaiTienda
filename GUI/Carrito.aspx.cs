@@ -1,4 +1,5 @@
 using BE;
+using BE.Enums;
 using BLL;
 using System;
 using System.Collections.Generic;
@@ -151,11 +152,18 @@ public partial class Carrito : Page
             return;
         }
 
+        int medio;
+        if (!int.TryParse(rblMedioPago.SelectedValue, out medio))
+        {
+            MostrarErrorCompra("Elegí un medio de pago.");
+            return;
+        }
+
         BEPedido pedido;
         try
         {
             pedido = new BLLPedido().FinalizarCompra(usuario, txtNombreCliente.Text, txtDocumentoCliente.Text,
-                txtDireccionEnvio.Text, latitud, longitud);
+                txtDireccionEnvio.Text, latitud, longitud, (MedioPago)medio, hdnFirma.Value);
         }
         catch (ArgumentException ex)
         {

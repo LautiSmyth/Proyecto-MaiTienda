@@ -17,6 +17,7 @@ namespace BE
         public decimal Total { get; set; }
         public List<BELineaPedido> Lineas { get; set; }
         public BEFactura Factura { get; set; }
+        public BEPago Pago { get; set; }
 
         public BEPedido()
         {

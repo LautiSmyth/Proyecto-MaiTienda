@@ -162,7 +162,19 @@ Proyecto-MaiTienda/
 | `Fecha` | DATETIME | Fecha de emisión |
 | `Neto` / `IVA` / `Total` | DECIMAL(18,2) | Importe neto gravado, IVA 21% y total |
 
-Las tablas `Pedido`, `LineaPedido` y `Factura` también las crea la aplicación si no existen (`DALPedido.AsegurarEsquema`, invocado por la verificación de integridad), así que una base creada con el `db.sql` anterior se actualiza sola.
+### Tabla `Pago`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `IdPago` | INT PK IDENTITY | Identificador único |
+| `IdPedido` | INT FK UNIQUE | Pedido pagado (un pago por pedido) |
+| `Medio` | INT | 1 Efectivo · 2 Tarjeta de débito · 3 Tarjeta de crédito · 4 Mercado Pago (simulado) |
+| `Estado` | INT | 1 Pendiente de cobro · 2 Aprobado |
+| `Referencia` | NVARCHAR(40) | Código del pago simulado (`SIM-XXXXXXXXXX`); vacío en efectivo |
+| `Fecha` | DATETIME | Fecha del pedido |
+| `Firma` | NVARCHAR(MAX) | Imagen PNG (Base64) de la firma del recuadro; vacía en efectivo |
+
+Las tablas `Pedido`, `LineaPedido`, `Factura` y `Pago` también las crea la aplicación si no existen (`DALPedido.AsegurarEsquema`, invocado por la verificación de integridad), así que una base creada con el `db.sql` anterior se actualiza sola.
 
 ---
 
@@ -198,6 +210,13 @@ Las tablas `Pedido`, `LineaPedido` y `Factura` también las crea la aplicación 
 - La compra queda guardada como pedido con sus ítems y el monto (`BLLPedido.FinalizarCompra`)
 - En una sola transacción se guarda el pedido, se emite la factura, se descuenta el stock, se recalculan el DVH del producto y el DVV de `Producto`, y se vacía el carrito
 - *Mis compras* muestra el historial de pedidos del usuario y enlaza cada factura
+
+### Pago (simulado)
+- Al finalizar la compra se elige el medio de pago: efectivo, tarjeta de débito, tarjeta de crédito o Mercado Pago (simulado)
+- **Efectivo:** no lleva firma; el pago queda *pendiente de cobro* hasta la entrega
+- **Medios electrónicos:** el cliente firma en el recuadro de firma (canvas) para autorizar el pago; el pago queda *aprobado* con una referencia `SIM-…` y la firma se guarda con el pedido
+- No hay ningún servicio externo, cuenta ni costo: la aprobación es una simulación (`BLLPago`) y no se cobra nada ni se piden datos de tarjeta
+- La factura muestra la forma de pago, el estado, la referencia y la firma del cliente; *Mis compras* lista el medio y el estado
 
 ### Factura
 - Cada compra emite una factura B con numeración correlativa (`0001-00000001`, `0001-00000002`, …)
