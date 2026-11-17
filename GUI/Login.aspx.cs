@@ -71,7 +71,7 @@ public partial class Login : Page
 
         try
         {
-            new BLLUsuario().ValidarCredenciales(nombreUsuario, password);
+            new BLLUsuario().ValidarCredenciales(nombreUsuario, password, Request.UserHostAddress);
 
             var usuario = SessionManager.GetInstance().Usuario;
             Session["nombreUsuario"] = usuario.NombreUsuario;

@@ -61,13 +61,23 @@ namespace BLL
             new DAL.DALDVV().GuardarDVV("Usuario", dvv);
         }
 
-        public void ValidarCredenciales(string nombreUsuario, string password)
+        public void ValidarCredenciales(string nombreUsuario, string password, string origen = null)
         {
             try
             {
                 BEUsuario usuario = _dalUsuario.BuscarPorNombreUsuario(nombreUsuario);
-                if (usuario == null || usuario.Estado != EstadoUsuario.Activo)
+                if (usuario == null)
+                {
+                    RegistrarEventoSistemaSeguro($"Intento de inicio de sesion con usuario inexistente '{Recortar(nombreUsuario, 50)}'{DescribirOrigen(origen)}");
                     throw new UnauthorizedAccessException();
+                }
+
+                if (usuario.Estado != EstadoUsuario.Activo)
+                {
+                    string estadoCuenta = usuario.Estado == EstadoUsuario.Bloqueado ? "bloqueada" : "inactiva";
+                    RegistrarEventoUsuarioSeguro($"Intento de inicio de sesion con cuenta {estadoCuenta}{DescribirOrigen(origen)}", usuario);
+                    throw new UnauthorizedAccessException();
+                }
 
                 bool esValido = Encriptador.Verificar(password, usuario.Password);
                 if (!esValido)
@@ -130,6 +140,41 @@ namespace BLL
 
             RegistrarEventoPasskey($"Intento fallido de passkey desde {origen}");
             return ResultadoPasskey.Incorrecto;
+        }
+
+        // El mensaje al usuario es siempre el mismo ("usuario o contraseña incorrectos"),
+        // asi no se revela si la cuenta existe o esta bloqueada; el detalle queda solo en la bitacora.
+        private void RegistrarEventoSistemaSeguro(string accion)
+        {
+            try
+            {
+                _sBitacora.RegistrarEventoSistema(Recortar(accion, 255));
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void RegistrarEventoUsuarioSeguro(string accion, BEUsuario usuario)
+        {
+            try
+            {
+                _sBitacora.RegistrarEvento(Recortar(accion, 255), usuario);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static string DescribirOrigen(string origen)
+        {
+            return string.IsNullOrEmpty(origen) ? string.Empty : " desde " + origen;
+        }
+
+        private static string Recortar(string texto, int largoMaximo)
+        {
+            texto = texto ?? string.Empty;
+            return texto.Length <= largoMaximo ? texto : texto.Substring(0, largoMaximo);
         }
 
         private void RegistrarEventoPasskey(string accion)
