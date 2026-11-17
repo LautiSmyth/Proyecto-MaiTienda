@@ -2,7 +2,6 @@ using BE;
 using BLL;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.IO;
 using System.Xml;
@@ -125,21 +124,7 @@ public partial class Carrito : Page
         else if (e.CommandName == "Restar")
             _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, -1);
         else if (e.CommandName == "Eliminar")
-        {
-            _bllCarrito.AgregarProducto(usuario.IdUsuario, idProducto, -9999);
-            DAL.Acceso.GetInstance().Escribir(
-                "DELETE FROM ItemCarrito WHERE IdUsuario = @IdUsuario AND IdProducto = @IdProducto",
-                new SqlParameter[] {
-                    new SqlParameter("@IdUsuario", usuario.IdUsuario),
-                    new SqlParameter("@IdProducto", idProducto)
-                }
-            );
-        }
-
-        DAL.Acceso.GetInstance().Escribir(
-            "DELETE FROM ItemCarrito WHERE IdUsuario = @IdUsuario AND Cantidad <= 0",
-            new SqlParameter[] { new SqlParameter("@IdUsuario", usuario.IdUsuario) }
-        );
+            _bllCarrito.EliminarProducto(usuario.IdUsuario, idProducto);
 
         (Master as SiteMaster)?.ActualizarCarritoContador();
         CargarCarrito();
