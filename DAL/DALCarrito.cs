@@ -1,6 +1,7 @@
 using BE;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -142,6 +143,31 @@ namespace DAL
                     new SqlParameter("@Cantidad", cantidad)
                 };
                 _acceso.Escribir(query, parameters);
+            }
+        }
+
+        public void ReemplazarCarrito(int idUsuario, List<BEItemPedido> items)
+        {
+            using (var conexion = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
+            {
+                conexion.Open();
+                // Si una escritura falla, Dispose revierte toda la importación.
+                using (var transaccion = conexion.BeginTransaction())
+                using (var cmd = new SqlCommand("DELETE FROM ItemCarrito WHERE IdUsuario = @Usuario", conexion, transaccion))
+                {
+                    cmd.Parameters.Add("@Usuario", SqlDbType.Int).Value = idUsuario;
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "INSERT INTO ItemCarrito (IdUsuario, IdProducto, Cantidad) VALUES (@Usuario, @Producto, @Cantidad)";
+                    cmd.Parameters.Add("@Producto", SqlDbType.Int);
+                    cmd.Parameters.Add("@Cantidad", SqlDbType.Int);
+                    foreach (var item in items)
+                    {
+                        cmd.Parameters["@Producto"].Value = item.IdProducto;
+                        cmd.Parameters["@Cantidad"].Value = item.Cantidad;
+                        cmd.ExecuteNonQuery();
+                    }
+                    transaccion.Commit();
+                }
             }
         }
 

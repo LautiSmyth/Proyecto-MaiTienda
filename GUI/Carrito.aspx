@@ -13,6 +13,18 @@
                 <div class="g-divider" style="margin: 15px auto 0; width: 60px;"></div>
             </div>
 
+            <div class="g-card" style="max-width: none; padding: 20px; margin-bottom: 20px;">
+                <h3>Guardar y recuperar carrito</h3>
+                <p>Con tu sesión iniciada, exportá el carrito o recuperalo desde un archivo XML.</p>
+                <asp:Button ID="btnExportarXml" runat="server" Text="Exportar XML" CssClass="btn btn-default"
+                    CausesValidation="false" OnClick="btnExportarXml_Click" />
+                <asp:FileUpload ID="archivoCarritoXml" runat="server" accept=".xml" />
+                <asp:Button ID="btnImportarXml" runat="server" Text="Importar XML" CssClass="btn btn-default"
+                    CausesValidation="false" OnClick="btnImportarXml_Click" />
+                <p>Importar reemplaza el carrito actual. Archivo XML de hasta 64 KB; los precios se consultan en la tienda.</p>
+                <asp:Label ID="lblXml" runat="server" role="status" style="display: block; margin-top: 10px;" />
+            </div>
+
             <div class="row" style="display: flex; flex-wrap: wrap; gap: 30px;">
 
                 <div style="flex: 1 1 700px; display: flex; flex-direction: column; gap: 20px;">
@@ -124,6 +136,7 @@
                             style="width: 100% !important; padding: 14px 0 !important; font-size: 12px !important; margin-top: 10px !important;" />
 
                         <a href="Default.aspx" style="display: block; text-align: center; margin-top: 15px; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 600;">← Seguir Comprando</a>
+                        <a href="Cotizador.aspx" style="display: block; text-align: center; margin-top: 10px; font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c3aed; text-decoration: none; font-weight: 600;">📄 Cotizar pedido</a>
                     </div>
                 </div>
             </div>

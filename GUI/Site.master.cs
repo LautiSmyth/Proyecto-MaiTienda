@@ -154,7 +154,9 @@ public partial class SiteMaster : MasterPage
 
     public void ActualizarCarritoContador()
     {
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        string nombre = Session["nombreUsuario"] as string;
+        var usuario = Session["perfil"] == null || string.IsNullOrEmpty(nombre)
+            ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
         int cantidad;
 
         if (usuario != null)
