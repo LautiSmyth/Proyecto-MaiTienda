@@ -1,6 +1,5 @@
 ﻿using BE;
 using BLL;
-using SERVICIOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,10 +52,9 @@ public class WSCatalogo : WebService
     {
         return Ejecutar(() =>
         {
-            BECotizacion cotizacion = _bllCotizacion.Cotizar(items);
-            new ServicioBitacora().RegistrarEventoSistema(
-                "WS Cotización: " + cotizacion.Lineas.Count + " producto(s), total $" + cotizacion.Total.ToString("N2"));
-            return cotizacion;
+            // El WS no escribe en la bitacora: lo puede llamar cualquier sistema externo sin sesion
+            // y cada llamada anonima llenaria la tabla. Registra el cliente que conoce al usuario (Cotizador.aspx).
+            return _bllCotizacion.Cotizar(items);
         });
     }
 

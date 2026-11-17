@@ -2,6 +2,7 @@ using BE;
 using BLL;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web.Services.Protocols;
 using System.Web.UI;
@@ -30,7 +31,7 @@ public partial class Cotizador : Page
     {
         try
         {
-            using (WsCliente ws = new WsCliente())
+            using (WsCliente ws = CrearClienteWS())
             {
                 var productos = ws.ObtenerCatalogo("");
                 ddlProducto.DataSource = productos.Select(p => new
@@ -51,7 +52,7 @@ public partial class Cotizador : Page
 
     protected void btnCotizarCarrito_Click(object sender, EventArgs e)
     {
-        BEUsuario usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
+        BEUsuario usuario = ObtenerUsuarioLogueado();
         if (usuario == null)
         {
             MostrarMensaje("Tenés que iniciar sesión para cotizar tu carrito.", false);
@@ -91,11 +92,12 @@ public partial class Cotizador : Page
         try
         {
             WsCotizacion cotizacion;
-            using (WsCliente ws = new WsCliente())
+            using (WsCliente ws = CrearClienteWS())
             {
                 cotizacion = llamada(ws);
             }
             MostrarCotizacion(cotizacion);
+            RegistrarCotizacionEnBitacora(cotizacion);
         }
         catch (SoapException ex)
         {
@@ -107,6 +109,55 @@ public partial class Cotizador : Page
         {
             pnlResultado.Visible = false;
             MostrarMensaje("Error al comunicarse con el Web Service: " + ex.Message, false);
+        }
+    }
+
+    /// <summary>
+    /// Crea el proxy del WS con la URL configurable:
+    /// - Si la clave "WSCatalogoRef.WSCatalogo" del Web.config tiene valor, se usa esa URL (por ejemplo, otro servidor).
+    /// - Si está vacía, se usa el WS del mismo sitio, sin importar el puerto o el dominio donde esté publicado.
+    /// </summary>
+    private WsCliente CrearClienteWS()
+    {
+        WsCliente ws = new WsCliente();
+        string urlConfigurada = ConfigurationManager.AppSettings["WSCatalogoRef.WSCatalogo"];
+        ws.Url = string.IsNullOrWhiteSpace(urlConfigurada)
+            ? new Uri(Request.Url, ResolveUrl("~/WSCatalogo.asmx")).ToString()
+            : urlConfigurada.Trim();
+        ws.Timeout = 15000;
+        return ws;
+    }
+
+    /// <summary>
+    /// Usuario logueado según la sesión ASP.NET de este visitante.
+    /// </summary>
+    private BEUsuario ObtenerUsuarioLogueado()
+    {
+        string nombreUsuario = Session["nombreUsuario"] as string;
+        if (string.IsNullOrEmpty(nombreUsuario))
+            return null;
+        return new BLLUsuario().BuscarPorNombreUsuario(nombreUsuario);
+    }
+
+    /// <summary>
+    /// Solo se registran las cotizaciones de usuarios logueados: las anónimas no llenan la bitácora.
+    /// Un error al registrar no impide mostrar la cotización.
+    /// </summary>
+    private void RegistrarCotizacionEnBitacora(WsCotizacion cotizacion)
+    {
+        try
+        {
+            BEUsuario usuario = ObtenerUsuarioLogueado();
+            if (usuario == null)
+                return;
+
+            new SERVICIOS.ServicioBitacora().RegistrarEvento(
+                "Cotizacion via WS: " + cotizacion.Lineas.Length + " producto(s), total $" + cotizacion.Total.ToString("N2"),
+                usuario);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError(ex.ToString());
         }
     }
 
