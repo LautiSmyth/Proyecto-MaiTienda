@@ -123,7 +123,15 @@ namespace BLL
                 recienCreado = true;
             }
 
-            new DALPedido().AsegurarEsquema();
+            try
+            {
+                new DALPedido().AsegurarEsquema();
+            }
+            catch (Exception ex)
+            {
+                // Si no se pueden crear las tablas de compras, el catálogo sigue funcionando: solo fallan las compras.
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+            }
 
             if (recienCreado)
             {
