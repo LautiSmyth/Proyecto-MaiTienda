@@ -171,6 +171,7 @@ Proyecto-MaiTienda/
 | Control de estado | Solo estado `Activo` permite acceder; `Bloqueado` e `Inactivo` son rechazados |
 | Protección de páginas | Verificación de sesión en `Page_Load` de cada página protegida |
 | Sin Identity/OWIN | Autenticación 100% propia, sin dependencias externas de identidad |
+| Passkey de emergencia | Tras 3 intentos fallidos el origen queda bloqueado 15 minutos; los accesos y los intentos quedan en la bitácora. En el login se usa con el usuario `WebMaster` |
 
 ---
 

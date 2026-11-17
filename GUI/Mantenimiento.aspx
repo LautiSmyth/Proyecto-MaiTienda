@@ -162,9 +162,12 @@
                 dataType: 'json',
                 success: function (response) {
                     document.getElementById('spinner').style.display = 'none';
-                    if (response.d) {
+                    if (response.d === 'Valido') {
                         window.location.href = 'GestionIntegridad.aspx';
                     } else {
+                        document.getElementById('errorMsg').textContent = response.d === 'Bloqueado'
+                            ? 'Demasiados intentos fallidos. Intente nuevamente más tarde.'
+                            : 'Passkey incorrecto. Intente nuevamente.';
                         document.getElementById('errorMsg').style.display = 'block';
                     }
                 },

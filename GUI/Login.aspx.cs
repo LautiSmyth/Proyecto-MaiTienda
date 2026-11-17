@@ -1,3 +1,4 @@
+using BE.Enums;
 using BLL;
 using SERVICIOS;
 using System;
@@ -42,11 +43,21 @@ public partial class Login : Page
         string nombreUsuario = txtUsuario.Text.Trim();
         string password = txtPassword.Text;
 
-        if (new BLLUsuario().ValidarConPasskey(password))
+        if (nombreUsuario.Equals("WebMaster", StringComparison.OrdinalIgnoreCase))
         {
-            Session["perfil"] = "WebMaster";
-            Session["nombreUsuario"] = nombreUsuario;
-            Response.Redirect("~/Backup.aspx");
+            ResultadoPasskey resultado = new BLLUsuario().ValidarConPasskey(password, Request.UserHostAddress);
+            if (resultado == ResultadoPasskey.Valido)
+            {
+                Session["perfil"] = "WebMaster";
+                Session["nombreUsuario"] = "WebMaster";
+                Response.Redirect("~/Backup.aspx");
+                return;
+            }
+
+            pnlError.Visible = true;
+            litError.Text = resultado == ResultadoPasskey.Bloqueado
+                ? "Demasiados intentos fallidos. Intente nuevamente más tarde."
+                : "Passkey incorrecto.";
             return;
         }
 

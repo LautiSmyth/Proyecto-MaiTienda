@@ -44,6 +44,7 @@
     <Compile Include="ServicioBitacora.cs" />
     <Compile Include="Encriptador.cs" />
     <Compile Include="GestorIntegridad.cs" />
+    <Compile Include="GestorIntentos.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SessionManager.cs" />
   </ItemGroup>
