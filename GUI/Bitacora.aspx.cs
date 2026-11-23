@@ -1,4 +1,5 @@
 using BE;
+using BLL;
 using SERVICIOS;
 using System;
 using System.Collections.Generic;
@@ -9,14 +10,10 @@ using System.Web.UI.WebControls;
 public partial class Bitacora : Page
 {
     private ServicioBitacora _bllBitacora = new ServicioBitacora();
+    private readonly BLLUsuario _bllUsuario = new BLLUsuario();
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (!IsPostBack)
-        {
-            CargarBitacora();
-        }
-
         string perfilActual = Session["perfil"] as string;
 
         if (string.IsNullOrEmpty(perfilActual))
@@ -29,6 +26,50 @@ public partial class Bitacora : Page
             Response.Redirect("~/Bienvenida.aspx");
             return;
         }
+
+        if (!IsPostBack)
+        {
+            CargarBitacora();
+            CargarBloqueados();
+        }
+    }
+
+    private void CargarBloqueados()
+    {
+        List<BE.BEUsuario> bloqueados = _bllUsuario.ObtenerBloqueados();
+        pnlCuentasBloqueadas.Visible = bloqueados.Count > 0;
+        gvBloqueados.DataSource = bloqueados;
+        gvBloqueados.DataBind();
+    }
+
+    private BE.BEUsuario ObtenerUsuarioSesion()
+    {
+        string nombre = Session["nombreUsuario"] as string;
+        return string.IsNullOrEmpty(nombre) ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
+    }
+
+    protected void gvBloqueados_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName != "Desbloquear")
+            return;
+
+        pnlMensajeDesbloqueo.Visible = false;
+        int idUsuario = Convert.ToInt32(e.CommandArgument);
+
+        try
+        {
+            _bllUsuario.DesbloquearUsuario(idUsuario, ObtenerUsuarioSesion());
+            litMensajeDesbloqueo.Text = "Cuenta desbloqueada correctamente.";
+            pnlMensajeDesbloqueo.Visible = true;
+        }
+        catch (Exception ex)
+        {
+            pnlError.Visible = true;
+            litError.Text = "No se pudo desbloquear la cuenta: " + ex.Message;
+        }
+
+        CargarBitacora();
+        CargarBloqueados();
     }
 
     private void CargarBitacora()

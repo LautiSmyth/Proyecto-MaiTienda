@@ -10,5 +10,6 @@ namespace BE
         public string Perfil { get; set; }
         public string Accion { get; set; }
         public DateTime Fecha { get; set; }
+        public string DVH { get; set; }
     }
 }

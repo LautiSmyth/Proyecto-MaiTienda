@@ -1,3 +1,4 @@
+using BE;
 using BLL;
 using System;
 using System.Collections.Generic;
@@ -84,7 +85,18 @@ public partial class SiteMaster : MasterPage
 
     protected void btnNavLogout_Click(object sender, EventArgs e)
     {
-        new BLLUsuario().CerrarSesion();
+        BEUsuario usuario = null;
+        try
+        {
+            string nombre = Session["nombreUsuario"] as string;
+            if (!string.IsNullOrEmpty(nombre))
+                usuario = new BLLUsuario().BuscarPorNombreUsuario(nombre);
+        }
+        catch (Exception)
+        {
+        }
+
+        new BLLUsuario().CerrarSesion(usuario);
         Session.Clear();
         Session.Abandon();
         Response.Redirect("~/Default.aspx");

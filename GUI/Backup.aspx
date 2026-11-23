@@ -22,7 +22,8 @@
             <h4 style="margin-top: 0;">Backup Manual</h4>
             <p>Genera un archivo <code>.bak</code> de la base de datos <strong>MaiTiendaDB</strong> en la carpeta configurada del servidor.</p>
             <p style="color: #666; font-size: 13px;">
-                Carpeta destino: <strong><asp:Literal runat="server" ID="litCarpeta" /></strong>
+                Carpeta destino: <strong><asp:Literal runat="server" ID="litCarpeta" /></strong><br />
+                Se conservan los últimos <strong><asp:Literal runat="server" ID="litMaximoArchivos" /></strong> backups (manuales y automáticos); los más viejos se borran solos.
             </p>
             <asp:Button ID="btnGenerarBackup" runat="server" Text="Generar Backup Ahora"
                 CssClass="btn btn-primary"

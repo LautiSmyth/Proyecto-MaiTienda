@@ -25,9 +25,12 @@ public partial class GestionIntegridad : Page
     private void CargarEstadoIntegridad()
     {
         var bll = new BLLIntegridad();
-        bool dvvUsuariosOk, dvvProductosOk;
+        bool dvvUsuariosOk, dvvProductosOk, dvvBitacoraOk, dvvPedidosOk, dvvFacturasOk;
         List<BE.BEUsuario> usuariosCorruptos = bll.VerificarIntegridadUsuarios(out dvvUsuariosOk);
         List<BE.BEProducto> productosCorruptos = bll.VerificarIntegridadProductos(out dvvProductosOk);
+        List<BE.BEBitacora> eventosCorruptos = bll.VerificarIntegridadBitacora(out dvvBitacoraOk);
+        List<BE.BEPedido> pedidosCorruptos = bll.VerificarIntegridadPedidos(out dvvPedidosOk);
+        List<BE.BEFactura> facturasCorruptas = bll.VerificarIntegridadFacturas(out dvvFacturasOk);
 
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         sb.Append(dvvUsuariosOk
@@ -36,6 +39,15 @@ public partial class GestionIntegridad : Page
         sb.Append(dvvProductosOk
             ? "<span class='dvv-chip ok'>DVV Productos ✓</span>"
             : "<span class='dvv-chip fail'>DVV Productos ✗</span>");
+        sb.Append(dvvBitacoraOk && eventosCorruptos.Count == 0
+            ? "<span class='dvv-chip ok'>DVV Bitácora ✓</span>"
+            : "<span class='dvv-chip fail'>DVV Bitácora ✗</span>");
+        sb.Append(dvvPedidosOk && pedidosCorruptos.Count == 0
+            ? "<span class='dvv-chip ok'>DVV Pedidos ✓</span>"
+            : "<span class='dvv-chip fail'>DVV Pedidos ✗</span>");
+        sb.Append(dvvFacturasOk && facturasCorruptas.Count == 0
+            ? "<span class='dvv-chip ok'>DVV Facturas ✓</span>"
+            : "<span class='dvv-chip fail'>DVV Facturas ✗</span>");
         litEstadoDVV.Text = sb.ToString();
 
         if (usuariosCorruptos.Count > 0)
@@ -53,7 +65,10 @@ public partial class GestionIntegridad : Page
         }
 
         bool todoOk = usuariosCorruptos.Count == 0 && dvvUsuariosOk
-                   && productosCorruptos.Count == 0 && dvvProductosOk;
+                   && productosCorruptos.Count == 0 && dvvProductosOk
+                   && eventosCorruptos.Count == 0 && dvvBitacoraOk
+                   && pedidosCorruptos.Count == 0 && dvvPedidosOk
+                   && facturasCorruptas.Count == 0 && dvvFacturasOk;
         pnlTodoOk.Visible = todoOk;
     }
 
@@ -95,6 +110,8 @@ public partial class GestionIntegridad : Page
             var bll = new BLLIntegridad();
             bll.RecalcularDVUsuarios();
             bll.RecalcularDVProductos();
+            bll.RecalcularDVBitacora();
+            bll.RecalcularDVPedidosYFacturas();
 
             Application["IntegridadFallida"] = false;
             Application["MensajeIntegridad"] = null;

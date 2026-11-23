@@ -1,3 +1,4 @@
+using BE;
 using BLL;
 using System;
 using System.Configuration;
@@ -27,6 +28,7 @@ public partial class Backup : Page
         {
             string carpeta = ConfigurationManager.AppSettings["BackupFolder"] ?? @"C:\Backups\MaiTienda";
             litCarpeta.Text = carpeta;
+            litMaximoArchivos.Text = _bllBackup.ObtenerMaximoArchivosBackup().ToString();
             CargarProximoBackup();
             CargarListaBackups(carpeta);
             
@@ -47,8 +49,20 @@ public partial class Backup : Page
             var usuariosCorruptos = bllIntegridad.VerificarIntegridadUsuarios(out dvvUsuariosValido);
             bool dvvProductosValido;
             var productosCorruptos = bllIntegridad.VerificarIntegridadProductos(out dvvProductosValido);
+            bool dvvBitacoraValido;
+            var eventosCorruptos = bllIntegridad.VerificarIntegridadBitacora(out dvvBitacoraValido);
+            bool dvvPedidosValido;
+            var pedidosCorruptos = bllIntegridad.VerificarIntegridadPedidos(out dvvPedidosValido);
+            bool dvvFacturasValido;
+            var facturasCorruptas = bllIntegridad.VerificarIntegridadFacturas(out dvvFacturasValido);
 
-            if (usuariosCorruptos.Count == 0 && dvvUsuariosValido && productosCorruptos.Count == 0 && dvvProductosValido)
+            bool todoValido = usuariosCorruptos.Count == 0 && dvvUsuariosValido
+                && productosCorruptos.Count == 0 && dvvProductosValido
+                && eventosCorruptos.Count == 0 && dvvBitacoraValido
+                && pedidosCorruptos.Count == 0 && dvvPedidosValido
+                && facturasCorruptas.Count == 0 && dvvFacturasValido;
+
+            if (todoValido)
             {
                 pnlIntegridadExito.Visible = true;
             }
@@ -82,6 +96,21 @@ public partial class Backup : Page
                     if (sb.Length > 0) sb.AppendLine();
                     sb.AppendLine("Tabla de Productos: DVV inválido (filas agregadas/eliminadas/modificadas).");
                 }
+                if (eventosCorruptos.Count > 0 || !dvvBitacoraValido)
+                {
+                    if (sb.Length > 0) sb.AppendLine();
+                    sb.AppendLine("Tabla de Bitácora: " + (eventosCorruptos.Count > 0 ? $"{eventosCorruptos.Count} evento(s) con DVH inválido. " : "") + (!dvvBitacoraValido ? "DVV inválido." : ""));
+                }
+                if (pedidosCorruptos.Count > 0 || !dvvPedidosValido)
+                {
+                    if (sb.Length > 0) sb.AppendLine();
+                    sb.AppendLine("Tabla de Pedidos: " + (pedidosCorruptos.Count > 0 ? $"{pedidosCorruptos.Count} pedido(s) con DVH inválido. " : "") + (!dvvPedidosValido ? "DVV inválido." : ""));
+                }
+                if (facturasCorruptas.Count > 0 || !dvvFacturasValido)
+                {
+                    if (sb.Length > 0) sb.AppendLine();
+                    sb.AppendLine("Tabla de Facturas: " + (facturasCorruptas.Count > 0 ? $"{facturasCorruptas.Count} factura(s) con DVH inválido. " : "") + (!dvvFacturasValido ? "DVV inválido." : ""));
+                }
                 lblDetalleErrorIntegridad.Text = sb.ToString();
                 pnlIntegridadError.Visible = true;
             }
@@ -103,6 +132,8 @@ public partial class Backup : Page
             var bllIntegridad = new BLL.BLLIntegridad();
             bllIntegridad.RecalcularDVUsuarios();
             bllIntegridad.RecalcularDVProductos();
+            bllIntegridad.RecalcularDVBitacora();
+            bllIntegridad.RecalcularDVPedidosYFacturas();
 
             Application["IntegridadFallida"] = false;
             Application["MensajeIntegridad"] = null;
@@ -123,7 +154,10 @@ public partial class Backup : Page
 
         try
         {
-            string ruta = _bllBackup.GenerarBackupManual();
+            string nombre = Session["nombreUsuario"] as string;
+            BEUsuario usuario = string.IsNullOrEmpty(nombre) ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
+
+            string ruta = _bllBackup.GenerarBackupManual(usuario);
             litRuta.Text = ruta;
             pnlExito.Visible = true;
 

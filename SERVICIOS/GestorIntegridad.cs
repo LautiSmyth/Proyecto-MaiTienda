@@ -22,6 +22,32 @@ namespace SERVICIOS
             return Encriptador.HashIntegridad(data);
         }
 
+        public string CalcularDVH(BEBitacora evento)
+        {
+            if (evento == null) return string.Empty;
+            string data = $"{evento.IdBitacora}{evento.IdUsuario}{evento.NombreUsuario}{evento.Perfil}{evento.Accion}{evento.Fecha:O}";
+            return Encriptador.HashIntegridad(data);
+        }
+
+        public string CalcularDVH(BEPedido pedido)
+        {
+            if (pedido == null) return string.Empty;
+            string data = $"{pedido.IdPedido}{pedido.IdUsuario}{pedido.Fecha:O}{pedido.NombreCliente}{pedido.DocumentoCliente}" +
+                $"{pedido.DireccionEnvio}{pedido.DistanciaKm.ToString("F2", CultureInfo.InvariantCulture)}" +
+                $"{pedido.Subtotal.ToString("F2", CultureInfo.InvariantCulture)}{pedido.Envio.ToString("F2", CultureInfo.InvariantCulture)}" +
+                $"{pedido.Total.ToString("F2", CultureInfo.InvariantCulture)}";
+            return Encriptador.HashIntegridad(data);
+        }
+
+        public string CalcularDVH(BEFactura factura)
+        {
+            if (factura == null) return string.Empty;
+            string data = $"{factura.IdFactura}{factura.Numero}{factura.IdPedido}{factura.Fecha:O}" +
+                $"{factura.Neto.ToString("F2", CultureInfo.InvariantCulture)}{factura.IVA.ToString("F2", CultureInfo.InvariantCulture)}" +
+                $"{factura.Total.ToString("F2", CultureInfo.InvariantCulture)}";
+            return Encriptador.HashIntegridad(data);
+        }
+
         public string CalcularDVV(List<string> listaHashesDVH)
         {
             StringBuilder sb = new StringBuilder();

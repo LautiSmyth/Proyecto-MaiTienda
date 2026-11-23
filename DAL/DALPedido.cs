@@ -28,6 +28,7 @@ namespace DAL
                     [Subtotal] [decimal](18, 2) NOT NULL,
                     [Envio] [decimal](18, 2) NOT NULL,
                     [Total] [decimal](18, 2) NOT NULL,
+                    [DVH] [nvarchar](255) NULL,
                     CONSTRAINT [PK_Pedido] PRIMARY KEY CLUSTERED ([IdPedido] ASC),
                     CONSTRAINT [FK_Pedido_Usuario] FOREIGN KEY ([IdUsuario]) REFERENCES [dbo].[Usuario] ([IdUsuario])
                 )", null);
@@ -56,6 +57,7 @@ namespace DAL
                     [Neto] [decimal](18, 2) NOT NULL,
                     [IVA] [decimal](18, 2) NOT NULL,
                     [Total] [decimal](18, 2) NOT NULL,
+                    [DVH] [nvarchar](255) NULL,
                     CONSTRAINT [PK_Factura] PRIMARY KEY CLUSTERED ([IdFactura] ASC),
                     CONSTRAINT [UQ_Factura_Numero] UNIQUE ([Numero]),
                     CONSTRAINT [UQ_Factura_IdPedido] UNIQUE ([IdPedido]),
@@ -226,10 +228,76 @@ namespace DAL
             }
         }
 
+        // El DVH se guarda null al insertar (el hash incluye el Id, que recién se conoce después de insertar).
+        // BLLPedido lo calcula apenas vuelve el Id y lo guarda acá; después recalcula el DVV de Pedido y de Factura.
+        public void ActualizarDVH(int idPedido, string dvhPedido, int? idFactura, string dvhFactura)
+        {
+            ActualizarDVHPedido(idPedido, dvhPedido);
+            if (idFactura.HasValue)
+            {
+                ActualizarDVHFactura(idFactura.Value, dvhFactura);
+            }
+        }
+
+        public void ActualizarDVHPedido(int idPedido, string dvh)
+        {
+            _acceso.Escribir("UPDATE Pedido SET DVH = @DVH WHERE IdPedido = @IdPedido",
+                new SqlParameter[] { new SqlParameter("@DVH", (object)dvh ?? DBNull.Value), new SqlParameter("@IdPedido", idPedido) });
+        }
+
+        public void ActualizarDVHFactura(int idFactura, string dvh)
+        {
+            _acceso.Escribir("UPDATE Factura SET DVH = @DVH WHERE IdFactura = @IdFactura",
+                new SqlParameter[] { new SqlParameter("@DVH", (object)dvh ?? DBNull.Value), new SqlParameter("@IdFactura", idFactura) });
+        }
+
+        // Para la verificación y el recálculo de integridad: todos los pedidos / todas las facturas, sin filtrar por usuario.
+        public List<BEPedido> ObtenerTodosParaIntegridad()
+        {
+            DataTable dt = _acceso.Leer(@"
+                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total, DVH
+                FROM Pedido
+                ORDER BY IdPedido ASC", null);
+            List<BEPedido> lista = new List<BEPedido>();
+            foreach (DataRow row in dt.Rows)
+                lista.Add(MapearPedido(row));
+            return lista;
+        }
+
+        public List<BEFactura> ObtenerTodasFacturasParaIntegridad()
+        {
+            DataTable dt = _acceso.Leer(@"
+                SELECT IdFactura, Numero, IdPedido, Fecha, Neto, IVA, Total, DVH
+                FROM Factura
+                ORDER BY IdFactura ASC", null);
+            List<BEFactura> lista = new List<BEFactura>();
+            foreach (DataRow row in dt.Rows)
+                lista.Add(MapearFactura(row));
+            return lista;
+        }
+
+        public List<string> ObtenerTodosDVHPedidos()
+        {
+            List<string> dvhs = new List<string>();
+            DataTable tabla = _acceso.Leer("SELECT DVH FROM Pedido WHERE DVH IS NOT NULL ORDER BY IdPedido ASC", null);
+            foreach (DataRow row in tabla.Rows)
+                dvhs.Add(row["DVH"].ToString());
+            return dvhs;
+        }
+
+        public List<string> ObtenerTodosDVHFacturas()
+        {
+            List<string> dvhs = new List<string>();
+            DataTable tabla = _acceso.Leer("SELECT DVH FROM Factura WHERE DVH IS NOT NULL ORDER BY IdFactura ASC", null);
+            foreach (DataRow row in tabla.Rows)
+                dvhs.Add(row["DVH"].ToString());
+            return dvhs;
+        }
+
         public List<BEPedido> ObtenerPorUsuario(int idUsuario)
         {
             DataTable dtPedidos = _acceso.Leer(@"
-                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total
+                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total, DVH
                 FROM Pedido
                 WHERE IdUsuario = @IdUsuario
                 ORDER BY Fecha DESC, IdPedido DESC",
@@ -244,7 +312,7 @@ namespace DAL
                 new SqlParameter[] { new SqlParameter("@IdUsuario", idUsuario) });
 
             DataTable dtFacturas = _acceso.Leer(@"
-                SELECT f.IdFactura, f.Numero, f.IdPedido, f.Fecha, f.Neto, f.IVA, f.Total
+                SELECT f.IdFactura, f.Numero, f.IdPedido, f.Fecha, f.Neto, f.IVA, f.Total, f.DVH
                 FROM Factura f
                 INNER JOIN Pedido p ON f.IdPedido = p.IdPedido
                 WHERE p.IdUsuario = @IdUsuario",
@@ -263,7 +331,7 @@ namespace DAL
         public BEPedido ObtenerPorId(int idPedido)
         {
             DataTable dtPedidos = _acceso.Leer(@"
-                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total
+                SELECT IdPedido, IdUsuario, Fecha, NombreCliente, DocumentoCliente, DireccionEnvio, DistanciaKm, Subtotal, Envio, Total, DVH
                 FROM Pedido
                 WHERE IdPedido = @IdPedido",
                 new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
@@ -276,7 +344,7 @@ namespace DAL
                 new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
 
             DataTable dtFacturas = _acceso.Leer(@"
-                SELECT IdFactura, Numero, IdPedido, Fecha, Neto, IVA, Total
+                SELECT IdFactura, Numero, IdPedido, Fecha, Neto, IVA, Total, DVH
                 FROM Factura
                 WHERE IdPedido = @IdPedido",
                 new SqlParameter[] { new SqlParameter("@IdPedido", idPedido) });
@@ -336,7 +404,8 @@ namespace DAL
                 DistanciaKm = Convert.ToDecimal(row["DistanciaKm"]),
                 Subtotal = Convert.ToDecimal(row["Subtotal"]),
                 Envio = Convert.ToDecimal(row["Envio"]),
-                Total = Convert.ToDecimal(row["Total"])
+                Total = Convert.ToDecimal(row["Total"]),
+                DVH = row["DVH"] == DBNull.Value ? null : row["DVH"].ToString()
             };
         }
 
@@ -361,7 +430,8 @@ namespace DAL
                 Fecha = Convert.ToDateTime(row["Fecha"]),
                 Neto = Convert.ToDecimal(row["Neto"]),
                 IVA = Convert.ToDecimal(row["IVA"]),
-                Total = Convert.ToDecimal(row["Total"])
+                Total = Convert.ToDecimal(row["Total"]),
+                DVH = row["DVH"] == DBNull.Value ? null : row["DVH"].ToString()
             };
         }
     }

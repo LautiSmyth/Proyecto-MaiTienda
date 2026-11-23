@@ -1,6 +1,5 @@
 using BE.Enums;
 using BLL;
-using SERVICIOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,9 +70,8 @@ public partial class Login : Page
 
         try
         {
-            new BLLUsuario().ValidarCredenciales(nombreUsuario, password, Request.UserHostAddress);
+            var usuario = new BLLUsuario().ValidarCredenciales(nombreUsuario, password, Request.UserHostAddress);
 
-            var usuario = SessionManager.GetInstance().Usuario;
             Session["nombreUsuario"] = usuario.NombreUsuario;
             Session["perfil"] = usuario.Perfil.ToString();
 

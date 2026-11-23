@@ -11,7 +11,14 @@ public partial class _Default : Page
     private readonly BLLProducto _bllProducto = new BLLProducto();
     private HashSet<int> _idsEnCarrito = new HashSet<int>();
     private Dictionary<int, int> _cantidadesEnCarrito = new Dictionary<int, int>();
+    private BEUsuario _usuario;
 
+    private BEUsuario ObtenerUsuarioSesion()
+    {
+        string nombre = Session["nombreUsuario"] as string;
+        return Session["perfil"] == null || string.IsNullOrEmpty(nombre)
+            ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
+    }
 
     protected bool IsEnCarrito(object idProducto)
     {
@@ -40,13 +47,13 @@ public partial class _Default : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-        if (usuario != null)
+        _usuario = ObtenerUsuarioSesion();
+        if (_usuario != null)
         {
             try
             {
                 BLLCarrito bllCarrito = new BLLCarrito();
-                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(_usuario.IdUsuario);
                 _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
             }
             catch
@@ -246,9 +253,7 @@ public partial class _Default : Page
         int productoId = Convert.ToInt32(args[0]);
         int stock = args.Length > 1 ? Convert.ToInt32(args[1]) : int.MaxValue;
 
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-
-        if (usuario != null)
+        if (_usuario != null)
         {
             int cantidadActual;
             _cantidadesEnCarrito.TryGetValue(productoId, out cantidadActual);
@@ -256,8 +261,8 @@ public partial class _Default : Page
             if (cantidadActual < stock)
             {
                 BLLCarrito bllCarrito = new BLLCarrito();
-                bllCarrito.AgregarProducto(usuario.IdUsuario, productoId, 1);
-                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+                bllCarrito.AgregarProducto(_usuario.IdUsuario, productoId, 1);
+                _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(_usuario.IdUsuario);
                 _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
             }
         }
@@ -288,17 +293,15 @@ public partial class _Default : Page
         int productoId = Convert.ToInt32(args[0]);
         int stock = args.Length > 1 ? Convert.ToInt32(args[1]) : int.MaxValue;
 
-        var usuario = SERVICIOS.SessionManager.GetInstance().Usuario;
-
         int cantidadActual;
         _cantidadesEnCarrito.TryGetValue(productoId, out cantidadActual);
         int nuevaCantidad = e.CommandName == "Incrementar" ? cantidadActual + 1 : cantidadActual - 1;
 
-        if (usuario != null)
+        if (_usuario != null)
         {
             BLLCarrito bllCarrito = new BLLCarrito();
-            bllCarrito.ActualizarCantidad(usuario.IdUsuario, productoId, nuevaCantidad, stock);
-            _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
+            bllCarrito.ActualizarCantidad(_usuario.IdUsuario, productoId, nuevaCantidad, stock);
+            _cantidadesEnCarrito = bllCarrito.ObtenerCantidadesProductos(_usuario.IdUsuario);
             _idsEnCarrito = new HashSet<int>(_cantidadesEnCarrito.Keys);
         }
         else

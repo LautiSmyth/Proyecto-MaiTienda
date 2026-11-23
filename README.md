@@ -130,6 +130,7 @@ Proyecto-MaiTienda/
 | `Perfil` | VARCHAR(50) | Perfil en el momento del evento |
 | `Accion` | VARCHAR(200) | Descripción del evento |
 | `Fecha` | DATETIME | Timestamp del evento |
+| `DVH` | NVARCHAR(255) | Dígito verificador de la fila (ver [Seguridad](#seguridad)) |
 
 ### Tabla `Pedido`
 
@@ -141,6 +142,7 @@ Proyecto-MaiTienda/
 | `NombreCliente` / `DocumentoCliente` / `DireccionEnvio` | NVARCHAR | Datos ingresados al comprar |
 | `DistanciaKm` | DECIMAL(9,2) | Distancia al negocio calculada en el servidor |
 | `Subtotal` / `Envio` / `Total` | DECIMAL(18,2) | Monto de la compra, con el envío calculado en el servidor |
+| `DVH` | NVARCHAR(255) | Dígito verificador de la fila |
 
 ### Tabla `LineaPedido`
 
@@ -161,6 +163,7 @@ Proyecto-MaiTienda/
 | `IdPedido` | INT FK UNIQUE | Pedido facturado (una factura por pedido) |
 | `Fecha` | DATETIME | Fecha de emisión |
 | `Neto` / `IVA` / `Total` | DECIMAL(18,2) | Importe neto gravado, IVA 21% y total |
+| `DVH` | NVARCHAR(255) | Dígito verificador de la fila |
 
 ### Tabla `Pago`
 
@@ -188,11 +191,11 @@ Las tablas `Pedido`, `LineaPedido`, `Factura` y `Pago` también las crea la apli
 - Registro en bitácora de cada intento fallido y del login exitoso
 
 ### Gestión de sesión
-- `SessionManager` Singleton: almacena el `BEUsuario` autenticado en memoria de servidor
-- Datos de sesión complementarios en `Session["nombreUsuario"]` y `Session["perfil"]`
-- Cierre de sesión registrado en bitácora vía `BLLUsuario.CerrarSesion()`
+- Sesión de ASP.NET por visitante: `Session["nombreUsuario"]` y `Session["perfil"]`, sin estado compartido entre usuarios
+- `BLLUsuario.ValidarCredenciales(...)` devuelve el `BEUsuario` validado; cada página busca su propio usuario con `BLLUsuario.BuscarPorNombreUsuario(Session["nombreUsuario"])`
+- Cierre de sesión registrado en bitácora vía `BLLUsuario.CerrarSesion(usuario)`, a nombre del usuario que cierra la sesión
 - Limpieza completa: `Session.Clear()` + `Session.Abandon()`
-- Protección de páginas: `Respuesta.aspx` redirige al login si no hay sesión activa
+- Protección de páginas: `Bienvenida.aspx` redirige al login si no hay sesión activa
 
 ### Panel principal
 - Barra superior con nombre del sistema, usuario autenticado, perfil y botón *Cerrar sesión*
@@ -203,6 +206,12 @@ Las tablas `Pedido`, `LineaPedido`, `Factura` y `Pago` también las crea la apli
 ### Bitácora
 - Registro automático de: inicio de sesión, cierre de sesión, intentos fallidos y bloqueo por intentos
 - Soporte para registro con usuario de sesión o usuario explícito (`ServicioBitacora`)
+- El WebMaster ve en `Bitacora.aspx` las cuentas bloqueadas por intentos fallidos y puede desbloquearlas (`BLLUsuario.DesbloquearUsuario`); queda registrado en la bitácora
+
+### Backup
+- Automático cada 24 h (`Global.asax`) y manual desde `Backup.aspx`
+- Se conservan los últimos **N** backups (`BackupMaximoArchivos` en `Web.config`, por defecto 7); los más viejos se borran solos (`BLLBackup`)
+- Si falla el backup automático, el error queda registrado en la bitácora en vez de perderse en silencio
 
 ### Compra y pedidos
 - *Finalizar compra* exige sesión iniciada y pide nombre, DNI o CUIT y dirección de entrega
@@ -237,6 +246,8 @@ Las tablas `Pedido`, `LineaPedido`, `Factura` y `Pago` también las crea la apli
 | Protección de páginas | Verificación de sesión en `Page_Load` de cada página protegida |
 | Sin Identity/OWIN | Autenticación 100% propia, sin dependencias externas de identidad |
 | Passkey de emergencia | Tras 3 intentos fallidos el origen queda bloqueado 15 minutos; los accesos y los intentos quedan en la bitácora. En el login se usa con el usuario `WebMaster` |
+| Desbloqueo de cuentas | El WebMaster puede reactivar una cuenta bloqueada por intentos fallidos desde `Bitacora.aspx` |
+| Dígitos verificadores (DVH/DVV) | Usuario y Producto, y también Bitácora, Pedido y Factura: cada fila tiene su DVH y cada tabla su DVV; se verifican y se pueden recalcular desde `GestionIntegridad.aspx` / `Backup.aspx`. Solo Usuario y Producto bloquean todo el sitio si fallan |
 
 ---
 

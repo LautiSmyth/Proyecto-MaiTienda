@@ -9,7 +9,33 @@
             <asp:Panel runat="server" ID="pnlError" Visible="false" CssClass="g-error" role="alert" style="margin-bottom: 20px;">
                 <asp:Literal runat="server" ID="litError" />
             </asp:Panel>
-            
+
+            <asp:Panel runat="server" ID="pnlMensajeDesbloqueo" Visible="false" role="status" style="margin-bottom: 20px; padding: 10px 15px; border-radius: 4px; background: #e7f6ec; color: #1e6b3a;">
+                <asp:Literal runat="server" ID="litMensajeDesbloqueo" />
+            </asp:Panel>
+
+            <asp:Panel runat="server" ID="pnlCuentasBloqueadas" Visible="false" style="margin-bottom: 25px;">
+                <h3>Cuentas bloqueadas</h3>
+                <p style="color: #666; font-size: 13px;">Se bloquean solas al 3er intento de contraseña incorrecta. Desde acá el WebMaster las puede reactivar.</p>
+                <div class="table-responsive">
+                    <asp:GridView ID="gvBloqueados" runat="server" CssClass="table table-striped table-bordered table-hover"
+                        AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvBloqueados_RowCommand">
+                        <Columns>
+                            <asp:BoundField DataField="NombreUsuario" HeaderText="Usuario" />
+                            <asp:BoundField DataField="Perfil" HeaderText="Perfil" />
+                            <asp:TemplateField HeaderText="">
+                                <ItemTemplate>
+                                    <asp:Button ID="btnDesbloquear" runat="server" Text="Desbloquear" CssClass="g-btn"
+                                        CommandName="Desbloquear" CommandArgument='<%# Eval("IdUsuario") %>'
+                                        OnClientClick='<%# "return confirm(\"¿Desbloquear a " + Eval("NombreUsuario") + "?\");" %>'
+                                        style="padding: 6px 14px !important; margin: 0 !important; width: auto !important;" />
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
+                </div>
+            </asp:Panel>
+
             <asp:HiddenField ID="hfFiltersExpanded" runat="server" Value="false" />
             <div style="margin-bottom: 25px;">
                 <div class="g-filter-toggle" data-toggle="collapse" data-target="#collapseFilters"

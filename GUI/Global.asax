@@ -77,8 +77,15 @@
         {
             new BLLBackup().GenerarBackupAutomatico();
         }
-        catch
+        catch (Exception ex)
         {
+            try
+            {
+                new SERVICIOS.ServicioBitacora().RegistrarEventoSistema("Error en el backup automatico: " + ex.Message);
+            }
+            catch (Exception)
+            {
+            }
         }
         finally
         {

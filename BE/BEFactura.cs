@@ -11,5 +11,6 @@ namespace BE
         public decimal Neto { get; set; }
         public decimal IVA { get; set; }
         public decimal Total { get; set; }
+        public string DVH { get; set; }
     }
 }

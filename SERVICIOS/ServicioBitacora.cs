@@ -7,28 +7,12 @@ namespace SERVICIOS
     public class ServicioBitacora
     {
         private readonly DAL.DALBitacora _dalBitacora = new DAL.DALBitacora();
-
-        public void RegistrarEvento(string accion)
-        {
-            BEUsuario usuario = SessionManager.GetInstance().Usuario;
-            if (usuario == null)
-            {
-                RegistrarEventoSistema(accion);
-                return;
-            }
-            _dalBitacora.RegistrarEvento(new BEBitacora
-            {
-                IdUsuario = usuario.IdUsuario,
-                NombreUsuario = usuario.NombreUsuario,
-                Perfil = usuario.Perfil.ToString(),
-                Accion = accion,
-                Fecha = DateTime.Now
-            });
-        }
+        private readonly DAL.DALDVV _dalDVV = new DAL.DALDVV();
+        private readonly GestorIntegridad _gestorIntegridad = new GestorIntegridad();
 
         public void RegistrarEvento(string accion, BEUsuario usuario)
         {
-            _dalBitacora.RegistrarEvento(new BEBitacora
+            Registrar(new BEBitacora
             {
                 IdUsuario = usuario.IdUsuario,
                 NombreUsuario = usuario.NombreUsuario,
@@ -40,7 +24,7 @@ namespace SERVICIOS
 
         public void RegistrarEventoSistema(string accion)
         {
-            _dalBitacora.RegistrarEvento(new BEBitacora
+            Registrar(new BEBitacora
             {
                 IdUsuario = 0,
                 NombreUsuario = "Sistema",
@@ -48,6 +32,31 @@ namespace SERVICIOS
                 Accion = accion,
                 Fecha = DateTime.Now
             });
+        }
+
+        private void Registrar(BEBitacora bitacora)
+        {
+            // El DVH incluye el IdBitacora, que recién se conoce después de insertar
+            // (igual que Pedido y Factura): primero se guarda, después se calcula y se actualiza.
+            _dalBitacora.RegistrarEvento(bitacora);
+            bitacora.DVH = _gestorIntegridad.CalcularDVH(bitacora);
+            _dalBitacora.ActualizarDVH(bitacora.IdBitacora, bitacora.DVH);
+            RecalcularDVV();
+        }
+
+        // Igual que con Usuario y Producto: se relee todo y se recalcula el DVV completo en cada escritura.
+        // Un error acá no debe impedir que el evento haya quedado registrado.
+        private void RecalcularDVV()
+        {
+            try
+            {
+                List<string> dvhs = _dalBitacora.ObtenerTodosDVH();
+                string dvv = _gestorIntegridad.CalcularDVV(dvhs);
+                _dalDVV.GuardarDVV("Bitacora", dvv);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public List<BEBitacora> ListarBitacora()

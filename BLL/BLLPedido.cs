@@ -15,6 +15,7 @@ namespace BLL
 
         private readonly DALPedido _dalPedido = new DALPedido();
         private readonly DALCarrito _dalCarrito = new DALCarrito();
+        private readonly DALDVV _dalDVV = new DALDVV();
         private readonly BLLProducto _bllProducto = new BLLProducto();
         private readonly BLLEnvio _bllEnvio = new BLLEnvio();
         private readonly BLLFactura _bllFactura = new BLLFactura();
@@ -94,6 +95,13 @@ namespace BLL
 
                 string dvv = _gestorIntegridad.CalcularDVV(catalogo.Select(p => p.DVH).ToList());
                 _dalPedido.RegistrarPedido(pedido, comprados, dvv);
+
+                // El DVH de Pedido y de Factura se calcula recién acá porque incluye el Id, que la base
+                // asigna al insertar (igual que Usuario y Producto: primero se guarda, después se calcula el DVH).
+                pedido.DVH = _gestorIntegridad.CalcularDVH(pedido);
+                pedido.Factura.DVH = _gestorIntegridad.CalcularDVH(pedido.Factura);
+                _dalPedido.ActualizarDVH(pedido.IdPedido, pedido.DVH, pedido.Factura.IdFactura, pedido.Factura.DVH);
+                RecalcularDVPedidosYFacturas();
             }
 
             string detallePago = _bllPago.Describir(pedido.Pago.Medio) + (pedido.Pago.EstaFirmado ? ", con firma" : string.Empty);
@@ -120,6 +128,20 @@ namespace BLL
         {
             string digitos = Regex.Replace(documento ?? string.Empty, @"[\s.\-]", string.Empty);
             return Regex.IsMatch(digitos, "^([0-9]{7,8}|[0-9]{11})$") ? digitos : null;
+        }
+
+        // Igual que con Usuario, Producto y la bitácora: se relee todo y se recalcula el DVV completo.
+        // Un error acá no debe deshacer la compra, que ya quedó registrada.
+        private void RecalcularDVPedidosYFacturas()
+        {
+            try
+            {
+                _dalDVV.GuardarDVV("Pedido", _gestorIntegridad.CalcularDVV(_dalPedido.ObtenerTodosDVHPedidos()));
+                _dalDVV.GuardarDVV("Factura", _gestorIntegridad.CalcularDVV(_dalPedido.ObtenerTodosDVHFacturas()));
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void RegistrarEventoCompra(string accion, BEUsuario usuario)

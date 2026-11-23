@@ -18,6 +18,7 @@ namespace BE
         public List<BELineaPedido> Lineas { get; set; }
         public BEFactura Factura { get; set; }
         public BEPago Pago { get; set; }
+        public string DVH { get; set; }
 
         public BEPedido()
         {

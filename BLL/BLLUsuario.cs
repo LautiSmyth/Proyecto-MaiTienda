@@ -4,6 +4,7 @@ using SERVICIOS;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 
 namespace BLL
 {
@@ -61,7 +62,7 @@ namespace BLL
             new DAL.DALDVV().GuardarDVV("Usuario", dvv);
         }
 
-        public void ValidarCredenciales(string nombreUsuario, string password, string origen = null)
+        public BEUsuario ValidarCredenciales(string nombreUsuario, string password, string origen = null)
         {
             try
             {
@@ -97,10 +98,10 @@ namespace BLL
                     throw new UnauthorizedAccessException();
                 }
 
-                SessionManager.GetInstance().Login(usuario);
                 usuario.IntentosFallidos = 0;
                 Actualizar(usuario);
-                _sBitacora.RegistrarEvento("Inicio de sesion");
+                _sBitacora.RegistrarEvento("Inicio de sesion", usuario);
+                return usuario;
             }
             catch (UnauthorizedAccessException)
             {
@@ -108,10 +109,12 @@ namespace BLL
             }
         }
 
-        public void CerrarSesion()
+        public void CerrarSesion(BEUsuario usuario)
         {
-            _sBitacora.RegistrarEvento("Cierre de sesion");
-            SessionManager.GetInstance().Logout();
+            if (usuario != null)
+            {
+                _sBitacora.RegistrarEvento("Cierre de sesion", usuario);
+            }
         }
 
         public ResultadoPasskey ValidarConPasskey(string passkey, string origen)
@@ -191,6 +194,45 @@ namespace BLL
         public bool VerificarConexion()
         {
             return _dalUsuario.VerificarConexion();
+        }
+
+        public List<BEUsuario> ObtenerBloqueados()
+        {
+            return _dalUsuario.ObtenerTodos().Where(u => u.Estado == EstadoUsuario.Bloqueado).ToList();
+        }
+
+        public void DesbloquearUsuario(int idUsuario, BEUsuario webmaster)
+        {
+            BEUsuario usuario = _dalUsuario.ObtenerTodos().FirstOrDefault(u => u.IdUsuario == idUsuario);
+            if (usuario == null)
+            {
+                throw new ArgumentException("El usuario no existe.");
+            }
+
+            string dvCalculado = _gestorIntegridad.CalcularDVH(usuario);
+            if (usuario.DVH != dvCalculado)
+            {
+                throw new InvalidOperationException("Error de integridad de datos: el registro del usuario ha sido alterado externamente.");
+            }
+
+            if (usuario.Estado != EstadoUsuario.Bloqueado)
+            {
+                return;
+            }
+
+            usuario.Estado = EstadoUsuario.Activo;
+            usuario.IntentosFallidos = 0;
+            Actualizar(usuario);
+
+            string accion = $"Cuenta desbloqueada por el WebMaster: {usuario.NombreUsuario}";
+            if (webmaster != null)
+            {
+                _sBitacora.RegistrarEvento(accion, webmaster);
+            }
+            else
+            {
+                _sBitacora.RegistrarEventoSistema(accion);
+            }
         }
     }
 }
