@@ -12,6 +12,7 @@ public partial class _Default : Page
     private HashSet<int> _idsEnCarrito = new HashSet<int>();
     private Dictionary<int, int> _cantidadesEnCarrito = new Dictionary<int, int>();
 
+
     protected bool IsEnCarrito(object idProducto)
     {
         return _idsEnCarrito.Contains(Convert.ToInt32(idProducto));
@@ -198,7 +199,7 @@ public partial class _Default : Page
             PaginaActual = 0;
 
             ResetearEstiloFiltros();
-            
+
             LinkButton btn = e.Item.FindControl("btnCatDinamico") as LinkButton;
             if (btn != null)
             {

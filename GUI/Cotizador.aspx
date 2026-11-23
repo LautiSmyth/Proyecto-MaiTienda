@@ -18,7 +18,7 @@
             <!-- Opción 1: cotizar el carrito del usuario logueado -->
             <div class="g-card" style="flex: 1 1 380px; max-width: none; padding: 24px;">
                 <h3 style="font-family: 'Exo 2', sans-serif; font-size: 16px; color: #1e0a3c; margin-top: 0;">Cotizar mi carrito</h3>
-                <p style="font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c5ea8;">Envía los productos de tu carrito al Web Service (método CotizarPedido).</p>
+                <p style="font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c5ea8;">Trae los productos de tu carrito para su cotizacion.</p>
                 <asp:Button ID="btnCotizarCarrito" runat="server" Text="Cotizar carrito" CssClass="g-btn" OnClick="btnCotizarCarrito_Click"
                     style="width: 100% !important; padding: 12px 0 !important; margin-top: 10px !important;" />
             </div>
