@@ -310,11 +310,19 @@ CREATE TABLE Bitacora (
 );
 ```
 
-**3. Configurar la cadena de conexión** en `Proyecto MaiTienda/Web.config`:
+**3. Configurar la cadena de conexión** en `GUI/ConnectionStrings.config` (no en `Web.config`: ese archivo solo apunta a este con `configSource`, así cada uno tiene la suya sin pisar la de los demás):
 ```xml
 <add name="DefaultConnection"
      connectionString="Data Source=TU_SERVIDOR;Initial Catalog=MaiTiendaDB;Integrated Security=True;" />
 ```
+Después de editarlo, corré una sola vez (en una terminal, parados en la carpeta del repo):
+```bash
+git update-index --skip-worktree GUI/ConnectionStrings.config
+```
+Así git deja de marcar ese archivo como modificado y nunca más se sube por error. Si en algún momento SÍ querés subir un cambio a propósito (por ejemplo, cambiar el valor por defecto para todos), primero hay que deshacerlo con `git update-index --no-skip-worktree GUI/ConnectionStrings.config`.
+
+### Conexión local
+`GUI/ConnectionStrings.config` queda en el repositorio con un valor por defecto (`(localdb)\MSSQLLocalDB`) para que el proyecto ande apenas se clona. Si tu SQL Server se llama distinto, cambiá solo ese archivo (paso 3 de arriba) y nunca `Web.config`.
 
 **4. Abrir la solución** `Proyecto MaiTienda.sln` en Visual Studio.
 
