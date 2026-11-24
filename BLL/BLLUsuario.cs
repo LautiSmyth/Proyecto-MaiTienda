@@ -145,8 +145,7 @@ namespace BLL
             return ResultadoPasskey.Incorrecto;
         }
 
-        // El mensaje al usuario es siempre el mismo ("usuario o contraseña incorrectos"),
-        // asi no se revela si la cuenta existe o esta bloqueada; el detalle queda solo en la bitacora.
+        // El mensaje al usuario es siempre el mismo ("usuario o contraseña incorrectos")
         private void RegistrarEventoSistemaSeguro(string accion)
         {
             try
