@@ -52,17 +52,23 @@ public class WSCatalogo : WebService
     {
         return Ejecutar(() =>
         {
-            // El WS no escribe en la bitacora: lo puede llamar cualquier sistema externo sin sesion
-            // y cada llamada anonima llenaria la tabla. Registra el cliente que conoce al usuario (Cotizador.aspx).
             return _bllCotizacion.Cotizar(items);
         });
     }
 
     private static T Ejecutar<T>(Func<T> accion)
     {
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaProducto))
+            throw new SoapException(EstadoIntegridad.MensajeMantenimiento, SoapException.ServerFaultCode);
+
         try
         {
             return accion();
+        }
+        catch (IntegridadException)
+        {
+            EstadoIntegridad.Verificar();
+            throw new SoapException(EstadoIntegridad.MensajeMantenimiento, SoapException.ServerFaultCode);
         }
         catch (ArgumentException ex)
         {

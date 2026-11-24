@@ -1,4 +1,5 @@
 using BE;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -7,6 +8,11 @@ namespace SERVICIOS
 {
     public class GestorIntegridad
     {
+        public static DateTime FechaAlmacenable(DateTime fecha)
+        {
+            return new DateTime(fecha.Ticks - fecha.Ticks % TimeSpan.TicksPerSecond, DateTimeKind.Unspecified);
+        }
+
         public string CalcularDVH(BEUsuario usuario)
         {
             if (usuario == null) return string.Empty;

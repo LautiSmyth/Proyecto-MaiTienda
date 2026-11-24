@@ -17,7 +17,6 @@ namespace BLL
             return medio != MedioPago.Efectivo;
         }
 
-        // Valida la firma del recuadro (imagen PNG en Base64). Con efectivo no se pide firma.
         public string ValidarFirma(MedioPago medio, string firma)
         {
             if (!RequiereFirma(medio))
@@ -48,7 +47,6 @@ namespace BLL
             return base64;
         }
 
-        // Pasarela simulada: con un medio electrónico firmado el pago se aprueba al instante.
         public BEPago Preparar(BEPedido pedido, MedioPago medio, string firmaValidada)
         {
             BEPago pago = new BEPago

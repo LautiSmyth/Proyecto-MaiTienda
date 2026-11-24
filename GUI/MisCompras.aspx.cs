@@ -19,6 +19,13 @@ public partial class MisCompras : Page
             return;
         }
 
+        if (EstadoIntegridad.AlgunaAlterada(BLLIntegridad.TablaPedido, BLLIntegridad.TablaFactura))
+        {
+            pnlMantenimiento.Visible = true;
+            gvCompras.Visible = false;
+            return;
+        }
+
         if (!IsPostBack)
             CargarCompras(nombreUsuario);
     }

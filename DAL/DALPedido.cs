@@ -85,7 +85,6 @@ namespace DAL
             using (var conexion = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 conexion.Open();
-                // Si una escritura falla, Dispose revierte el pedido, la factura, el stock y el carrito juntos.
                 using (var transaccion = conexion.BeginTransaction())
                 {
                     using (var cmd = new SqlCommand(@"
@@ -203,7 +202,6 @@ namespace DAL
         {
             BEFactura factura = pedido.Factura;
 
-            // El bloqueo evita que dos compras simultáneas tomen el mismo número: la numeración sale correlativa y sin saltos.
             using (var cmd = new SqlCommand("SELECT ISNULL(MAX(Numero), 0) + 1 FROM Factura WITH (UPDLOCK, HOLDLOCK)", conexion, transaccion))
             {
                 factura.Numero = Convert.ToInt32(cmd.ExecuteScalar());
@@ -228,8 +226,6 @@ namespace DAL
             }
         }
 
-        // El DVH se guarda null al insertar (el hash incluye el Id, que recién se conoce después de insertar).
-        // BLLPedido lo calcula apenas vuelve el Id y lo guarda acá; después recalcula el DVV de Pedido y de Factura.
         public void ActualizarDVH(int idPedido, string dvhPedido, int? idFactura, string dvhFactura)
         {
             ActualizarDVHPedido(idPedido, dvhPedido);
@@ -251,7 +247,6 @@ namespace DAL
                 new SqlParameter[] { new SqlParameter("@DVH", (object)dvh ?? DBNull.Value), new SqlParameter("@IdFactura", idFactura) });
         }
 
-        // Para la verificación y el recálculo de integridad: todos los pedidos / todas las facturas, sin filtrar por usuario.
         public List<BEPedido> ObtenerTodosParaIntegridad()
         {
             DataTable dt = _acceso.Leer(@"

@@ -151,8 +151,8 @@
         <header>
             <h1>🛡 Gestión de Integridad de Datos</h1>
             <span class="badge">ACCESO DE EMERGENCIA</span>
-            <asp:HyperLink runat="server" NavigateUrl="~/Login.aspx" CssClass="btn btn-secondary" style="margin-left:auto;font-size:0.82rem;">
-                Ir al Login →
+            <asp:HyperLink runat="server" NavigateUrl="~/Default.aspx" CssClass="btn btn-secondary" style="margin-left:auto;font-size:0.82rem;">
+                Ir al sitio →
             </asp:HyperLink>
         </header>
 

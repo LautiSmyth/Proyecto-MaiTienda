@@ -9,8 +9,7 @@ public partial class Mantenimiento : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
-        if (!integridadFallida)
+        if (!EstadoIntegridad.HayAlteraciones)
             Response.Redirect("~/Default.aspx");
     }
 
@@ -19,11 +18,7 @@ public partial class Mantenimiento : Page
     {
         ResultadoPasskey resultado = new BLLUsuario().ValidarConPasskey(passkey, HttpContext.Current.Request.UserHostAddress);
         if (resultado == ResultadoPasskey.Valido)
-        {
-            HttpContext.Current.Session["PasskeyVerificado"] = true;
-            HttpContext.Current.Session["perfil"] = "WebMaster";
-            HttpContext.Current.Session["nombreUsuario"] = "WebMaster";
-        }
+            EstadoIntegridad.IniciarSesion(HttpContext.Current.Session, "WebMaster", "WebMaster", true);
         return resultado.ToString();
     }
 }

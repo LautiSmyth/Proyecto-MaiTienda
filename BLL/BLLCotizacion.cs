@@ -5,11 +5,6 @@ using System.Linq;
 
 namespace BLL
 {
-    /// <summary>
-    /// Reglas de negocio para cotizar pedidos a partir del catálogo y del stock actual.
-    /// La usa el Web Service WSCatalogo, pero no depende de él: cualquier otra pantalla
-    /// (carrito, factura) podría reutilizarla.
-    /// </summary>
     public class BLLCotizacion
     {
         private const int HorasVigencia = 24;
@@ -25,14 +20,12 @@ namespace BLL
             if (items.Count > MaximoItemsPorPedido)
                 throw new ArgumentException("El pedido supera el máximo de " + MaximoItemsPorPedido + " ítems.");
 
-            // Si el mismo producto viene en varios ítems, se suman las cantidades.
             List<BEItemPedido> agrupados = items
                 .Where(i => i != null)
                 .GroupBy(i => i.IdProducto)
                 .Select(g => new BEItemPedido { IdProducto = g.Key, Cantidad = g.Sum(x => x.Cantidad) })
                 .ToList();
 
-            // ObtenerProductos ya valida el DVH de cada producto (integridad).
             Dictionary<int, BEProducto> catalogo = _bllProducto.ObtenerProductos()
                 .ToDictionary(p => p.IdProducto);
 

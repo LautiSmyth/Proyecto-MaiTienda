@@ -13,6 +13,11 @@
                 <div class="g-divider" style="margin: 15px auto 0; width: 60px;"></div>
             </div>
 
+            <asp:Panel ID="pnlMantenimiento" runat="server" Visible="false" CssClass="g-card" style="max-width: none; padding: 40px; text-align: center;">
+                <h3 style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #7c3aed; margin-bottom: 5px;">Servidor en mantenimiento</h3>
+                <p style="font-family: 'Exo 2', sans-serif; color: #9f7cc0; font-size: 13px; margin-bottom: 0;">El historial de compras no está disponible en este momento. Intente nuevamente más tarde.</p>
+            </asp:Panel>
+
             <asp:Panel ID="pnlVacio" runat="server" Visible="false" CssClass="g-card" style="max-width: none; padding: 40px; text-align: center;">
                 <h3 style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #7c3aed; margin-bottom: 5px;">Todavía no hiciste compras</h3>
                 <p style="font-family: 'Exo 2', sans-serif; color: #9f7cc0; font-size: 13px; margin-bottom: 20px;">Cuando finalices una compra desde el carrito, el pedido queda guardado acá.</p>

@@ -10,8 +10,6 @@ namespace DAL
     {
         private readonly Acceso _acceso = Acceso.GetInstance();
 
-        // El DVH se guarda null al insertar: todavía no se conoce el IdBitacora que asigna la base.
-        // ServicioBitacora lo calcula apenas vuelve el Id y lo guarda con ActualizarDVH.
         public void RegistrarEvento(BEBitacora bitacora)
         {
             string query = @"
@@ -45,7 +43,6 @@ namespace DAL
             return bitacoras;
         }
 
-        // Todas las filas en orden de inserción, para recalcular o verificar el DVH de cada una y el DVV de la tabla.
         public List<BEBitacora> ObtenerTodasOrdenadas()
         {
             List<BEBitacora> bitacoras = new List<BEBitacora>();

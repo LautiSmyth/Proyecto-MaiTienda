@@ -47,6 +47,12 @@ public partial class _Default : Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaProducto))
+        {
+            MostrarMantenimiento();
+            return;
+        }
+
         _usuario = ObtenerUsuarioSesion();
         if (_usuario != null)
         {
@@ -127,6 +133,17 @@ public partial class _Default : Page
 
             lblSinResultados.Visible = !productos.Any();
         }
+        catch (IntegridadException)
+        {
+            EstadoIntegridad.Verificar();
+            repProductos.DataSource = null;
+            repProductos.DataBind();
+            lblSinResultados.Text = "<div class='no-results-title'>Servidor en mantenimiento</div><div class='no-results-text'>" +
+                EstadoIntegridad.MensajeMantenimiento + "</div>";
+            lblSinResultados.Visible = true;
+            pnlPaginadorSup.Visible = false;
+            pnlPaginadorInf.Visible = false;
+        }
         catch (Exception ex)
         {
             lblSinResultados.Text = $"<div class='no-results-title'>Error de Conexión</div><div class='no-results-text'>{ex.Message}</div>";
@@ -134,6 +151,12 @@ public partial class _Default : Page
             pnlPaginadorSup.Visible = false;
             pnlPaginadorInf.Visible = false;
         }
+    }
+
+    private void MostrarMantenimiento()
+    {
+        pnlTienda.Visible = false;
+        pnlMantenimiento.Visible = true;
     }
 
     private void ConfigurarPaginadores(int totalPaginas)

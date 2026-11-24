@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Exo+2:wght@300;400;500;600&display=swap');
 
-/* ─── Page Resets & General Defaults ─── */
 body {
     background: #f0ebfa !important;
 }
@@ -21,7 +20,6 @@ body {
     box-sizing: border-box;
 }
 
-/* ─── Shared Theme Layouts ─── */
 .g-wrapper {
     height: calc(100vh - 50px);
     background: #f0ebfa;
@@ -53,7 +51,6 @@ body {
     pointer-events: none;
 }
 
-/* ─── Cards & Containers ─── */
 .g-card {
     background: #ffffff;
     border: 1.5px solid #ddd0f5;
@@ -79,7 +76,6 @@ body {
     padding: 42px 38px 36px;
 }
 
-/* ─── Typography & Branding ─── */
 .g-brand {
     margin-bottom: 30px;
 }
@@ -120,7 +116,6 @@ body {
     display: block;
 }
 
-/* ─── Decorative Elements ─── */
 .g-divider {
     border: none;
     border-top: 1.5px solid #ede5f8;
@@ -152,7 +147,6 @@ body {
     display: block;
 }
 
-/* ─── Forms & Controls ─── */
 .g-form-group {
     margin-bottom: 20px;
 }
@@ -189,7 +183,6 @@ body {
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.10) !important;
 }
 
-/* ─── Buttons ─── */
 .g-btn {
     width: 100%;
     background: #7c3aed !important;
@@ -215,7 +208,6 @@ body {
     color: #fff !important;
 }
 
-/* ─── Validation & Errors ─── */
 .g-error {
     background: #fdf2ff;
     border: 1px solid #d8b4fe;
@@ -236,7 +228,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* ─── Footer & Status ─── */
 .g-footer {
     margin-top: 28px;
     padding-top: 18px;
@@ -272,7 +263,6 @@ body {
     animation: pulse 2s infinite;
 }
 
-/* ─── Success Badge/Alert Card (Respuesta.aspx) ─── */
 .g-success-alert {
     background: #fdf2ff;
     border: 1.5px solid #ddd0f5;
@@ -320,7 +310,6 @@ body {
     font-weight: 600;
 }
 
-/* ─── Animations & Media Queries ─── */
 @keyframes pulse {
 
     0%,
@@ -347,7 +336,6 @@ body {
     }
 }
 
-/* ─── GridView Pager Styling ─── */
 .gv-pager td {
     padding: 0 4px;
 }
@@ -383,7 +371,6 @@ body {
     font-weight: 600;
 }
 
-/* ─── Filter Card Styling ─── */
 .g-filter-card {
     background: #ffffff;
     border: 1.5px solid #ddd0f5;
@@ -404,7 +391,6 @@ body {
     background: linear-gradient(to right, #7c3aed, #a855f7, #c084fc);
 }
 
-/* ─── Filter Collapse Toggle (Tab) ─── */
 .g-filter-toggle {
     background: #ffffff;
     border: 1.5px solid #ddd0f5;
@@ -431,7 +417,6 @@ body {
     box-shadow: 0 -6px 16px rgba(109, 40, 217, 0.06);
 }
 
-/* ─── Premium Navigation Bar ─── */
 .g-navbar {
     background: #ffffff !important;
     border: none !important;
@@ -454,7 +439,6 @@ body {
     z-index: 10000;
 }
 
-/* Nav brand */
 .g-navbar .navbar-brand {
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
@@ -471,7 +455,6 @@ body {
     color: #7c3aed !important;
 }
 
-/* Nav links */
 .g-navbar .nav>li>a {
     color: #4c1d95 !important;
     font-weight: 600 !important;
@@ -492,7 +475,6 @@ body {
     color: #7c3aed !important;
 }
 
-/* Specific logout button */
 .g-navbar .nav>li>a#btnNavLogout,
 .g-navbar .nav>li>a[id*="btnNavLogout"] {
     color: #9f7cc0 !important;
@@ -503,7 +485,6 @@ body {
     color: #7c3aed !important;
 }
 
-/* Responsive navbar toggle */
 .g-navbar .navbar-toggle {
     border-color: #ddd0f5 !important;
     margin-top: 13px !important;
@@ -519,7 +500,6 @@ body {
     background-color: #faf7ff;
 }
 
-/* ─── Quienes Somos Page Custom Styles ─── */
 .g-video-container {
     position: relative;
     width: 100%;
@@ -614,9 +594,6 @@ body {
     display: block;
 }
 
-/* ==========================================
-   ESTILOS ESPECÍFICOS DE LA TIENDA DE HARDWARE
-   ========================================== */
 .store-hero-container {
     max-width: 1200px;
     margin: 0 auto 30px;
@@ -666,7 +643,6 @@ body {
     margin-top: 8px;
 }
 
-/* Maquetación del Catálogo (Dos Columnas o Grid Base) */
 .store-layout-container {
     max-width: 1200px;
     margin: 0 auto 50px;
@@ -679,7 +655,6 @@ body {
     width: 100%;
 }
 
-/* Botón de toggle (Visible solo en pantallas medianas/móviles < 1450px) */
 .g-btn-toggle-filters {
     display: inline-flex;
     align-items: center;
@@ -711,7 +686,6 @@ body {
     stroke: #7c3aed;
 }
 
-/* Cabecera del sidebar (Solo para móviles/Offcanvas) */
 .sidebar-mobile-header {
     display: flex;
     justify-content: space-between;
@@ -743,7 +717,6 @@ body {
     color: #7c3aed;
 }
 
-/* Overlay oscuro para fondo */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -760,7 +733,6 @@ body {
     opacity: 1;
 }
 
-/* Sidebar en modo Offcanvas (Por defecto para < 1450px) */
 .store-sidebar {
     position: fixed;
     left: -300px;
@@ -781,7 +753,6 @@ body {
     left: 0;
 }
 
-/* Forzar botones de filtros verticales en modo Offcanvas */
 .search-box-container {
     display: flex;
     flex-direction: column;
@@ -825,7 +796,6 @@ body {
     box-shadow: 0 4px 12px rgba(109, 40, 217, 0.15);
 }
 
-/* Pantallas Grandes (>= 1450px) */
 @media (min-width: 1750px) {
     .g-btn-toggle-filters {
         display: none;
@@ -873,7 +843,6 @@ body {
     }
 }
 
-/* Catálogo Grid */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -885,7 +854,6 @@ body {
     z-index: 1;
 }
 
-/* Tarjetas de Producto */
 .product-card {
     max-width: 100% !important;
     display: flex;
@@ -1003,9 +971,6 @@ body {
     margin-right: 2px;
 }
 
-/* ── Estado "En carrito" en la card ─────────────────────────────── */
-
-/* Ribbon verde sobre la imagen */
 .en-carrito-ribbon {
     display: none;
     position: absolute;
@@ -1024,7 +989,6 @@ body {
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
 }
 
-/* Mostrar ribbon y aplicar borde verde cuando la card tiene clase en-carrito */
 .product-card.en-carrito .en-carrito-ribbon {
     display: block;
 }
@@ -1037,8 +1001,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     box-shadow: 0 8px 40px rgba(16, 185, 129, 0.18), 0 2px 8px rgba(16, 185, 129, 0.10) !important;
 }
 
-
-/* Botón sin stock */
 .g-btn-buy.btn-sin-stock {
     background: #9ca3af !important;
     border-color: #9ca3af !important;
@@ -1093,8 +1055,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     border-right: 1.5px solid #c4b5fd;
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
-
 .g-btn-buy {
     width: 100% !important;
     padding: 12px 16px !important;
@@ -1102,7 +1062,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     letter-spacing: 1px !important;
     margin-top: 0 !important;
 }
-
 
 .g-btn-buy .btn-plus {
     font-size: 18px;
@@ -1119,7 +1078,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     vertical-align: middle;
 }
 
-/* Mensaje Sin Resultados */
 .no-results {
     grid-column: 1 / -1;
     text-align: center;
@@ -1144,7 +1102,6 @@ a.en-carrito-ribbon:hover { background: #059669; }
     color: #9f7cc0;
 }
 
-/* Estilos del Paginador */
 .store-pager {
     display: flex;
     justify-content: center;

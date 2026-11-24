@@ -71,8 +71,6 @@ namespace BLL
             return ObtenerMaximoArchivos();
         }
 
-        // Conserva solo los N backups más recientes; los más viejos se borran.
-        // Un error al borrar (por ejemplo, un archivo en uso) no debe impedir que el backup recién hecho cuente como exitoso.
         private void AplicarRetencion(string carpeta)
         {
             try

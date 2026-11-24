@@ -24,7 +24,7 @@ namespace BLL
                 string dvCalculado = _gestorIntegridad.CalcularDVH(producto);
                 if (producto.DVH != dvCalculado)
                 {
-                    throw new System.InvalidOperationException("Error de integridad de datos: Un registro de producto ha sido alterado externamente.");
+                    throw new IntegridadException(BLLIntegridad.TablaProducto, "Error de integridad de datos: Un registro de producto ha sido alterado externamente.");
                 }
             }
             return productos;

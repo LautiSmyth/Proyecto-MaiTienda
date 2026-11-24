@@ -25,34 +25,33 @@
             path.StartsWith("~/assets/") || path.StartsWith("~/bundles/");
 
         if (!esRecursoEstatico)
-        {
-            DateTime? ultima = Application["IntegridadUltimaVerificacion"] as DateTime?;
-            if (!ultima.HasValue || (DateTime.Now - ultima.Value).TotalSeconds >= 30)
-            {
-                Application["IntegridadUltimaVerificacion"] = DateTime.Now;
-                try
-                {
-                    new BLL.BLLIntegridad().ValidarIntegridadGlobal();
-                    Application["IntegridadFallida"] = false;
-                    Application["MensajeIntegridad"] = null;
-                }
-                catch (Exception ex)
-                {
-                    Application["IntegridadFallida"] = true;
-                    Application["MensajeIntegridad"] = ex.Message;
-                }
-            }
-        }
+            EstadoIntegridad.VerificarSiCorresponde();
+    }
 
-        bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
-        if (!integridadFallida) return;
+    void Application_PostAcquireRequestState(object sender, EventArgs e)
+    {
+        if (Context.Session != null)
+            EstadoIntegridad.CerrarSesionSiQuedoVieja(Context.Session);
+    }
 
-        if (path == "~/mantenimiento.aspx" ||
-            path == "~/gestionintegridad.aspx" ||
-            esRecursoEstatico)
+    void Application_Error(object sender, EventArgs e)
+    {
+        Exception ex = Server.GetLastError();
+        while (ex != null && !(ex is IntegridadException) && ex.InnerException != null)
+            ex = ex.InnerException;
+        if (!(ex is IntegridadException))
             return;
 
-        Response.Redirect("~/Mantenimiento.aspx");
+        string path = Request.AppRelativeCurrentExecutionFilePath.ToLower();
+        if (path == "~/login.aspx")
+            return;
+
+        Server.ClearError();
+        EstadoIntegridad.Verificar();
+        if (Context.Session != null)
+            EstadoIntegridad.CerrarSesionSiQuedoVieja(Context.Session);
+        Response.Redirect("~/Login.aspx", false);
+        Context.ApplicationInstance.CompleteRequest();
     }
 
     void Application_End(object sender, EventArgs e)

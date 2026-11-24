@@ -21,6 +21,12 @@ public partial class Factura : Page
         if (IsPostBack)
             return;
 
+        if (EstadoIntegridad.AlgunaAlterada(BLLIntegridad.TablaPedido, BLLIntegridad.TablaFactura))
+        {
+            pnlMantenimiento.Visible = true;
+            return;
+        }
+
         BEUsuario usuario = new BLLUsuario().BuscarPorNombreUsuario(nombreUsuario);
         bool veTodos = perfil == "WebMaster" || perfil == "Administrador";
 

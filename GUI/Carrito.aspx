@@ -13,6 +13,12 @@
                 <div class="g-divider" style="margin: 15px auto 0; width: 60px;"></div>
             </div>
 
+            <asp:Panel ID="pnlMantenimiento" runat="server" Visible="false" CssClass="g-card" style="max-width: none; padding: 40px; text-align: center;">
+                <h3 style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #7c3aed; margin-bottom: 5px;">Servidor en mantenimiento</h3>
+                <p style="font-family: 'Exo 2', sans-serif; color: #9f7cc0; font-size: 13px; margin-bottom: 0;">El carrito no está disponible en este momento. Intente nuevamente más tarde.</p>
+            </asp:Panel>
+
+            <asp:PlaceHolder ID="phContenido" runat="server">
             <div class="g-card" style="max-width: none; padding: 20px; margin-bottom: 20px;">
                 <h3>Guardar y recuperar carrito</h3>
                 <p>Con tu sesión iniciada, exportá el carrito o recuperalo desde un archivo XML.</p>
@@ -166,9 +172,11 @@
                     </div>
                 </div>
             </div>
+            </asp:PlaceHolder>
         </div>
     </div>
 
+    <asp:PlaceHolder ID="phScriptCarrito" runat="server">
     <script type="text/javascript">
         var costoEnvio = 0;
 
@@ -509,4 +517,5 @@
             actualizarMedioPago();
         });
     </script>
+    </asp:PlaceHolder>
 </asp:Content>

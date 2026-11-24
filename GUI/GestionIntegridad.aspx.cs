@@ -9,9 +9,9 @@ public partial class GestionIntegridad : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (Session["PasskeyVerificado"] as bool? != true)
+        if (!EstadoIntegridad.EsWebMasterConPasskey(Session))
         {
-            Response.Redirect("~/Mantenimiento.aspx");
+            Response.Redirect("~/Login.aspx");
             return;
         }
 
@@ -113,10 +113,11 @@ public partial class GestionIntegridad : Page
             bll.RecalcularDVBitacora();
             bll.RecalcularDVPedidosYFacturas();
 
-            Application["IntegridadFallida"] = false;
-            Application["MensajeIntegridad"] = null;
-
-            MostrarResultado(true, "DVH y DVV recalculados correctamente. El sistema ha sido desbloqueado.");
+            EstadoIntegridad.Verificar();
+            if (EstadoIntegridad.HayAlteraciones)
+                MostrarResultado(false, "Se recalcularon los dígitos verificadores, pero siguen alteradas: " + string.Join(", ", EstadoIntegridad.TablasAlteradas()) + ".");
+            else
+                MostrarResultado(true, "DVH y DVV recalculados correctamente. El sistema ha sido desbloqueado.");
             CargarEstadoIntegridad();
         }
         catch (Exception ex)
@@ -138,11 +139,12 @@ public partial class GestionIntegridad : Page
         {
             new BLLBackup().EjecutarRestore(rutaBackup);
 
-            new BLLIntegridad().ValidarIntegridadGlobal();
-            Application["IntegridadFallida"] = false;
-            Application["MensajeIntegridad"] = null;
-
-            MostrarResultado(true, $"Base de datos restaurada correctamente desde '{Path.GetFileName(rutaBackup)}'. El sistema ha sido desbloqueado.");
+            EstadoIntegridad.Verificar();
+            if (EstadoIntegridad.HayAlteraciones)
+                MostrarResultado(false, $"Se restauró '{Path.GetFileName(rutaBackup)}', pero ese backup también tiene datos alterados en: " +
+                    string.Join(", ", EstadoIntegridad.TablasAlteradas()) + ". Pruebe con otro backup o recalcule los dígitos verificadores.");
+            else
+                MostrarResultado(true, $"Base de datos restaurada correctamente desde '{Path.GetFileName(rutaBackup)}'. El sistema ha sido desbloqueado.");
             CargarEstadoIntegridad();
             CargarListaBackups();
         }

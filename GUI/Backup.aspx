@@ -7,7 +7,6 @@
         <h2>Backup de Base de Datos</h2>
         <hr />
 
-        <%-- Mensajes de resultado --%>
         <asp:Panel runat="server" ID="pnlExito" Visible="false" CssClass="alert alert-success" role="alert" style="margin-bottom: 20px;">
             <strong>&#10003; Backup generado correctamente</strong><br />
             <asp:Literal runat="server" ID="litRuta" />
@@ -17,7 +16,6 @@
             <asp:Literal runat="server" ID="litError" />
         </asp:Panel>
 
-        <%-- Panel principal --%>
         <div class="g-card" style="padding: 30px; margin-bottom: 30px; max-width: 100%;">
             <h4 style="margin-top: 0;">Backup Manual</h4>
             <p>Genera un archivo <code>.bak</code> de la base de datos <strong>MaiTiendaDB</strong> en la carpeta configurada del servidor.</p>
@@ -32,7 +30,6 @@
                 style="margin-top: 10px;" />
         </div>
 
-        <%-- Próximo backup automático --%>
         <div class="g-card" style="padding: 30px; margin-bottom: 30px; max-width: 100%;">
             <h4 style="margin-top: 0;">Backup Automático</h4>
             <p>El sistema genera un backup automáticamente cada 24 horas.</p>
@@ -41,7 +38,6 @@
             </p>
         </div>
 
-        <%-- Listado de backups existentes --%>
         <div class="g-card" style="padding: 30px; max-width: 100%;">
             <h4 style="margin-top: 0;">Archivos de Backup Existentes</h4>
             <asp:Panel runat="server" ID="pnlSinArchivos" Visible="false">
@@ -70,7 +66,6 @@
             </div>
         </div>
 
-        <%-- Integridad de Datos (Dígitos Verificadores) --%>
         <div class="g-card" style="padding: 30px; margin-top: 30px; max-width: 100%;">
             <h4 style="margin-top: 0;">Integridad de Datos (Dígitos Verificadores)</h4>
             <p>Verifique la integridad física de las tablas de usuarios y productos del sistema.</p>
@@ -89,7 +84,7 @@
                     CssClass="btn btn-info" OnClick="btnVerificarIntegridad_Click" style="margin-right: 10px;" />
                     
                 <asp:Button ID="btnRecalcularDVs" runat="server" Text="Recalcular Dígitos Verificadores"
-                    CssClass="btn btn-warning" OnClick="btnRecalcularDVs_Click" 
+                    CssClass="btn btn-warning" OnClick="btnRecalcularDVs_Click"
                     OnClientClick="return confirm('¿Está seguro de que desea recalcular los dígitos verificadores? Esto sobrescribirá los valores de DV con el estado actual de los registros.');" />
             </div>
         </div>
