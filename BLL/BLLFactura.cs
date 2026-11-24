@@ -16,7 +16,6 @@ namespace BLL
 
         private const int PuntoDeVenta = 1;
 
-        // Los precios del catálogo ya incluyen IVA: se discrimina el 21% contenido en el total del pedido.
         public BEFactura Emitir(BEPedido pedido)
         {
             decimal neto = Math.Round(pedido.Total / (1 + AlicuotaIva), 2, MidpointRounding.AwayFromZero);

@@ -135,8 +135,7 @@ public partial class Backup : Page
             bllIntegridad.RecalcularDVBitacora();
             bllIntegridad.RecalcularDVPedidosYFacturas();
 
-            Application["IntegridadFallida"] = false;
-            Application["MensajeIntegridad"] = null;
+            EstadoIntegridad.Verificar();
 
             btnVerificarIntegridad_Click(sender, e);
         }

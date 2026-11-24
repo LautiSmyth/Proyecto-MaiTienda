@@ -36,6 +36,12 @@ public partial class Bitacora : Page
 
     private void CargarBloqueados()
     {
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaUsuario))
+        {
+            pnlCuentasBloqueadas.Visible = false;
+            return;
+        }
+
         List<BE.BEUsuario> bloqueados = _bllUsuario.ObtenerBloqueados();
         pnlCuentasBloqueadas.Visible = bloqueados.Count > 0;
         gvBloqueados.DataSource = bloqueados;
@@ -75,6 +81,15 @@ public partial class Bitacora : Page
     private void CargarBitacora()
     {
         pnlError.Visible = false;
+
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaBitacora))
+        {
+            pnlError.Visible = true;
+            litError.Text = "Servidor en mantenimiento: la bitácora tiene registros alterados. Restáurela o recalcule los dígitos verificadores desde Integridad.";
+            gvBitacora.DataSource = null;
+            gvBitacora.DataBind();
+            return;
+        }
 
         if (!string.IsNullOrEmpty(txtDesde.Text) && !string.IsNullOrEmpty(txtHasta.Text))
         {

@@ -8,21 +8,24 @@ using System.Web.Services.Protocols;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-// Proxy generado por la referencia web (App_WebReferences/WSCatalogoRef).
-// Se usan alias porque el proxy genera clases con el mismo nombre que las de BE.
 using WsCliente = WSCatalogoRef.WSCatalogo;
 using WsItemPedido = WSCatalogoRef.BEItemPedido;
 using WsCotizacion = WSCatalogoRef.BECotizacion;
 using WsLinea = WSCatalogoRef.BELineaCotizacion;
 
-/// <summary>
-/// Página cliente del Web Service WSCatalogo.
-/// No llama a la BLL de cotización directamente: todo pasa por el proxy SOAP.
-/// </summary>
 public partial class Cotizador : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaProducto))
+        {
+            btnCotizarCarrito.Enabled = false;
+            btnCotizarProducto.Enabled = false;
+            pnlResultado.Visible = false;
+            MostrarMensaje(EstadoIntegridad.MensajeMantenimiento, false);
+            return;
+        }
+
         if (!IsPostBack)
             CargarProductos();
     }
@@ -59,7 +62,6 @@ public partial class Cotizador : Page
             return;
         }
 
-        // En el carrito, la propiedad Stock de cada producto representa la cantidad agregada.
         List<BEProducto> carrito = new BLLCarrito().ObtenerProductos(usuario.IdUsuario);
         if (carrito.Count == 0)
         {
@@ -101,7 +103,6 @@ public partial class Cotizador : Page
         }
         catch (SoapException ex)
         {
-            // Errores que el Web Service informa como SOAP Fault (por ejemplo, pedido vacío).
             pnlResultado.Visible = false;
             MostrarMensaje("El Web Service rechazó la cotización: " + ex.Message, false);
         }
@@ -112,11 +113,6 @@ public partial class Cotizador : Page
         }
     }
 
-    /// <summary>
-    /// Crea el proxy del WS con la URL configurable:
-    /// - Si la clave "WSCatalogoRef.WSCatalogo" del Web.config tiene valor, se usa esa URL (por ejemplo, otro servidor).
-    /// - Si está vacía, se usa el WS del mismo sitio, sin importar el puerto o el dominio donde esté publicado.
-    /// </summary>
     private WsCliente CrearClienteWS()
     {
         WsCliente ws = new WsCliente();
@@ -128,9 +124,6 @@ public partial class Cotizador : Page
         return ws;
     }
 
-    /// <summary>
-    /// Usuario logueado según la sesión ASP.NET de este visitante.
-    /// </summary>
     private BEUsuario ObtenerUsuarioLogueado()
     {
         string nombreUsuario = Session["nombreUsuario"] as string;
@@ -139,10 +132,6 @@ public partial class Cotizador : Page
         return new BLLUsuario().BuscarPorNombreUsuario(nombreUsuario);
     }
 
-    /// <summary>
-    /// Solo se registran las cotizaciones de usuarios logueados: las anónimas no llenan la bitácora.
-    /// Un error al registrar no impide mostrar la cotización.
-    /// </summary>
     private void RegistrarCotizacionEnBitacora(WsCotizacion cotizacion)
     {
         try

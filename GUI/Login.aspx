@@ -17,6 +17,11 @@
 
                     <span class="g-section-title">Autenticación</span>
 
+                    <asp:Panel runat="server" ID="pnlMantenimiento" Visible="false" role="status"
+                        style="background: #fff7e6; border: 1px solid #f5c26b; color: #8a5a00; padding: 10px 14px; border-radius: 4px; margin-bottom: 15px; font-size: 13px;">
+                        <strong>&#9888; Servidor en mantenimiento.</strong> Intente nuevamente m&#225;s tarde.
+                    </asp:Panel>
+
                     <asp:Panel runat="server" ID="pnlError" Visible="false" CssClass="g-error" role="alert">
                         <asp:Literal runat="server" ID="litError" />
                     </asp:Panel>

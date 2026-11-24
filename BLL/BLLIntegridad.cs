@@ -9,6 +9,12 @@ namespace BLL
 {
     public class BLLIntegridad
     {
+        public const string TablaUsuario = "Usuario";
+        public const string TablaProducto = "Producto";
+        public const string TablaBitacora = "Bitacora";
+        public const string TablaPedido = "Pedido";
+        public const string TablaFactura = "Factura";
+
         private readonly DALUsuario _dalUsuario = new DALUsuario();
         private readonly DALProducto _dalProducto = new DALProducto();
         private readonly DALBitacora _dalBitacora = new DALBitacora();
@@ -35,7 +41,7 @@ namespace BLL
 
             string dvvCalculado = _gestorIntegridad.CalcularDVV(dvhs);
             string dvvRegistrado = _dalDVV.ObtenerDVV("Usuario");
-            if (dvvCalculado != dvvRegistrado)
+            if (!DvvCoincide(dvvCalculado, dvvRegistrado))
             {
                 dvvValido = false;
             }
@@ -62,7 +68,7 @@ namespace BLL
 
             string dvvCalculado = _gestorIntegridad.CalcularDVV(dvhs);
             string dvvRegistrado = _dalDVV.ObtenerDVV("Producto");
-            if (dvvCalculado != dvvRegistrado)
+            if (!DvvCoincide(dvvCalculado, dvvRegistrado))
             {
                 dvvValido = false;
             }
@@ -89,7 +95,7 @@ namespace BLL
 
             string dvvCalculado = _gestorIntegridad.CalcularDVV(dvhs);
             string dvvRegistrado = _dalDVV.ObtenerDVV("Bitacora");
-            if (dvvCalculado != dvvRegistrado)
+            if (!DvvCoincide(dvvCalculado, dvvRegistrado))
             {
                 dvvValido = false;
             }
@@ -116,7 +122,7 @@ namespace BLL
 
             string dvvCalculado = _gestorIntegridad.CalcularDVV(dvhs);
             string dvvRegistrado = _dalDVV.ObtenerDVV("Pedido");
-            if (dvvCalculado != dvvRegistrado)
+            if (!DvvCoincide(dvvCalculado, dvvRegistrado))
             {
                 dvvValido = false;
             }
@@ -143,7 +149,7 @@ namespace BLL
 
             string dvvCalculado = _gestorIntegridad.CalcularDVV(dvhs);
             string dvvRegistrado = _dalDVV.ObtenerDVV("Factura");
-            if (dvvCalculado != dvvRegistrado)
+            if (!DvvCoincide(dvvCalculado, dvvRegistrado))
             {
                 dvvValido = false;
             }
@@ -218,8 +224,6 @@ namespace BLL
             }
             else
             {
-                // La columna puede existir pero con filas sembradas por db.sql que nunca tuvieron DVH
-                // (a diferencia de Usuario y Producto, la bitácora sembrada no trae hashes precalculados).
                 DataTable dtNulos = acceso.Leer("SELECT COUNT(*) FROM [dbo].[Bitacora] WHERE [DVH] IS NULL", null);
                 if (dtNulos.Rows.Count > 0 && Convert.ToInt32(dtNulos.Rows[0][0]) > 0)
                 {
@@ -233,11 +237,9 @@ namespace BLL
             }
             catch (Exception ex)
             {
-                // Si no se pueden crear las tablas de compras, el catálogo sigue funcionando: solo fallan las compras.
                 System.Diagnostics.Trace.TraceError(ex.ToString());
             }
 
-            // Si Pedido/Factura ya existían de antes (sin la columna DVH), AsegurarEsquema no las vuelve a crear.
             bool pedidoFacturaRecienAgregada = false;
             try
             {
@@ -279,26 +281,30 @@ namespace BLL
             }
         }
 
-        public void ValidarIntegridadGlobal()
+        private static bool DvvCoincide(string dvvCalculado, string dvvRegistrado)
+        {
+            return dvvCalculado == (dvvRegistrado ?? string.Empty);
+        }
+
+        public List<string> ObtenerTablasAlteradas()
         {
             VerificarYAsegurarEsquema();
 
-            bool dvvUsuariosValido;
-            var usuariosCorruptos = VerificarIntegridadUsuarios(out dvvUsuariosValido);
+            List<string> alteradas = new List<string>();
+            bool dvvValido;
 
-            bool dvvProductosValido;
-            var productosCorruptos = VerificarIntegridadProductos(out dvvProductosValido);
+            if (VerificarIntegridadUsuarios(out dvvValido).Count > 0 || !dvvValido)
+                alteradas.Add(TablaUsuario);
+            if (VerificarIntegridadProductos(out dvvValido).Count > 0 || !dvvValido)
+                alteradas.Add(TablaProducto);
+            if (VerificarIntegridadBitacora(out dvvValido).Count > 0 || !dvvValido)
+                alteradas.Add(TablaBitacora);
+            if (VerificarIntegridadPedidos(out dvvValido).Count > 0 || !dvvValido)
+                alteradas.Add(TablaPedido);
+            if (VerificarIntegridadFacturas(out dvvValido).Count > 0 || !dvvValido)
+                alteradas.Add(TablaFactura);
 
-            if (usuariosCorruptos.Count > 0 || !dvvUsuariosValido || productosCorruptos.Count > 0 || !dvvProductosValido)
-            {
-                string msg = "Error de integridad de datos detectado:";
-                if (usuariosCorruptos.Count > 0) msg += " Tabla Usuario tiene DVH corruptos.";
-                if (!dvvUsuariosValido) msg += " Tabla Usuario tiene DVV inválido.";
-                if (productosCorruptos.Count > 0) msg += " Tabla Producto tiene DVH corruptos.";
-                if (!dvvProductosValido) msg += " Tabla Producto tiene DVV inválido.";
-
-                throw new InvalidOperationException(msg);
-            }
+            return alteradas;
         }
 
         public void RecalcularDVUsuarios()

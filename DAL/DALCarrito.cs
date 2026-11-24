@@ -151,7 +151,6 @@ namespace DAL
             using (var conexion = new SqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString))
             {
                 conexion.Open();
-                // Si una escritura falla, Dispose revierte toda la importación.
                 using (var transaccion = conexion.BeginTransaction())
                 using (var cmd = new SqlCommand("DELETE FROM ItemCarrito WHERE IdUsuario = @Usuario", conexion, transaccion))
                 {

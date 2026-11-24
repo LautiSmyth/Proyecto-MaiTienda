@@ -3,11 +3,9 @@
 
     <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-
         <div style="background: #f0ebfa; min-height: 100vh; position: relative;">
             <div class="g-grid"></div>
 
-            <!-- Cabecera de la tienda (Hero Panel) -->
             <div class="store-hero-container">
                 <div class="g-card store-hero-card">
                     <span class="g-pretag">Estación de Componentes</span>
@@ -22,9 +20,14 @@
                 </div>
             </div>
 
-            <!-- Contenedor del Layout (Sidebar + Catálogo) -->
-            <div class="store-layout-container">
-                <!-- Botón para abrir filtros en móviles/tablets -->
+            <asp:Panel ID="pnlMantenimiento" runat="server" Visible="false" CssClass="store-layout-container">
+                <div class="g-card" style="max-width: none; width: 100%; padding: 40px; text-align: center;">
+                    <div class="no-results-title">Servidor en mantenimiento</div>
+                    <div class="no-results-text">El catálogo no está disponible en este momento. Intente nuevamente más tarde.</div>
+                </div>
+            </asp:Panel>
+
+            <asp:Panel ID="pnlTienda" runat="server" CssClass="store-layout-container">
                 <button type="button" class="g-btn-toggle-filters" onclick="toggleSidebar(true)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
@@ -36,12 +39,9 @@
                     <span>Filtros</span>
                 </button>
 
-                <!-- Fondo oscuro para desenfoque cuando se abre el sidebar -->
                 <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
-                <!-- Columna Izquierda: Buscador y Filtros -->
                 <div class="store-sidebar">
-                    <!-- Cabecera del Sidebar para móviles -->
                     <div class="sidebar-mobile-header">
                         <span>Filtros</span>
                         <button type="button" class="btn-close-sidebar" onclick="toggleSidebar(false)">✕</button>
@@ -57,8 +57,6 @@
                                 OnClick="btnBuscar_Click" />
                         </div>
 
-
-                        <!-- Sección de Categorías Colapsable -->
                         <div class="category-dropdown-container" style="margin-top: 15px;">
                             <div class="category-dropdown-header" onclick="toggleCategoryCollapse()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 10px 0; border-bottom: 1.5px solid #ddd0f5; margin-bottom: 10px;">
                                 <span class="g-section-title" style="margin: 0;">Categorías</span>
@@ -72,8 +70,8 @@
                                     
                                     <asp:Repeater ID="repCategorias" runat="server" OnItemCommand="repCategorias_ItemCommand">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnCatDinamico" runat="server" 
-                                                Text='<%# Container.DataItem %>' 
+                                            <asp:LinkButton ID="btnCatDinamico" runat="server"
+                                                Text='<%# Container.DataItem %>'
                                                 CommandName="FiltrarCategoria"
                                                 CommandArgument='<%# Container.DataItem %>'
                                                 CssClass='<%# Session["CategoriaSeleccionada"] as string == Container.DataItem.ToString() ? "g-btn-filter active" : "g-btn-filter" %>'
@@ -83,7 +81,6 @@
                                 </asp:Panel>
                             </div>
                         </div>
-
 
                         <span class="g-section-title" style="margin-top: 15px; margin-bottom: 12px;">Ordenar por</span>
                         <asp:DropDownList ID="ddlOrden" runat="server" CssClass="g-input" AutoPostBack="true"
@@ -128,11 +125,9 @@
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Catálogo de productos -->
                 <div class="store-content">
                 <asp:UpdatePanel ID="upCatalogo" runat="server" UpdateMode="Conditional">
                 <ContentTemplate>
-                    <!-- Paginador Superior -->
                     <asp:Panel ID="pnlPaginadorSup" runat="server" CssClass="store-pager"
                         style="margin-top: 0; margin-bottom: 25px;">
                         <asp:LinkButton ID="btnAntSup" runat="server" OnClick="btnAnterior_Click" CssClass="g-btn-page">
@@ -173,7 +168,6 @@
                                         <p class="product-desc"><%# Eval("Descripcion") %></p>
                                         <div class="product-footer">
                                             <span class="product-price"><%# Eval("Precio", "{0:N2}") %></span>
-                                            <%-- No en carrito --%>
                                             <asp:Panel runat="server" Visible='<%# !IsEnCarrito(Eval("IdProducto")) %>'>
                                                 <asp:LinkButton ID="btnAgregar" runat="server" CommandName="Agregar"
                                                     CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
@@ -184,7 +178,6 @@
                                                     <span class="btn-plus">+</span> <span class="btn-label">Agregar</span>
                                                 </asp:LinkButton>
                                             </asp:Panel>
-                                            <%-- En carrito: controles qty (logueado y anónimo) --%>
                                             <asp:Panel runat="server" Visible='<%# IsEnCarrito(Eval("IdProducto")) %>' CssClass="qty-ctrl">
                                                 <asp:LinkButton ID="btnMenos" runat="server" CommandName="Decrementar"
                                                     CommandArgument='<%# string.Format("{0}|{1}", Eval("IdProducto"), Eval("Stock")) %>'
@@ -203,7 +196,6 @@
                         </asp:Repeater>
                     </div>
 
-                    <!-- Paginador Inferior -->
                     <asp:Panel ID="pnlPaginadorInf" runat="server" CssClass="store-pager"
                         style="margin-top: 30px; margin-bottom: 0;">
                         <asp:LinkButton ID="btnAntInf" runat="server" OnClick="btnAnterior_Click" CssClass="g-btn-page">
@@ -223,7 +215,7 @@
                 </ContentTemplate>
                 </asp:UpdatePanel>
                 </div>
-            </div>
+            </asp:Panel>
         </div>
 
         <script type="text/javascript">
@@ -242,7 +234,6 @@
                     }
                 }
             }
-
 
             function toggleCategoryCollapse() {
                 var content = document.getElementById('categoryCollapseContent');

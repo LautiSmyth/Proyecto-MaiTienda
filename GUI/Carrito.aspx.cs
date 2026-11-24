@@ -18,6 +18,15 @@ public partial class Carrito : Page
     protected void Page_Load(object sender, EventArgs e)
     {
         Form.Enctype = "multipart/form-data";
+
+        if (EstadoIntegridad.TablaAlterada(BLLIntegridad.TablaProducto))
+        {
+            phContenido.Visible = false;
+            phScriptCarrito.Visible = false;
+            pnlMantenimiento.Visible = true;
+            return;
+        }
+
         if (!IsPostBack)
             CargarCarrito();
     }

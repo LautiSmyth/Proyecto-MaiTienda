@@ -15,7 +15,6 @@
 
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
 
-            <!-- Opción 1: cotizar el carrito del usuario logueado -->
             <div class="g-card" style="flex: 1 1 380px; max-width: none; padding: 24px;">
                 <h3 style="font-family: 'Exo 2', sans-serif; font-size: 16px; color: #1e0a3c; margin-top: 0;">Cotizar mi carrito</h3>
                 <p style="font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c5ea8;">Trae los productos de tu carrito para su cotizacion.</p>
@@ -23,7 +22,6 @@
                     style="width: 100% !important; padding: 12px 0 !important; margin-top: 10px !important;" />
             </div>
 
-            <!-- Opción 2: cotizar un producto puntual -->
             <div class="g-card" style="flex: 1 1 380px; max-width: none; padding: 24px;">
                 <h3 style="font-family: 'Exo 2', sans-serif; font-size: 16px; color: #1e0a3c; margin-top: 0;">Cotizar un producto</h3>
                 <p style="font-family: 'Exo 2', sans-serif; font-size: 12px; color: #7c5ea8;">Usa el método CotizarProducto del Web Service.</p>
@@ -40,7 +38,6 @@
             <asp:Label ID="lblMensaje" runat="server" Visible="false"
                 style="display: block; font-family: 'Exo 2', sans-serif; font-size: 13px; padding: 12px 15px; border-radius: 4px; margin-bottom: 20px;" />
 
-            <!-- Resultado -->
             <asp:Panel ID="pnlResultado" runat="server" Visible="false" CssClass="g-card" style="max-width: none; padding: 24px;">
                 <h3 style="font-family: 'Exo 2', sans-serif; font-size: 16px; color: #1e0a3c; margin-top: 0;">Resultado de la cotización</h3>
 

@@ -24,7 +24,7 @@ namespace BLL
                 string dvCalculado = _gestorIntegridad.CalcularDVH(usuario);
                 if (usuario.DVH != dvCalculado)
                 {
-                    throw new InvalidOperationException("Error de integridad de datos: El registro del usuario ha sido alterado externamente.");
+                    throw new IntegridadException(BLLIntegridad.TablaUsuario, "Error de integridad de datos: El registro del usuario ha sido alterado externamente.");
                 }
             }
             return usuario;
@@ -71,6 +71,11 @@ namespace BLL
                 {
                     RegistrarEventoSistemaSeguro($"Intento de inicio de sesion con usuario inexistente '{Recortar(nombreUsuario, 50)}'{DescribirOrigen(origen)}");
                     throw new UnauthorizedAccessException();
+                }
+
+                if (usuario.DVH != _gestorIntegridad.CalcularDVH(usuario))
+                {
+                    throw new IntegridadException(BLLIntegridad.TablaUsuario, "Error de integridad de datos: El registro del usuario ha sido alterado externamente.");
                 }
 
                 if (usuario.Estado != EstadoUsuario.Activo)
@@ -145,7 +150,44 @@ namespace BLL
             return ResultadoPasskey.Incorrecto;
         }
 
-        // El mensaje al usuario es siempre el mismo ("usuario o contraseña incorrectos")
+        public ResultadoPasskey ValidarWebMaster(string clave, string origen, out BEUsuario cuenta)
+        {
+            cuenta = null;
+
+            if (_gestorIntentos.EstaBloqueado(origen))
+            {
+                RegistrarEventoPasskey($"Intento de ingreso como WebMaster desde {origen}: origen bloqueado temporalmente");
+                return ResultadoPasskey.Bloqueado;
+            }
+
+            string passkeyConfigurado = ConfigurationManager.AppSettings["WebMasterPasskey"];
+            if (!string.IsNullOrEmpty(passkeyConfigurado) && Encriptador.CompararSeguro(clave, passkeyConfigurado))
+            {
+                _gestorIntentos.Reiniciar(origen);
+                RegistrarEventoPasskey($"Inicio de sesion con passkey desde {origen}");
+                return ResultadoPasskey.Valido;
+            }
+
+            BEUsuario cuentaWebMaster = _dalUsuario.ObtenerTodos()
+                .Where(u => u.Perfil == Perfil.WebMaster)
+                .OrderBy(u => u.IdUsuario)
+                .FirstOrDefault();
+            if (cuentaWebMaster != null)
+            {
+                try
+                {
+                    cuenta = ValidarCredenciales(cuentaWebMaster.NombreUsuario, clave, origen);
+                    _gestorIntentos.Reiniciar(origen);
+                    return ResultadoPasskey.Valido;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+
+            return _gestorIntentos.RegistrarFallo(origen) ? ResultadoPasskey.Bloqueado : ResultadoPasskey.Incorrecto;
+        }
+
         private void RegistrarEventoSistemaSeguro(string accion)
         {
             try
@@ -211,7 +253,7 @@ namespace BLL
             string dvCalculado = _gestorIntegridad.CalcularDVH(usuario);
             if (usuario.DVH != dvCalculado)
             {
-                throw new InvalidOperationException("Error de integridad de datos: el registro del usuario ha sido alterado externamente.");
+                throw new IntegridadException(BLLIntegridad.TablaUsuario, "Error de integridad de datos: el registro del usuario ha sido alterado externamente.");
             }
 
             if (usuario.Estado != EstadoUsuario.Bloqueado)

@@ -65,6 +65,7 @@ public partial class SiteMaster : MasterPage
 
         liBitacora.Visible = esWebMaster;
         liBackup.Visible = esWebMaster;
+        liIntegridad.Visible = EstadoIntegridad.EsWebMasterConPasskey(Session);
         liMisCompras.Visible = !string.IsNullOrEmpty(perfilActual) && !esWebMaster;
         liLogin.Visible = string.IsNullOrEmpty(perfilActual);
         liLogout.Visible = !string.IsNullOrEmpty(perfilActual);
@@ -80,6 +81,7 @@ public partial class SiteMaster : MasterPage
 
     protected void Page_PreRender(object sender, EventArgs e)
     {
+        pnlSesionCerrada.Visible = EstadoIntegridad.ConsumirAvisoSesionCerrada(Session);
         ActualizarCarritoContador();
     }
 
@@ -168,8 +170,16 @@ public partial class SiteMaster : MasterPage
     public void ActualizarCarritoContador()
     {
         string nombre = Session["nombreUsuario"] as string;
-        var usuario = Session["perfil"] == null || string.IsNullOrEmpty(nombre)
-            ? null : new BLLUsuario().BuscarPorNombreUsuario(nombre);
+        BEUsuario usuario = null;
+        try
+        {
+            if (Session["perfil"] != null && !string.IsNullOrEmpty(nombre))
+                usuario = new BLLUsuario().BuscarPorNombreUsuario(nombre);
+        }
+        catch (IntegridadException)
+        {
+            usuario = null;
+        }
         int cantidad;
 
         if (usuario != null)

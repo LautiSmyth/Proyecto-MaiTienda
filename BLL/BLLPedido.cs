@@ -55,14 +55,12 @@ namespace BLL
                 Envio = _bllEnvio.CalcularCosto(distanciaKm)
             };
 
-            // Una compra a la vez: el DVV de Producto se recalcula sobre toda la tabla.
             lock (_bloqueoCompra)
             {
                 Dictionary<int, int> cantidades = _dalCarrito.ObtenerCantidadesProductos(usuario.IdUsuario);
                 if (!cantidades.Any(c => c.Value > 0))
                     throw new ArgumentException("Tu carrito está vacío.");
 
-                // ObtenerProductos ya valida el DVH de cada producto (integridad).
                 List<BEProducto> catalogo = _bllProducto.ObtenerProductos();
                 List<BEProducto> comprados = new List<BEProducto>();
 
@@ -87,7 +85,7 @@ namespace BLL
                     comprados.Add(producto);
                 }
 
-                pedido.Fecha = DateTime.Now;
+                pedido.Fecha = GestorIntegridad.FechaAlmacenable(DateTime.Now);
                 pedido.Subtotal = pedido.Lineas.Sum(l => l.Subtotal);
                 pedido.Total = pedido.Subtotal + pedido.Envio;
                 pedido.Factura = _bllFactura.Emitir(pedido);
@@ -96,8 +94,6 @@ namespace BLL
                 string dvv = _gestorIntegridad.CalcularDVV(catalogo.Select(p => p.DVH).ToList());
                 _dalPedido.RegistrarPedido(pedido, comprados, dvv);
 
-                // El DVH de Pedido y de Factura se calcula recién acá porque incluye el Id, que la base
-                // asigna al insertar (igual que Usuario y Producto: primero se guarda, después se calcula el DVH).
                 pedido.DVH = _gestorIntegridad.CalcularDVH(pedido);
                 pedido.Factura.DVH = _gestorIntegridad.CalcularDVH(pedido.Factura);
                 _dalPedido.ActualizarDVH(pedido.IdPedido, pedido.DVH, pedido.Factura.IdFactura, pedido.Factura.DVH);
@@ -130,8 +126,6 @@ namespace BLL
             return Regex.IsMatch(digitos, "^([0-9]{7,8}|[0-9]{11})$") ? digitos : null;
         }
 
-        // Igual que con Usuario, Producto y la bitácora: se relee todo y se recalcula el DVV completo.
-        // Un error acá no debe deshacer la compra, que ya quedó registrada.
         private void RecalcularDVPedidosYFacturas()
         {
             try

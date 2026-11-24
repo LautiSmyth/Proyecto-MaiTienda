@@ -36,16 +36,13 @@ namespace SERVICIOS
 
         private void Registrar(BEBitacora bitacora)
         {
-            // El DVH incluye el IdBitacora, que recién se conoce después de insertar
-            // (igual que Pedido y Factura): primero se guarda, después se calcula y se actualiza.
+            bitacora.Fecha = GestorIntegridad.FechaAlmacenable(bitacora.Fecha);
             _dalBitacora.RegistrarEvento(bitacora);
             bitacora.DVH = _gestorIntegridad.CalcularDVH(bitacora);
             _dalBitacora.ActualizarDVH(bitacora.IdBitacora, bitacora.DVH);
             RecalcularDVV();
         }
 
-        // Igual que con Usuario y Producto: se relee todo y se recalcula el DVV completo en cada escritura.
-        // Un error acá no debe impedir que el evento haya quedado registrado.
         private void RecalcularDVV()
         {
             try

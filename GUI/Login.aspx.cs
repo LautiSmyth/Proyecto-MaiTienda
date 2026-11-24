@@ -1,3 +1,4 @@
+using BE;
 using BE.Enums;
 using BLL;
 using System;
@@ -10,19 +11,10 @@ public partial class Login : Page
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        pnlMantenimiento.Visible = EstadoIntegridad.HayAlteraciones;
+
         if (!IsPostBack)
         {
-            bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
-            if (integridadFallida)
-            {
-                string msg = Application["MensajeIntegridad"] as string;
-                pnlError.Visible = true;
-                litError.Text = "Sistema bloqueado por problema de integridad de datos. " +
-                    "Solo el WebMaster puede acceder usando el passkey de emergencia." +
-                    (string.IsNullOrEmpty(msg) ? "" : " Detalle: " + msg);
-                return;
-            }
-
             bool conectado = new BLLUsuario().VerificarConexion();
             if (conectado)
             {
@@ -44,27 +36,13 @@ public partial class Login : Page
 
         if (nombreUsuario.Equals("WebMaster", StringComparison.OrdinalIgnoreCase))
         {
-            ResultadoPasskey resultado = new BLLUsuario().ValidarConPasskey(password, Request.UserHostAddress);
-            if (resultado == ResultadoPasskey.Valido)
-            {
-                Session["perfil"] = "WebMaster";
-                Session["nombreUsuario"] = "WebMaster";
-                Response.Redirect("~/Backup.aspx");
-                return;
-            }
-
-            pnlError.Visible = true;
-            litError.Text = resultado == ResultadoPasskey.Bloqueado
-                ? "Demasiados intentos fallidos. Intente nuevamente más tarde."
-                : "Passkey incorrecto.";
+            IngresarComoWebMaster(password);
             return;
         }
 
-        bool integridadFallida = Application["IntegridadFallida"] as bool? ?? false;
-        if (integridadFallida)
+        if (EstadoIntegridad.HayAlteraciones)
         {
-            pnlError.Visible = true;
-            litError.Text = "Sistema bloqueado. Ingrese el passkey de emergencia para acceder como WebMaster.";
+            MostrarNoDisponible();
             return;
         }
 
@@ -72,8 +50,7 @@ public partial class Login : Page
         {
             var usuario = new BLLUsuario().ValidarCredenciales(nombreUsuario, password, Request.UserHostAddress);
 
-            Session["nombreUsuario"] = usuario.NombreUsuario;
-            Session["perfil"] = usuario.Perfil.ToString();
+            EstadoIntegridad.IniciarSesion(Session, usuario.NombreUsuario, usuario.Perfil.ToString(), false);
 
             MigrarCarritoLocal(usuario.IdUsuario);
 
@@ -84,11 +61,62 @@ public partial class Login : Page
             pnlError.Visible = true;
             litError.Text = ex.Message;
         }
+        catch (IntegridadException)
+        {
+            EstadoIntegridad.Verificar();
+            pnlMantenimiento.Visible = EstadoIntegridad.HayAlteraciones;
+            MostrarNoDisponible();
+        }
         catch (Exception)
         {
             pnlError.Visible = true;
             litError.Text = "Ocurrio un error al intentar iniciar sesion. Intente nuevamente.";
         }
+    }
+
+    private void IngresarComoWebMaster(string clave)
+    {
+        bool hayAlteraciones = EstadoIntegridad.HayAlteraciones;
+        BEUsuario cuenta = null;
+        ResultadoPasskey resultado;
+
+        try
+        {
+            resultado = hayAlteraciones
+                ? new BLLUsuario().ValidarConPasskey(clave, Request.UserHostAddress)
+                : new BLLUsuario().ValidarWebMaster(clave, Request.UserHostAddress, out cuenta);
+        }
+        catch (IntegridadException)
+        {
+            EstadoIntegridad.Verificar();
+            pnlMantenimiento.Visible = EstadoIntegridad.HayAlteraciones;
+            pnlError.Visible = true;
+            litError.Text = "Servidor en mantenimiento: ingrese con el passkey de emergencia.";
+            return;
+        }
+
+        if (resultado == ResultadoPasskey.Valido)
+        {
+            if (cuenta != null)
+                EstadoIntegridad.IniciarSesion(Session, cuenta.NombreUsuario, cuenta.Perfil.ToString(), false);
+            else
+                EstadoIntegridad.IniciarSesion(Session, "WebMaster", "WebMaster", true);
+
+            Response.Redirect(hayAlteraciones ? "~/GestionIntegridad.aspx" : "~/Backup.aspx");
+            return;
+        }
+
+        pnlError.Visible = true;
+        if (resultado == ResultadoPasskey.Bloqueado)
+            litError.Text = "Demasiados intentos fallidos. Intente nuevamente más tarde.";
+        else
+            litError.Text = hayAlteraciones ? "Passkey incorrecto." : "Contraseña o passkey incorrectos.";
+    }
+
+    private void MostrarNoDisponible()
+    {
+        pnlError.Visible = true;
+        litError.Text = "No es posible iniciar sesión mientras el servidor está en mantenimiento.";
     }
 
     private void MigrarCarritoLocal(int idUsuario)
